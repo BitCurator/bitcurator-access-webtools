@@ -1,4 +1,4 @@
-from flask import Flask
+from dimac import app
 import pytsk3
 
 app = Flask(__name__)
