@@ -1,8 +1,6 @@
 from dimac import app
 import pytsk3
 
-app = Flask(__name__)
-
 @app.route("/")
 
 # Sample hello world for testing
