@@ -7,9 +7,16 @@ DIMAC: Disk Image Access for the Web
 DIMAC provides simple access to disk images over the web using open source technologies including
 The Sleuth Kit, PyTSK, and Flask.
 
-To clone out the DIMAC code repo, run:
+To check out the DIMAC code repo, run:
 
 * git clone https://github.com/kamwoods/dimac
+
+Running the sample program is easy. Simply do the following:
+
+* cd dimac
+* python runserver.py
+
+Now, open a web browser and navigate to 127.0.0.1:5000
 
 # Dependencies
 
