@@ -12,15 +12,17 @@
 # This is the main disk image access package script
 
 from dimac import app
+from flask import render_template
 import pytsk3
 
 @app.route("/")
+@app.route("/<retstr>")
 
 # Sample hello world for testing
 # def hello():
 #     return "Hello World!"
 
-def tsktest():
+def tsktest(retstr=None):
     # Step 1: get an IMG_INFO object
     img = pytsk3.Img_Info("/home/bcadmin/Desktop/jo-work-usb-2009-12-11.E01")
 
@@ -28,7 +30,7 @@ def tsktest():
     volume = pytsk3.Volume_Info(img)
 
     ## Step 3: Iterate over all the partitions.
-    retstr = 'PARTITIONS ON THIS DISK:' + '<br>'
+    retstr = 'PARTITIONS ON THIS DISK:' + '\<br\>'
     for part in volume:
         #print part.addr, part.desc, part.start, part.len
         retstr += str(part.addr) + ' ' + str(part.desc) + ' ' + str(part.start) + ' ' + str(part.len) + '</br>'
@@ -46,7 +48,8 @@ def tsktest():
             directory_entry.decode("utf8")
         except UnicodeError:
             pass
-    return retstr
+    #return retstr
+    return render_template('index.html', retstr=retstr)
 
-if __name__ == "__main__":
-    app.run()
+#if __name__ == "__main__":
+#    app.run()
