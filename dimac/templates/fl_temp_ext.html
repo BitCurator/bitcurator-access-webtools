@@ -1,0 +1,53 @@
+{% extends "flask_template.html" %}
+{% block title %}BitCurator Image Browser{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:green;
+            background-color: #d2b48c;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 1px dotted gray;;
+            font-family: sans-serif;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    {#<img src="IMG_3446.JPG" height="100" width="150" />#}
+    <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
+    <h1>BitCurator Image Browser</h1>
+    <BR>&nbsp;<BR> 
+    <BR>&nbsp;<BR> 
+    <p class="important">
+      Images to browse or Download:
+      <BR>&nbsp;<BR> 
+      {# {% if image %} <p > Hello {{ image }} !  </p> #}
+      {#<p > Image List: \n {{ image_list }}  </p> #}
+      {#{% for item in image_list %} #}
+        {#<li><a {{ item }} </a></li>#}
+        {#<p {{ item }} </p> #}
+      {#{% endfor %} #}
+
+      {# {% raw %} #}
+        <ul>
+          {% for item in image_list %}
+            {% set imginfo_html = item ~ "_md.html" %}
+            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>
+          {% endfor %}
+        </ul>
+      {# {% endraw %} #}
+    </p>
+{% endblock %}
