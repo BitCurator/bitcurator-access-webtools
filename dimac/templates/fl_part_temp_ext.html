@@ -1,0 +1,70 @@
+{% extends "flask_template.html" %}
+{% block title %}BitCurator Image Browser{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:green;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 1px dotted gray;;
+            font-family: sans-serif;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
+    <h1>BitCurator Image Browser</h1>
+    <BR>&nbsp;<BR> 
+    <BR>&nbsp;<BR> 
+    <p class="important">
+      Files to browse or Download:
+
+      <BR>&nbsp;<BR> 
+        <script>
+        document.write({{ file_list }});
+        </script>
+        <ul>
+          <!--<table style="width:300px"> -->
+          <table>
+          <caption><i> File List </i></caption>
+          <tr>
+              <th>d/r</th>
+              <th>Filename</th>
+              <th>Size</th>
+              <th>Modified time</th>
+          </tr>
+          {% for item in file_list %} 
+            {% if item.isdir %}
+                {% set column1 = 'd' %}
+            {% else %}
+                {% set column1 = 'r' %}
+            {% endif %}
+            {% set fileinfo_html = partition_num ~'/'~ item.name %}
+            <p style="font-size:9">
+            <tr>
+              <td>{{ column1 }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.size }}</td>
+              <td>{{ item.mtime }}</td>
+              <td> <a href={{ fileinfo_html }}>Browse</a> <a href=imgdnld.html>Download</a> </td>
+            </tr>
+            </p>
+          {% endfor %}
+        </ul>
+      {# {% endraw %} #}
+    </p>
+{% endblock %}
