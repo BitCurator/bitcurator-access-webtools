@@ -1,0 +1,53 @@
+{% extends "flask_template.html" %}
+{% block title %}BitCurator Image Browser{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body, html {
+            color:green;
+            #background-color: #d2b48c;
+            background-color: white;
+            #margin-left: 5%;
+            #margin-right: 5%;
+            #border: 1px dotted gray;;
+            font-family: sans-serif;
+            padding: 0;
+            height: 100%;
+
+        } 
+        .scroller {
+          overflow: scroll;
+          padding: 5px;
+          height: 100%;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
+    <h1>BitCurator Image Browser</h1>
+    <p class="important">
+      <BR>&nbsp;<BR>
+      <p> 
+      Image: {{image_name }} <br/>
+      Partition: {{partition_num }} <br/>
+      Filename: {{ file_name }} 
+      </p>
+      <BR>&nbsp;<BR>
+
+        <ul>
+        {{ contents }} 
+        </ul>
+    </p>
+{% endblock %}
