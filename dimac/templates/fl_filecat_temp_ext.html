@@ -14,14 +14,22 @@
             color:black;
             text-align:center;
         }
-        body {
+        body, html {
             color:green;
-            background-color: #d2b48c;
+            #background-color: #d2b48c;
             background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 1px dotted gray;;
+            #margin-left: 5%;
+            #margin-right: 5%;
+            #border: 1px dotted gray;;
             font-family: sans-serif;
+            padding: 0;
+            height: 100%;
+
+        } 
+        .scroller {
+          overflow: scroll;
+          padding: 5px;
+          height: 100%;
         }
 
     </style>
@@ -29,17 +37,17 @@
 {% block content %}
     <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
     <h1>BitCurator Image Browser</h1>
-    <BR>&nbsp;<BR> 
-    <BR>&nbsp;<BR> 
     <p class="important">
-      Images to browse or Download:
-      <BR>&nbsp;<BR> 
+      <BR>&nbsp;<BR>
+      <p> 
+      Image: {{image_name }} <br/>
+      Partition: {{partition_num }} <br/>
+      Filename: {{ file_name }} 
+      </p>
+      <BR>&nbsp;<BR>
+
         <ul>
-          {% for item in image_list %}
-            {% set imginfo_html = "image/" ~ item  %} 
-            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>
-          {% endfor %}
+        {{ contents }} 
         </ul>
-      {# {% endraw %} #}
     </p>
 {% endblock %}

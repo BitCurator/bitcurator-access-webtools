@@ -17,27 +17,41 @@
         body {
             color:green;
             background-color: #d2b48c;
-            background-color: white;
             margin-left: 5%;
             margin-right: 5%;
             border: 1px dotted gray;;
             font-family: sans-serif;
+            font-size:14px;
         }
 
     </style>
 {% endblock %}
 {% block content %}
+    {#<img src="IMG_3446.JPG" height="100" width="150" />#}
     <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
     <h1>BitCurator Image Browser</h1>
     <BR>&nbsp;<BR> 
     <BR>&nbsp;<BR> 
     <p class="important">
-      Images to browse or Download:
+      Partitions to browse or Download:
+      {#
+      <script>
+      document.write(document.URL);
+      </script>
+      #}
+
       <BR>&nbsp;<BR> 
+        <script>
+        document.write({{ image_name }});
+        </script>
         <ul>
-          {% for item in image_list %}
-            {% set imginfo_html = "image/" ~ item  %} 
-            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>
+          {% set num_partitions = 1 %}
+          {% for number in range(0, num_partitions) %} 
+            {# <li> Partition#: {{ number+1 }}  </li> #}
+            {% set part = number + 1 %}
+            {# {% set partinfo_html = image_name ~ "/partition/"~part %} #}
+            {% set partinfo_html = image_name ~ "/"~part %}
+            <li>Partition# {{ part }} <a href={{ partinfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>
           {% endfor %}
         </ul>
       {# {% endraw %} #}
