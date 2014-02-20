@@ -87,10 +87,12 @@ def root_directory_list(image_name, image_partition):
 #
 # Template rendering when a File is clicked 
 #
-@app.route('/image/<image_name>/<image_partition>/<file_path>')
-def file_clicked(image_name, image_partition, file_path):
+@app.route('/image/<image_name>/<image_partition>', defaults={'path': ''})
+@app.route('/image/<image_name>/<image_partition>/<path:path>')
+
+def file_clicked(image_name, image_partition, path):
     print("Files: Rendering Template for subdirectory or contents of a file: ", 
-          image_name, image_partition, file_path)
+          image_name, image_partition, path)
     
     image_index = dimacGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
@@ -103,11 +105,13 @@ def file_clicked(image_name, image_partition, file_path):
     # slash int he URL. This will be re-constructed in the end of this
     # routine to replace the % by '/' before calling render_template, so
     # appropriate HTML page will be rendered.
-    file_name_list = file_path.split('%')
+
+    # NO. FIXED NOW.
+    file_name_list = path.split('/')
     file_name = file_name_list[len(file_name_list)-1]
 
-    file_path = re.sub('%','/',file_path)
-    print "D: File_path after manipulation = ", file_path
+    #file_path = re.sub('%','/',file_path)
+    print "D: File_path after manipulation = ", path
 
 
     # To verify that the file_name exsits, we need the directory where
@@ -115,7 +119,7 @@ def file_clicked(image_name, image_partition, file_path):
     # to look for the file $RmData under the directory $Extend. So we
     # will call the TSK API fs.open_dir with the parent directory
     # ($Extend in this example)
-    temp_list = file_path.split("/")
+    temp_list = path.split("/")
     temp_list = file_name_list[0:(len(temp_list)-1)]
     parent_dir = '/'.join(temp_list)
 
@@ -140,17 +144,17 @@ def file_clicked(image_name, image_partition, file_path):
         # So calling once again the TSK API ipen_dir, with the current
         # directory, this time.
         file_list, fs = dm.dimacGenFileList(image_path, image_index, 
-                                        int(image_partition), file_path)
+                                        int(image_partition), path)
 
         # Generate the URL to communicate to the template:
         with app.test_request_context():
-            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, file_path=file_path )
+            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, path=path )
 
         print (">> Rendering template with URL: ", url)
         return render_template('fl_dir_temp_ext.html', 
                    image_name=str(image_name), 
                    partition_num=image_partition, 
-                   file_path=file_path,
+                   path=path,
                    file_list=file_list,
                    url=url)
 
@@ -172,7 +176,7 @@ def file_clicked(image_name, image_partition, file_path):
 
             offset += len(data)
            
-            filename = "/tmp/"+file_path
+            filename = "/tmp/"+path
 
         #return data
         '''

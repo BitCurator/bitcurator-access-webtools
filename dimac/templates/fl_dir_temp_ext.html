@@ -65,12 +65,13 @@
             {#{% set fileinfo_html = '/' ~ new_dir~'/'~item.name %} #}
               {#<td> <a href={{ filepath_string ~ '%' ~ item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
               {#<td> <a href={{ url~'-'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
-            {% set temp = url | replace('/','%') %}
-            {% set filepath_string = temp | replace('%', '/', 4) %}
+            {#{% set temp = url | replace('/','%') %}#}
+            {#{% set filepath_string = temp | replace('%', '/', 4) %}#}
+            {% set filepath_string = url %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
-              <td> <a href={{ filepath_string~'%'~item.name }}>{{ item.name }}</a>  </td>
+              <td> <a href={{ filepath_string~'/'~item.name }}>{{ item.name }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               {#<td> <a href={{ filepath_string~'%'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td>  #}
