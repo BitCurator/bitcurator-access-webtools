@@ -1,5 +1,5 @@
 {% extends "flask_template.html" %}
-{% block title %}BitCurator Image Browser{% endblock %}
+{% block title %}Disk Image Access for the web{% endblock %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -27,24 +27,27 @@
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
-    <h1>BitCurator Image Browser</h1>
+    <img src="{{ url_for('static', filename ='Astro.JPG') }}" height="100" width="150" align="right" >
+    <h1>Disk Image Access for the web</h1>
     <BR>&nbsp;<BR> 
     <BR>&nbsp;<BR> 
     <p class="important">
       Files to browse or Download:
 
       <BR>&nbsp;<BR> 
+        {#
         <script>
         document.write(document.URL);
         document.write(partition_num);
         url = document.URL;
         </script>
         {% set current_url = url %}
+        #}
+
         <ul>
           <!--<table style="width:300px"> -->
           <table>
-          <caption><i> File List </i></caption>
+          <caption><i> Directory Listing </i></caption>
           <tr>
               <th>d/r</th>
               <th>Filename</th>
@@ -58,15 +61,20 @@
                 {% set column1 = 'r' %}
             {% endif %}
             {#{% set fileinfo_html = partition_num ~'/'~new_dir~'/'~item.name %}#}
-            {% set fileinfo_html = partition_num ~ '/' ~ new_dir~'/'~item.name %}
+            {#{% set fileinfo_html = partition_num ~ '/' ~ new_dir~'/'~item.name %} #}
             {#{% set fileinfo_html = '/' ~ new_dir~'/'~item.name %} #}
+              {#<td> <a href={{ filepath_string ~ '%' ~ item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
+              {#<td> <a href={{ url~'-'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
+            {% set temp = url | replace('/','%') %}
+            {% set filepath_string = temp | replace('%', '/', 4) %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
-              <td>{{ item.name }}</td>
+              <td> <a href={{ filepath_string~'%'~item.name }}>{{ item.name }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
-              <td> <a href={{ fileinfo_html }}>Browse</a> <a href=imgdnld.html>Download</a> </td>
+              {#<td> <a href={{ filepath_string~'%'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td>  #}
+ 
             </tr>
             </p>
           {% endfor %}
