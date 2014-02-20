@@ -1,5 +1,5 @@
 {% extends "flask_template.html" %}
-{% block title %}BitCurator Image Browser{% endblock %}
+{% block title %}Disk Image Access for the web{% endblock %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -22,13 +22,14 @@
             margin-right: 5%;
             border: 1px dotted gray;;
             font-family: sans-serif;
+            font-size:14px;
         }
 
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" >
-    <h1>BitCurator Image Browser</h1>
+    <img src="{{ url_for('static', filename ='Astro.JPG') }}" height="100" width="150" align="right" >
+    <h1>Disk Image Access for the web</h1>
     <BR>&nbsp;<BR> 
     <BR>&nbsp;<BR> 
     <p class="important">

@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 import pytsk3
 import os, sys, string, time, re
 
@@ -7,7 +7,9 @@ from dimac import app
 image_list = []
 file_list_root = []
 dirDictList = [[]]
-image_dir = "/home/bcadmin/disk_images" # HARDCODED: FIXME
+
+# FIXME: Imagedir is hardcoded for now. Will be moved to config file shortly
+image_dir = "/home/bcadmin/disk_images"
 num_images = 0
 
 @app.route("/")
@@ -83,7 +85,7 @@ def root_directory_list(image_name, image_partition):
                            file_list=file_list_root)
 
 #
-# Template rendering for File CAT utility
+# Template rendering when a File is clicked 
 #
 @app.route('/image/<image_name>/<image_partition>/<file_path>')
 def file_clicked(image_name, image_partition, file_path):
@@ -92,62 +94,68 @@ def file_clicked(image_name, image_partition, file_path):
     
     image_index = dimacGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
-    file_name = os.path.basename(file_path)
-    file_path = '/'+file_path
 
-    # First find out if it is a file or a directory.
-    print("D: FILE Clicked: image: {}, part:{}, file_path:{}".format(image_name, image_partition, file_path))
+    # A bit of an ugly string manipulation here: Since we are re-using
+    # this flask route routine to get invoked by a browser-click on 
+    # any file/directory, the template code manipulates the "file" part
+    # of the URL to replace "/" with "%", so flask can be cheated into
+    # calling this routine (there is just one file name after the last
+    # slash int he URL. This will be re-constructed in the end of this
+    # routine to replace the % by '/' before calling render_template, so
+    # appropriate HTML page will be rendered.
+    file_name_list = file_path.split('%')
+    file_name = file_name_list[len(file_name_list)-1]
 
-    dm = dimac()
+    file_path = re.sub('%','/',file_path)
+    print "D: File_path after manipulation = ", file_path
 
-    # For the files in the root directory, current directory is /. 
-    # To reuse this func for other directories below the root,
-    # This needs to be set appropriately. For now, this will do: FIXME.
-    current_dir = "/"
 
+    # To verify that the file_name exsits, we need the directory where
+    # the file sits. That is if tje file name is $Extend/$RmData, we have
+    # to look for the file $RmData under the directory $Extend. So we
+    # will call the TSK API fs.open_dir with the parent directory
+    # ($Extend in this example)
     temp_list = file_path.split("/")
-    # FIXME: Add comments here: Can test this logic only after the
-    # partition_num issue is fixed and we can go deeper in the 
-    # directory structure.
-    if len(temp_list) == 2:
-        # Just one directory. So parent directory is '/'
-        current_dir = "/"
-    else:
-        print("D: temp comment: temp_list BEFORE: ", temp_list)
-        temp_list = temp_list[0:(len(temp_list)-1)]
-        print("D: temp comment: temp_list AFTER: ", temp_list)
-        current_dir = ''.join(temp_list)
-        print("D: temp comment: NEW Current DIR: ", current_dir)
-    
+    temp_list = file_name_list[0:(len(temp_list)-1)]
+    parent_dir = '/'.join(temp_list)
 
-    print("D: current_dir: ", current_dir)
+    print("D: Invoking TSK API to get files under parent_dir: ", parent_dir)
+
+    # Generate File_list for the parent directory to see if the 
+    dm = dimac()
     file_list, fs = dm.dimacGenFileList(image_path, image_index, 
-                                        int(image_partition), current_dir)
+                                        int(image_partition), parent_dir)
 
     # Look for file_name in file_list
     for item in file_list:
-        ## print("D: item-name= {} fule_name={} ".format(item['name'], file_name))
+        ## print("D: item-name={} file_name={} ".format(item['name'], file_name))
         if item['name'] == file_name:
-            print("D: File Found in the list: ", file_name)
+            print("D : File {} Found in the list: ".format(file_name))
             break
     else:
-        print("File {} not found in file_list".format(file_name))
+        print("D: File_clicked: File {} not found in file_list".format(file_name))
             
     if item['isdir'] == True:
+        # We will send the file_list under this directory to the template.
+        # So calling once again the TSK API ipen_dir, with the current
+        # directory, this time.
         file_list, fs = dm.dimacGenFileList(image_path, image_index, 
                                         int(image_partition), file_path)
-        # It is a directory call the template to display file
-        # list under this directory FIXME: Add template rendering
-        # code for a directory: Can reuse the same templates used before
-        new_dir = file_path
-        print("D: temp comment: current_dir:new_dir ", current_dir, new_dir)
+
+        # Generate the URL to communicate to the template:
+        with app.test_request_context():
+            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, file_path=file_path )
+
+        print (">> Rendering template with URL: ", url)
         return render_template('fl_dir_temp_ext.html', 
                    image_name=str(image_name), 
                    partition_num=image_partition, 
-                   new_dir=new_dir,
-                   file_list=file_list)
+                   file_path=file_path,
+                   file_list=file_list,
+                   url=url)
 
     else:
+        # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
     
         # Read data and store it in a string
@@ -163,9 +171,10 @@ def file_clicked(image_name, image_partition, file_path):
                 break
 
             offset += len(data)
-            #print data
+           
+            filename = "/tmp/"+file_path
 
-        return data
+        #return data
         '''
         return render_template('fl_filecat_temp_ext.html', 
                     image_name=str(image_name), 
@@ -238,20 +247,20 @@ class dimac:
         
 
     dimacFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir']
-    dimacDirInfo = ['dirname', 'inode', 'par_inode', 'dirpath']
-
-    def dirInDirList(self, dirname, inode, image_index, partnum):
-        print ("Checking if dirname:inode exists in the dictlist: ",
-                     dirname, inode, image_index, partnum)
 
     def dimacListFiles(self, fs, path, image_index, partition_num):
         file_list = []
-        print("Listing Directory for PATH: ", path)
+        print("Func:dimacListFiles: Listing Directory for PATH: ", path)
         directory = fs.open_dir(path=path)
         i=0
         for f in directory:
             is_dir = False
-            #print f.info.name.name, f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr, f.info.name.par_addr, f.info.meta.mode, f.info.meta.type
+            '''
+            print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
+                   par inode: {} mode: {} type: {} ".format(f.info.name.name,\
+                   f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
+                   f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
+            '''
             if f.info.meta.type == 2:
                 is_dir = True
             file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
