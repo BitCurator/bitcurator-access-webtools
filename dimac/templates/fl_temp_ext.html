@@ -1,5 +1,5 @@
 {% extends "flask_template.html" %}
-{% block title %}Disk Image Access for the web{% endblock %}
+{% block title %}Disk Image Access for the Web{% endblock %}
 {% block head %}
     {{ super() }}
     <style type="text/css">
@@ -28,17 +28,33 @@
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='Astro.JPG') }}" height="100" width="150" align="right" >
-    <h1>Disk Image Access for the web</h1>
+    <img src="{{ url_for('static', filename ='dimac.png') }}" height="80" width="300" align="right" >
+    <h1>Disk Image Access for the Web</h1>
     <BR>&nbsp;<BR> 
     <BR>&nbsp;<BR> 
     <p class="important">
-      Images to browse or Download:
+      DIMAC provides access to forensically-packaged and raw disk images. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
       <BR>&nbsp;<BR> 
         <ul>
+          <!--<table style="width:300px"> -->
+          <table>
+          <caption><i>Image List</i></caption>
+          <tr>
+              <th>Image Name</th>
+              <th>Actions</th>
+              <th> </th>
+          </tr>
           {% for item in image_list %}
             {% set imginfo_html = "image/" ~ item  %} 
-            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>
+            <p style='font-size:9'>
+            <tr>
+               <td>{{ item }}</td>
+               <td><a href={{ imginfo_html }}>Browse</a></td>
+               <td><a href=imgdnld.html>Download</a></td>
+            </tr>
+            </p>
+{#            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>#}
+
           {% endfor %}
         </ul>
       {# {% endraw %} #}
