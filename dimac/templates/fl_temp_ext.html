@@ -28,20 +28,20 @@
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='dimac.png') }}" height="80" width="300" align="right" >
-    <h1>Disk Image Access for the Web</h1>
-    <BR>&nbsp;<BR> 
+    <img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" >
+    <h2 align="left">Disk Image Access for the Web</h2>
+    {#<BR>&nbsp;<BR>#} 
     <BR>&nbsp;<BR> 
     <p class="important">
-      DIMAC provides access to forensically-packaged and raw disk images. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
+      DIMAC provides access to forensically-packaged and raw disk images. Supported file systems include FAT16, FAT32, NTFS, HFS+, ISO9660, and EXT2/3/4. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
       <BR>&nbsp;<BR> 
         <ul>
           <!--<table style="width:300px"> -->
           <table>
-          <caption><i>Image List</i></caption>
+          {#<caption><i>Image List</i></caption>#}
           <tr>
-              <th>Image Name</th>
-              <th>Actions</th>
+              <th align="left">Image Name</th>
+              <th align="left">Actions</th>
               <th> </th>
           </tr>
           {% for item in image_list %}

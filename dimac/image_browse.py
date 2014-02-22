@@ -1,6 +1,7 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, Response
 import pytsk3
 import os, sys, string, time, re
+from mimetypes import MimeTypes
 
 from dimac import app
 
@@ -63,48 +64,50 @@ def image(image_name):
     print("Partitions: Rendering Template with partitions for img: ", image_name)
     num_partitions = dimac.num_partitions_ofimg[image_name]
 
-    return render_template('fl_img_temp_ext.html', 
-                            image_name=str(image_name), 
+    return render_template('fl_img_temp_ext.html',
+                            image_name=str(image_name),
                             num_partitions=num_partitions)
 
+
 #
-# Template rendering for Directory Listing per partition 
+# Template rendering for Directory Listing per partition
 #
 @app.route('/image/<image_name>/<image_partition>')
 def root_directory_list(image_name, image_partition):
-    print("Files: Rendering Template with files for partition: ", 
+    print("Files: Rendering Template with files for partition: ",
                             image_name, image_partition)
     image_index = dimacGetImageIndex(str(image_name), False)
     dm = dimac()
     image_path = image_dir+'/'+image_name
-    file_list_root, fs = dm.dimacGenFileList(image_path, image_index, 
+    file_list_root, fs = dm.dimacGenFileList(image_path, image_index,
                                              int(image_partition), '/')
-    return render_template('fl_part_temp_ext.html', 
-                           image_name=str(image_name), 
-                           partition_num=image_partition, 
+    return render_template('fl_part_temp_ext.html',
+                           image_name=str(image_name),
+                           partition_num=image_partition,
                            file_list=file_list_root)
 
 #
-# Template rendering when a File is clicked 
+# Template rendering when a File is clicked
 #
 @app.route('/image/<image_name>/<image_partition>', defaults={'path': ''})
 @app.route('/image/<image_name>/<image_partition>/<path:path>')
 
 def file_clicked(image_name, image_partition, path):
-    print("Files: Rendering Template for subdirectory or contents of a file: ", 
+    print("Files: Rendering Template for subdirectory or contents of a file: ",
           image_name, image_partition, path)
     
     image_index = dimacGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
 
     # A bit of an ugly string manipulation here: Since we are re-using
-    # this flask route routine to get invoked by a browser-click on 
+    # this flask route routine to get invoked by a browser-click on
     # any file/directory, the template code manipulates the "file" part
     # of the URL to replace "/" with "%", so flask can be cheated into
     # calling this routine (there is just one file name after the last
     # slash int he URL. This will be re-constructed in the end of this
     # routine to replace the % by '/' before calling render_template, so
     # appropriate HTML page will be rendered.
+
 
     # NO. FIXED NOW.
     file_name_list = path.split('/')
@@ -125,9 +128,9 @@ def file_clicked(image_name, image_partition, path):
 
     print("D: Invoking TSK API to get files under parent_dir: ", parent_dir)
 
-    # Generate File_list for the parent directory to see if the 
+    # Generate File_list for the parent directory to see if the
     dm = dimac()
-    file_list, fs = dm.dimacGenFileList(image_path, image_index, 
+    file_list, fs = dm.dimacGenFileList(image_path, image_index,
                                         int(image_partition), parent_dir)
 
     # Look for file_name in file_list
@@ -143,22 +146,24 @@ def file_clicked(image_name, image_partition, path):
         # We will send the file_list under this directory to the template.
         # So calling once again the TSK API ipen_dir, with the current
         # directory, this time.
-        file_list, fs = dm.dimacGenFileList(image_path, image_index, 
+        file_list, fs = dm.dimacGenFileList(image_path, image_index,
                                         int(image_partition), path)
+
 
         # Generate the URL to communicate to the template:
         with app.test_request_context():
             url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, path=path )
 
         print (">> Rendering template with URL: ", url)
-        return render_template('fl_dir_temp_ext.html', 
-                   image_name=str(image_name), 
-                   partition_num=image_partition, 
+        return render_template('fl_dir_temp_ext.html',
+                   image_name=str(image_name),
+                   partition_num=image_partition,
                    path=path,
                    file_list=file_list,
                    url=url)
 
     else:
+        print("DDDDDDDDownloading File: ", item['name'])
         # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
     
@@ -167,25 +172,43 @@ def file_clicked(image_name, image_partition, path):
         size = f.info.meta.size
         BUFF_SIZE = 1024 * 1024
 
+        total_data = ""
         while offset < size:
             available_to_read = min(BUFF_SIZE, size - offset)
             data = f.read_random(offset, available_to_read)
-            if not data: 
+            if not data:
                 print("Done with reading")
                 break
 
             offset += len(data)
+            total_data = total_data+data 
+            print "LEN OF TOTAL DATA: ", len(total_data)
            
-            filename = "/tmp/"+path
+            #return data
+            #results = generate_file_data()
+        generator = (cell for row in total_data
+                for cell in row)
 
-        #return data
+        mime = MimeTypes()
+        mime_type, a = mime.guess_type(file_name)
+        print("MIME YTPE: ", mime_type)
+        return Response(generator,
+                       mimetype=mime_type,
+                       headers={"Content-Disposition":
+                                    "attachment;filename=file_name" })        
         '''
-        return render_template('fl_filecat_temp_ext.html', 
-                    image_name=str(image_name), 
-                    partition_num=image_partition, 
-                    file_name=file_name,
-                    contents=str(data))
-                    #contents = data.decode("utf-8"))
+        return Response(generator,
+                   mimetype="text/plain",
+                   headers={"Content-Disposition":
+                                "attachment;filename=file.txt" })        
+        '''
+        '''
+        return render_template('fl_filecat_temp_ext.html',
+        image_name=str(image_name),
+        partition_num=image_partition,
+        file_name=file_name,
+        contents=str(data))
+        #contents = data.decode("utf-8"))
         '''
 class dimac:
     num_partitions = 0
@@ -208,7 +231,7 @@ class dimac:
 
                 # Add the entry to the List of dictionaries, partDictList.
                 # The list will have one dictionary per partition. The image
-                # name is added as the first element of each partition to 
+                # name is added as the first element of each partition to
                 # avoid a two-dimentional list.
                 print "D: image_path: ", image_path
                 print "D: part_addr: ", part.addr
@@ -221,15 +244,15 @@ class dimac:
                                      self.part_array[3]:part.start, \
                                      self.part_array[4]:part.desc })
     
-                # Open the file system for this image at the extracted 
+                # Open the file system for this image at the extracted
                 # start_offset.
                 fs = pytsk3.FS_Info(img, offset=(part.start * 512))
 
                 # First level files and directories off the root
                 # Builds dirDictList (global) and returns file_list for
-                # the root directory 
+                # the root directory
                 file_list_root = self.dimacListFiles(fs, "/", image_index, part.slot_num)
-                ## print(file_list_root) 
+                ## print(file_list_root)
     
         image_name = os.path.basename(image_path)
         self.num_partitions_ofimg[image_name] = self.num_partitions
@@ -241,7 +264,7 @@ class dimac:
         # Get the start of the partition:
         part_start = self.partDictList[int(image_index)][partition_num-1]['start_offset']
 
-        # Open the file system for this image at the extracted 
+        # Open the file system for this image at the extracted
         # start_offset.
         fs = pytsk3.FS_Info(img, offset=(part_start * 512))
 
@@ -252,6 +275,7 @@ class dimac:
 
     dimacFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir']
 
+
     def dimacListFiles(self, fs, path, image_index, partition_num):
         file_list = []
         print("Func:dimacListFiles: Listing Directory for PATH: ", path)
@@ -260,11 +284,11 @@ class dimac:
         for f in directory:
             is_dir = False
             '''
-            print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
-                   par inode: {} mode: {} type: {} ".format(f.info.name.name,\
-                   f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
-                   f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
-            '''
+print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
+par inode: {} mode: {} type: {} ".format(f.info.name.name,\
+f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
+f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
+'''
             if f.info.meta.type == 2:
                 is_dir = True
             file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
