@@ -195,7 +195,7 @@ def file_clicked(image_name, image_partition, path):
         return Response(generator,
                        mimetype=mime_type,
                        headers={"Content-Disposition":
-                                    "attachment;filename=file_name" })        
+                                    "attachment;filename=" + file_name })        
         '''
         return Response(generator,
                    mimetype="text/plain",
