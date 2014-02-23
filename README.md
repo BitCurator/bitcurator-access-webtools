@@ -31,7 +31,7 @@ On a Debian or Ubuntu system, fulfilling these dependencies is easy. Just run th
 * sudo apt-get install python-pip
 * sudo pip install flask
 
-# DIMAC Documentation, Help, and other Information
+# DIMAC Documentation
 
 Coming soon...
 [http://wiki.bitcurator.net/dimac](http://wiki.bitcurator.net/dimac).
@@ -40,6 +40,6 @@ Coming soon...
 
 DIMAC project documentation, and other non-software products of the DIMAC team are subject to the the Creative Commons Attribution 2.0 Generic license (CC By 2.0).
 
-Unless otherwise indicated, software items in this repository are distributed under the terms of the GNU General Public License, Version 3. See the text file "COPYING" for further details about the terms of this license.
+Unless otherwise indicated, software objects in this repository are distributed under the terms of the GNU General Public License, Version 3. See the text file "COPYING" for further details about the terms of this license.
 
 
