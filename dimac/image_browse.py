@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, Response
 import pytsk3
 import os, sys, string, time, re
 from mimetypes import MimeTypes
+from datetime import date
 
 from dimac import app
 
@@ -291,12 +292,18 @@ f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
 '''
             if f.info.meta.type == 2:
                 is_dir = True
+           
+            # Since we are displaying the modified time for the file,
+            # Convert the mtime to isoformat to be passed in file_list.
+            d = date.fromtimestamp(f.info.meta.mtime)
+            mtime = d.isoformat()
+
             file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
                               self.dimacFileInfo[1]:f.info.meta.size, \
                               self.dimacFileInfo[2]:f.info.meta.mode, \
                               self.dimacFileInfo[3]:f.info.meta.addr, \
                               self.dimacFileInfo[4]:f.info.name.par_addr, \
-                              self.dimacFileInfo[5]:f.info.meta.mtime, \
+                              self.dimacFileInfo[5]:mtime, \
                               self.dimacFileInfo[6]:f.info.meta.atime, \
                               self.dimacFileInfo[7]:f.info.meta.ctime, \
                               self.dimacFileInfo[8]:is_dir })
