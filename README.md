@@ -11,21 +11,25 @@ To check out the DIMAC code repo, run:
 
 * git clone https://github.com/kamwoods/dimac
 
-Running the sample program is easy. Simply do the following:
+Running the sample program is easy. First, you'll need to tell the Flask application where the directory containing your disk images is.
 
-* cd dimac
+* cd dimac/dimac
+
+Now, edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
+
+* cd ../
 * python runserver.py
 
 Now, open a web browser and navigate to 127.0.0.1:5000
 
 # Dependencies
 
-On a Debian or Ubuntu system:
+DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.10, and the related dependencies for Flask (including Jinja2).
+
+On a Debian or Ubuntu system, fulfilling these dependencies is easy. Just run the following commands to install python-pip and flask:
 
 * sudo apt-get install python-pip
 * sudo pip install flask
-
-(More instructions on running the DIMAC Flask app coming soon...)
 
 # DIMAC Documentation, Help, and other Information
 
