@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, Response
+from flask import Flask, render_template, url_for, Response, stream_with_context, request
 import pytsk3
 import os, sys, string, time, re
 from mimetypes import MimeTypes
@@ -8,7 +8,6 @@ from dimac import app
 
 image_list = []
 file_list_root = []
-dirDictList = [[]]
 
 # FIXME: Imagedir is hardcoded for now. Will be moved to config file shortly
 image_dir = "/home/bcadmin/disk_images"
@@ -63,11 +62,18 @@ def dimacGetImageIndex(image, is_path):
 @app.route('/image/<image_name>')
 def image(image_name):
     print("Partitions: Rendering Template with partitions for img: ", image_name)
-    num_partitions = dimac.num_partitions_ofimg[image_name]
+    num_partitions = dimac.num_partitions_ofimg[str(image_name)]
+    part_desc = [num_partitions]
+
+    image_index =  dimacGetImageIndex(image_name, is_path=False)
+    for i in range(0, num_partitions):
+        part_desc[i] = dimac.partDictList[image_index][i]['desc']
+        ## print("D: part_disk[i={}]={}".format(i, part_desc[i]))
 
     return render_template('fl_img_temp_ext.html',
                             image_name=str(image_name),
-                            num_partitions=num_partitions)
+                            num_partitions=num_partitions,
+                            part_desc=part_desc)
 
 
 #
@@ -87,6 +93,15 @@ def root_directory_list(image_name, image_partition):
                            partition_num=image_partition,
                            file_list=file_list_root)
 
+# FIXME: Retained for possible later use
+def stream_template(template_name, **context):
+    print("In stream_template(): ", template_name)
+    app.update_template_context(context)
+    t = app.jinja_env.get_template(template_name)
+    rv = t.stream(context)
+    rv.enable_buffering(5)
+    return rv
+
 #
 # Template rendering when a File is clicked
 #
@@ -100,23 +115,10 @@ def file_clicked(image_name, image_partition, path):
     image_index = dimacGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
 
-    # A bit of an ugly string manipulation here: Since we are re-using
-    # this flask route routine to get invoked by a browser-click on
-    # any file/directory, the template code manipulates the "file" part
-    # of the URL to replace "/" with "%", so flask can be cheated into
-    # calling this routine (there is just one file name after the last
-    # slash int he URL. This will be re-constructed in the end of this
-    # routine to replace the % by '/' before calling render_template, so
-    # appropriate HTML page will be rendered.
-
-
-    # NO. FIXED NOW.
     file_name_list = path.split('/')
     file_name = file_name_list[len(file_name_list)-1]
 
-    #file_path = re.sub('%','/',file_path)
     print "D: File_path after manipulation = ", path
-
 
     # To verify that the file_name exsits, we need the directory where
     # the file sits. That is if tje file name is $Extend/$RmData, we have
@@ -150,7 +152,6 @@ def file_clicked(image_name, image_partition, path):
         file_list, fs = dm.dimacGenFileList(image_path, image_index,
                                         int(image_partition), path)
 
-
         # Generate the URL to communicate to the template:
         with app.test_request_context():
             url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, path=path )
@@ -164,7 +165,7 @@ def file_clicked(image_name, image_partition, path):
                    url=url)
 
     else:
-        print("DDDDDDDDownloading File: ", item['name'])
+        print("Downloading File: ", item['name'])
         # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
     
@@ -183,26 +184,17 @@ def file_clicked(image_name, image_partition, path):
 
             offset += len(data)
             total_data = total_data+data 
-            print "LEN OF TOTAL DATA: ", len(total_data)
+            print "Length OF TOTAL DATA: ", len(total_data)
            
-            #return data
-            #results = generate_file_data()
-        generator = (cell for row in total_data
-                for cell in row)
 
         mime = MimeTypes()
         mime_type, a = mime.guess_type(file_name)
-        print("MIME YTPE: ", mime_type)
-        return Response(generator,
-                       mimetype=mime_type,
-                       headers={"Content-Disposition":
-                                    "attachment;filename=" + file_name })        
-        '''
-        return Response(generator,
-                   mimetype="text/plain",
-                   headers={"Content-Disposition":
-                                "attachment;filename=file.txt" })        
-        '''
+        generator = (cell for row in total_data
+                for cell in row)
+        return Response(stream_with_context(generator),
+                        mimetype=mime_type,
+                        headers={"Content-Disposition":
+                                    "attachment;filename=" + file_name })
         '''
         return render_template('fl_filecat_temp_ext.html',
         image_name=str(image_name),
@@ -250,8 +242,7 @@ class dimac:
                 fs = pytsk3.FS_Info(img, offset=(part.start * 512))
 
                 # First level files and directories off the root
-                # Builds dirDictList (global) and returns file_list for
-                # the root directory
+                # returns file_list for the root directory
                 file_list_root = self.dimacListFiles(fs, "/", image_index, part.slot_num)
                 ## print(file_list_root)
     
@@ -274,7 +265,7 @@ class dimac:
         return file_list_root, fs
         
 
-    dimacFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir']
+    dimacFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
 
 
     def dimacListFiles(self, fs, path, image_index, partition_num):
@@ -295,8 +286,15 @@ f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
            
             # Since we are displaying the modified time for the file,
             # Convert the mtime to isoformat to be passed in file_list.
-            d = date.fromtimestamp(f.info.meta.mtime)
-            mtime = d.isoformat()
+            ## d = date.fromtimestamp(f.info.meta.mtime)
+            ## mtime = d.isoformat()
+            mtime = time.strftime("%FT%TZ",time.gmtime(f.info.meta.mtime))
+
+
+            if (int(f.info.meta.flags) & 0x01 == 0):
+                deleted = "Yes"
+            else:
+                deleted = "No"
 
             file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
                               self.dimacFileInfo[1]:f.info.meta.size, \
@@ -306,7 +304,8 @@ f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
                               self.dimacFileInfo[5]:mtime, \
                               self.dimacFileInfo[6]:f.info.meta.atime, \
                               self.dimacFileInfo[7]:f.info.meta.ctime, \
-                              self.dimacFileInfo[8]:is_dir })
+                              self.dimacFileInfo[8]:is_dir, \
+                              self.dimacFileInfo[9]:deleted })
 
         return file_list
 
