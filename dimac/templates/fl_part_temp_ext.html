@@ -27,7 +27,6 @@
     </style>
 {% endblock %}
 {% block content %}
-    {#<img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" > #}
     <img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" >
     <h2 align="left">Disk Image Access for the Web</h2>
     {#<BR>&nbsp;<BR>#} 
@@ -47,6 +46,7 @@
               <th>Filename</th>
               <th>Size</th>
               <th>Modified time</th>
+              <th>Deleted?</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}
@@ -61,7 +61,7 @@
               <td> <a href={{ fileinfo_html }}>{{ item.name }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
-              {#<td> <a href={{ fileinfo_html }}>Browse</a> <a href=imgdnld.html>Download</a> </td>#}
+              <td>{{ item.deleted }}</td>
             </tr>
             </p>
           {% endfor %}
