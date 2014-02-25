@@ -53,6 +53,7 @@
               <th>Filename</th>
               <th>Size</th>
               <th>Modified time</th>
+              <th>Deleted?</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}
@@ -74,6 +75,7 @@
               <td> <a href={{ filepath_string~'/'~item.name }}>{{ item.name }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
+              <td>{{ item.deleted }}</td>
               {#<td> <a href={{ filepath_string~'%'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td>  #}
  
             </tr>

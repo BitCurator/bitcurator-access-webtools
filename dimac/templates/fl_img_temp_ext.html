@@ -27,11 +27,8 @@
     </style>
 {% endblock %}
 {% block content %}
-    {#<img src="IMG_3446.JPG" height="100" width="150" />#}
-    {#<img src="{{ url_for('static', filename ='FinalBCLogo-400px-v2.png') }}" align="right" height="50" > #}
     <img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" >
     <h2 align="left">Disk Image Access for the Web</h2>
-    {#<BR>&nbsp;<BR>#}
     <BR>&nbsp;<BR> 
     <p class="important">
       The following readable partitions were found in this disk image:
@@ -45,7 +42,7 @@
           {% for number in range(0, num_partitions) %} 
             {% set part = number + 1 %}
             {% set partinfo_html = image_name ~ "/"~part %}
-            <li>Partition# {{ part }} <a href={{ partinfo_html }}>Browse</a> </li>
+            <li>Partition# {{ part }} [ {{part_desc[number]}} ] <a href={{ partinfo_html }}>Browse</a> </li>
           {% endfor %}
         </ul>
       {# {% endraw %} #}
