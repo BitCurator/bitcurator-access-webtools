@@ -15,4 +15,17 @@
 from flask import Flask
 app = Flask(__name__)
 
+# Config file:
+# For the from_envvar to work, dimac_settings.cfg is to be populated 
+# and the env variable DIMAC_SETTINGS is to be set to this path:
+# Ex: cat /home/bcadmin/myflask/dimac/dimac/settings.cfg
+# IMAGEDIR = "/home/bcadmin/disk_images"
+# export DIMAC_SETTINGS=/home/bcadmin/myflask/dimac/dimac/settings.cfg
+# It is commented out here. IT can be uncommented once the above
+# export command is executed. The default setting can be changed in 
+# the line below, as an alternative.
+
+app.config['IMAGEDIR'] = "/home/bcadmin/disk_images"
+# app.config.from_envvar('DIMAC_SETTINGS')
+
 import dimac.image_browse
