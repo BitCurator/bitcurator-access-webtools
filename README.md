@@ -24,12 +24,31 @@ Now, open a web browser and navigate to 127.0.0.1:5000
 
 # Dependencies
 
-DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.10, and the related dependencies for Flask (including Jinja2).
+DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.1 (but will likely work with other versions). If you're unsure whether you have the correct dependencies, see the "Dependencies" section below.
 
 On a Debian or Ubuntu system, fulfilling these dependencies is easy. Just run the following commands to install python-pip and flask:
 
 * sudo apt-get install python-pip
 * sudo pip install flask
+
+In order to use the database backend, you'll also need postgresql. On a Ubuntu or Debian system, you can install this with the following command:
+
+* sudo apt-get install postgresql
+
+PGAdmin 3 will simplify the process of managing databases you may use with the application. You can install this with:
+
+* sudo apt-get install pgadmin3
+
+In order to build server-side applications (and configure psycopg2 for use by the Flask app) you'll need the postgresql server development package:
+
+* sudo apt-get install postgresql-server-dev-9.1
+
+You'll also need psycopg2 and SQLAlchemy to run the app:
+
+* sudo pip install -U psycopq2
+* sudo pip install Flask-SQLAlchemy
+
+(More coming soon)
 
 # DIMAC Documentation
 
