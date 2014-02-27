@@ -9,8 +9,7 @@ from dimac import app
 image_list = []
 file_list_root = []
 
-# FIXME: Imagedir is hardcoded for now. Will be moved to config file shortly
-image_dir = "/home/bcadmin/disk_images"
+image_dir = app.config['IMAGEDIR']
 num_images = 0
 
 @app.route("/")
@@ -276,27 +275,30 @@ class dimac:
         for f in directory:
             is_dir = False
             '''
-print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
-par inode: {} mode: {} type: {} ".format(f.info.name.name,\
-f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
-f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
-'''
-            if f.info.meta.type == 2:
-                is_dir = True
+            print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
+            par inode: {} mode: {} type: {} ".format(f.info.name.name,\
+            f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
+            f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
+            '''
+            # Some files may not have the metadta information. So
+            # access it only if it exists.
+            if f.info.meta != None:
+                if f.info.meta.type == 2:
+                    is_dir = True
            
-            # Since we are displaying the modified time for the file,
-            # Convert the mtime to isoformat to be passed in file_list.
-            ## d = date.fromtimestamp(f.info.meta.mtime)
-            ## mtime = d.isoformat()
-            mtime = time.strftime("%FT%TZ",time.gmtime(f.info.meta.mtime))
+                # Since we are displaying the modified time for the file,
+                # Convert the mtime to isoformat to be passed in file_list.
+                ## d = date.fromtimestamp(f.info.meta.mtime)
+                ## mtime = d.isoformat()
+                mtime = time.strftime("%FT%TZ",time.gmtime(f.info.meta.mtime))
 
+    
+                if (int(f.info.meta.flags) & 0x01 == 0):
+                    deleted = "Yes"
+                else:
+                    deleted = "No"
 
-            if (int(f.info.meta.flags) & 0x01 == 0):
-                deleted = "Yes"
-            else:
-                deleted = "No"
-
-            file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
+                file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
                               self.dimacFileInfo[1]:f.info.meta.size, \
                               self.dimacFileInfo[2]:f.info.meta.mode, \
                               self.dimacFileInfo[3]:f.info.meta.addr, \
