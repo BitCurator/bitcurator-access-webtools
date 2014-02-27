@@ -1,12 +1,14 @@
 DIMAC: Disk Image Access for the Web
 ------------------------------------
+DIMAC is a digital media access tool geared towards the needs of archives and libraries. DIMAC
+provides simple access to disk images over the web using open source technologies including
+The Sleuth Kit, PyTSK, and Flask. Simply point DIMAC at a local directory that contains raw (dd)
+or forensically-packaged disk images, and it will create a web portal that allows you to browse
+the file systems, download files, and examine disk image metadata.
+
 <http://wiki.bitcurator.net/dimac>
 
 # Getting started
-
-DIMAC provides simple access to disk images over the web using open source technologies including
-The Sleuth Kit, PyTSK, and Flask.
-
 To check out the DIMAC code repo, run:
 
 * git clone https://github.com/kamwoods/dimac
