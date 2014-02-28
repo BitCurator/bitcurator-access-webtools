@@ -1,0 +1,42 @@
+{% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:green;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 1px dotted gray;;
+            font-family: sans-serif;
+            font-size:14px;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    <img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" >
+    <h2 align="left">Disk Image Access for the Web</h2>
+    <BR>&nbsp;<BR> 
+    <p class="important">
+      The following readable partitions were found in this disk image:
+
+      <BR>&nbsp;<BR> 
+        <ul>
+            <li>Image Info {{ image }} </li>
+        </ul>
+
+    </p>
+{% endblock %}
