@@ -12,6 +12,8 @@
 # This is a python script to run the main app server
 
 from dimac import app
+#from dimac import dimac_db
+#dimac_db.dimacdb()
 
 app.run(debug=True)
 
