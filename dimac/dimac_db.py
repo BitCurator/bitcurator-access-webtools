@@ -1,29 +1,25 @@
-from flask import Flask
+from flask import Flask, render_template, url_for, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+db = SQLAlchemy(app)
 #app.config.from_pyfile(config.py) 
 # FIXME: The above line gives error - so added the following 2 lines for now
-SQLALCHEMY_DATABASE_URI = "postgresql://bcadmin:bcadmin@localhost/bcdb"
+#SQLALCHEMY_DATABASE_URI = "postgresql://bcadmin:bcadmin@localhost/DimacImages"
 #db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-db_uri = "postgresql://bcadmin:bcadmin@localhost/bcdb"
-db = SQLAlchemy(app)
+#db_uri = "postgresql://bcadmin:bcadmin@localhost/DimacImages"
 
 import os
 import dimac_utils
 import xml.etree.ElementTree as ET
 
 image_list = []
-#image_dir = app.config['IMAGEDIR']  # FIXME
+#image_dir = app.config['IMAGEDIR']  # FIXME: This is giving keyerror.
 image_dir = "/home/bcadmin/disk_images"
 
-'''
-dbrec = ['image_name', 'acq_date', 'sys_date', 'os', 'file_format', 
-         'media_type', 'is_physical', 'bps', 'media_size', 'md5']
-'''
-
-num_images = 0
-
+#
+# dimacGetXmlInfo: Extracts information from the dfxml file
+#
 def dimacGetXmlInfo(xmlfile):
     result = ""
     try:
@@ -68,11 +64,6 @@ def dimacGetXmlInfo(xmlfile):
                     print("HASH TYPE: ", hash_type)
                     dbrec['md5'] = hash_type 
  
-            '''
-            getAcquiryInfo(ewfinfo)
-            getEwfInfo(ewfinfo)
-            getMediaInfo(ewfinfo)
-            '''
     return dbrec
 
 def dbBrowseImages():
@@ -85,7 +76,7 @@ def dbBrowseImages():
 
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
-            print "IMAGE: ", img
+            print "\n IMAGE: ", img
             global image_list
             image_list.append(img)
 
@@ -103,7 +94,7 @@ def dbBrowseImages():
             # Read the XML file and populate the record for this image
             dbrec = dimacGetXmlInfo(xmlfile)
 
-            print("Adding dbrec session to the DB: ", dbrec)
+            ## print("D: Adding dbrec session to the DB: ", dbrec)
             dbrec['image_name'] = img
 
             # Populate the db:
@@ -113,21 +104,21 @@ def dbBrowseImages():
             image_index +=1
         else:
             continue
+    db.session.commit()
   
     print 'D: Image_list: ', image_list
-    global num_images
-    num_images = len(image_list)
 
 class DimacImages(db.Model):
+    __tablename__ = 'dimac-images'
     image_index = db.Column(db.Integer, primary_key=True)
     image_name = db.Column(db.String(60), unique=True)
-    acq_date = db.Column(db.DateTime)
-    sys_date = db.Column(db.DateTime)
+    acq_date = db.Column(db.String(80), unique=True)
+    sys_date = db.Column(db.String(80), unique=True)
     os = db.Column(db.String(20))
     file_format = db.Column(db.String)
-    media_type = db.Column(db.String(100), unique=True)
-    is_physical = db.Column(db.String(10), unique=True)
-    bps = db.Column(db.Integer, unique=True)
+    media_type = db.Column(db.String(100))
+    is_physical = db.Column(db.String(10))
+    bps = db.Column(db.Integer)
     media_size = db.Column(db.String(100), unique=True)
     md5 = db.Column(db.String(100))
 
@@ -145,7 +136,6 @@ bps = None, media_size = None, md5 = None):
         self.media_size = media_size
         self.md5 = md5
 
-
 def dimacDbSessionAdd(dbrec):
    db.session.add(DimacImages(image_name=dbrec['image_name'], 
                          acq_date=dbrec['acq_date'],
@@ -158,16 +148,29 @@ def dimacDbSessionAdd(dbrec):
                          md5 = dbrec['md5'])) 
     
 def dbinit(): 
+   print(">>> Creating tables ")
    db.drop_all()
    db.create_all()
 
+def dimacdb():
+    dbinit()
+    dbBrowseImages()
+
+## FIXME: Just for testing - Will be removed
 @app.route('/')
 def index(image_name = None):
-    image = DimacImages.query.filter_by(image_name=image_name).first()
+    '''
+    # Hardcode the image for now: FIXME
+    image_name = "charlie-work-usb-2009-12-11.E01"
+    #image = DimacImages.query.filter_by(image_name=image_name).first()
+    print("Querying the DB ...")
+    #image = bcdb.query.filter_by(image_name=image_name).first()
+    image = bcdb.query.filter_by(image_name=image_name).first()
+    print("img", image.acq_date)
     return render_template("db_temp.html", image=image)
-        
-
+    '''
 if __name__=="__main__":
+    db = SQLAlchemy(app)
     dbinit()
     dbBrowseImages()
     app.run(debug=True, host="0.0.0.0", port=8888)
