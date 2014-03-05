@@ -5,22 +5,39 @@ from mimetypes import MimeTypes
 from datetime import date
 
 from dimac import app
+import dimac_db
+from sqlalchemy import *
+'''
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relation, sessionmaker
+'''
+
 
 image_list = []
 file_list_root = []
 
-image_dir = app.config['IMAGEDIR']
+####image_dir = app.config['IMAGEDIR'] FIXME
+image_dir = "/home/bcadmin/disk_images"
 num_images = 0
+image_db = []
 
 @app.route("/")
 
-def bcBrowseImages():
+def dimacBrowseImages():
     global image_dir
     image_index = 0
 
     # Since image_list is declared globally, empty it before populating
     global image_list
     del image_list[:]
+    global image_db
+    del image_db [:]
+
+    # Create the DB. FIXME: This needs to be called from runserver.py 
+    # before calling run. That seems to have some issues. So calling from
+    # here for now. Need to fix it.
+    session = dimac_db.dimacdb()
+
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
             print img
@@ -29,7 +46,10 @@ def bcBrowseImages():
 
             dm = dimac()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.dimacGenerateHtmlForImage(image_path, image_index)
+            dm.num_partitions = dm.dimacGetPartInfoForImage(image_path, image_index)
+            idb = dimac_db.DimacImages.query.filter_by(image_name=img).first()
+            image_db.append(idb)
+            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5)) 
             image_index +=1
         else:
             continue
@@ -39,7 +59,7 @@ def bcBrowseImages():
     global num_images
     num_images = len(image_list)
 
-    return render_template('fl_temp_ext.html', image_list=image_list, np=dm.num_partitions)
+    return render_template('fl_temp_ext.html', image_list=image_list, np=dm.num_partitions, image_db=image_db)
 
 def dimacGetImageIndex(image, is_path):
     global image_list
@@ -74,6 +94,15 @@ def image(image_name):
                             num_partitions=num_partitions,
                             part_desc=part_desc)
 
+@app.route('/image/metadata/<image_name>')
+def image_psql(image_name):
+    ## print("D: Rendering DB template for image: ", image_name)
+
+    image_index =  dimacGetImageIndex(image_name, is_path=False)
+
+    return render_template("db_temp.html", 
+                           image_name = image_name,
+                           image=image_db[image_index])
 
 #
 # Template rendering for Directory Listing per partition
@@ -208,7 +237,7 @@ class dimac:
     partDictList = []
     num_partitions_ofimg = dict()
 
-    def dimacGenerateHtmlForImage(self, image_path, image_index):
+    def dimacGetPartInfoForImage(self, image_path, image_index):
         img = pytsk3.Img_Info(image_path)
         volume = pytsk3.Volume_Info(img)
         self.partDictList.append([])
@@ -311,6 +340,9 @@ class dimac:
 
         return file_list
 
+# FIXME: This is never called (since we run runserver.py)
+# Remove once confirmed to be deleted
 if __name__ == "__main__":
     dm = dimac()
+    dimac_db.dimacdb()
     app.run()
