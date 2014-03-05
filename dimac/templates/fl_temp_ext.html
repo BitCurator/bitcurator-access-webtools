@@ -40,19 +40,24 @@
           <table>
           {#<caption><i>Image List</i></caption>#}
           <tr>
+              <th align="left"></th>
               <th align="left">Image Name</th>
               <th align="left">Actions</th>
               <th> </th>
           </tr>
+          {% set item_num = 0 %}
           {% for item in image_list %}
             {% set imginfo_html = "image/" ~ item  %} 
+            {% set img_md_html = "image/metadata/" ~ item  %} 
             <p style='font-size:9'>
             <tr>
+               <td><a href={{ img_md_html }}><img src="{{ url_for('static', filename ='diskman.png') }}" height="20" width="20" align="center" border="0" </a> 
                <td>{{ item }}</td>
                <td><a href={{ imginfo_html }}>Browse</a></td>
                <td><a href=imgdnld.html>Download</a></td>
             </tr>
             </p>
+            {% set item_num = item_num + 1 %}
 {#            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>#}
 
           {% endfor %}
