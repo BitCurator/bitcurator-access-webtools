@@ -1,0 +1,50 @@
+{% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:green;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 1px dotted gray;;
+            font-family: sans-serif;
+            font-size:14px;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    <img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" >
+    <h2 align="left">Disk Image Access for the Web</h2>
+    <BR>&nbsp;<BR> 
+    <p class="important">
+      Metadata for the image: {{image.image_name }}
+
+      <BR>&nbsp;<BR> 
+        <ul>
+            <li>Acquisition Date: <b>{{ image.acq_date }} </b> </li>
+            <li>System Date:      <b>{{ image.sys_date }} </b> </li>
+            <li>OS:               <b>{{ image.os }}</b> </li>
+            <li>File Format:      <b>{{ image.file_format }}</b> </li>
+            <li>Media Type:       <b>{{ image.media_type }}</b> </li>
+            <li>Is Physical?:     <b>{{ image.is_physical }}</b> </li>
+            <li>Blocks Per Sector:<b>{{ image.bps }}</b> </li>
+            <li>Media Size:       <b>{{ image.media_size }}</b> </li>
+            <li>MD5:              <b>{{ image.md5 }}</b> </li>
+        </ul>
+
+    </p>
+{% endblock %}
