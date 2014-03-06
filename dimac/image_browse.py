@@ -1,3 +1,17 @@
+#!/usr/bin/python
+# coding=UTF-8
+#
+# DIMAC (Disk Image Access for the Web)
+# Copyright (C) 2014
+# All rights reserved.
+#
+# This code is distributed under the terms of the GNU General Public
+# License, Version 3. See the text file "COPYING" for further details
+# about the terms of this license.
+#
+# This file contains the main DIMAC application.
+#
+
 from flask import Flask, render_template, url_for, Response, stream_with_context, request
 import pytsk3
 import os, sys, string, time, re
