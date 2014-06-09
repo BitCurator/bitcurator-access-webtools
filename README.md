@@ -61,6 +61,25 @@ Download the current libewf code from the downloads link at https://code.google.
 * ./configure --enable-v1-api
 * make
 * sudo make install
+* sudo ldconfig
+
+Install The Sleuth Kit:
+
+Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
+
+* ./configure
+* make
+* sudo make install
+* sudo ldconfig
+
+Install The Sleuth Kit Python bindings:
+
+Download the current pytsk (TSK Python bindings) from https://code.google.com/p/pytsk/. Unpack the .tar.gz files, change into the pytsk directory, and run the following:
+
+* python setup.py build
+* sudo python setup.py install
+
+(More coming soon...)
 
 # DIMAC Documentation
 
