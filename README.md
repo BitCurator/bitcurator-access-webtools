@@ -6,7 +6,9 @@ The Sleuth Kit, PyTSK, and Flask. Simply point DIMAC at a local directory that c
 or forensically-packaged disk images, and it will create a web portal that allows you to browse
 the file systems, download files, and examine disk image metadata.
 
-<http://access.bitcurator.net/>
+Find out more at <http://access.bitcurator.net/>
+
+See DIMAC in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>
 
 # Getting started
 To check out the DIMAC code repo, run:
