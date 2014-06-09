@@ -31,8 +31,8 @@ You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or l
 
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions of the necessary packages have not yet been packaged. The instructions below should help: 
 
-Run the following commands to install python-pip and flask:
------------------------------------------------------------
+Install python-pip and Flask:
+-----------------------------
 
   $ sudo apt-get install python-pip
   $ sudo pip install flask
@@ -49,14 +49,14 @@ In order to build server-side applications (and configure psycopg2 for use by th
 
   $ sudo apt-get install postgresql-server-dev-9.1
 
-You'll also need psycopg2 and SQLAlchemy to run the app:
---------------------------------------------------------
+Install psycopg2 and SQLAlchemy (required):
+-------------------------------------------
 
   $ sudo pip install -U psycopq2
   $ sudo pip install Flask-SQLAlchemy
 
-Now, you'll need to set up the database:
--------------------------------------
+Set up the database:
+--------------------
 
 We need to change the PostgreSQL postgres user password; we will not be able to access the server otherwise. As the “postgres” Linux user, execute the psql command. In a terminal, type: 
 
