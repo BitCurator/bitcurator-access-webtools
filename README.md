@@ -53,6 +53,33 @@ You'll also need psycopg2 and SQLAlchemy to run the app:
 * sudo pip install -U psycopq2
 * sudo pip install Flask-SQLAlchemy
 
+To start off, we need to change the PostgreSQL postgres user password; we will not be able to access the server otherwise. As the “postgres” Linux user, we will execute the psql command. In a terminal, type: 
+
+* sudo -u postgres psql postgres
+
+Now, in the postgres prompt, type the following:
+* \password postgres
+
+You’ll need to enter a password, twice, for the “postgres” (master RDBMS control) user. You won’t see the password appear as you type it (twice). Our example below assumes you use the master user "bcadmin".
+
+Now hit “Ctrl-D” to quit the pgsql prompt.
+
+Now, it’s time to create a new user who can create new databases but not other users (note that you won’t see the characters you type in as the password):
+
+* sudo -u postgres createuser -A -P bcadmin
+* Enter password for new role: bcadmin
+* Enter it again: bcadmin
+* Shall the new role be allowed to create databases? (y/n) y
+* Shall the new role be allowed to create more new roles? (y/n) n
+
+Now, create a new database (in this example, we'll call it “bcdb”) with user access rights for the user we created earlier (the "bcadmin" user, in this example, and the -O in the following line is a capital letter O, not a zero): 
+
+* sudo -u postgres createdb -O bcadmin bcdb
+
+Finally, do a full restart on the database, and you should be ready to go:
+
+* sudo /etc/init.d/postgresql restart
+
 Install libewf:
 
 Download the current libewf code from the downloads link at https://code.google.com/p/libewf/. Unpack the .tar.gz file, change into the libewf directory, and run the following:
