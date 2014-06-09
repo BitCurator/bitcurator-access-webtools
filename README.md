@@ -13,7 +13,7 @@ To check out the DIMAC code repo, run:
 
   * git clone https://github.com/kamwoods/dimac
 
-Running the sample program is easy. First, you'll need to tell the Flask application where the directory containing your disk images is.
+Running the sample program is easy (but you probably want to check the dependencies in the next section before continuing). First, you'll need to tell the Flask application where the directory containing your disk images is.
 
   * cd dimac/dimac
 
