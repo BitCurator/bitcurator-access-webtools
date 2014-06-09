@@ -11,16 +11,16 @@ the file systems, download files, and examine disk image metadata.
 # Getting started
 To check out the DIMAC code repo, run:
 
-* git clone https://github.com/kamwoods/dimac
+  $ git clone https://github.com/kamwoods/dimac
 
 Running the sample program is easy. First, you'll need to tell the Flask application where the directory containing your disk images is.
 
-* cd dimac/dimac
+  $ cd dimac/dimac
 
 Edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
 
-* cd ../
-* python runserver.py
+  $ cd ../
+  $ python runserver.py
 
 Now, open a web browser and navigate to 127.0.0.1:5000. Of course, if you haven't installed the dependencies, below, you'll need them before you can get started.
 
@@ -32,33 +32,38 @@ You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or l
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions of the necessary packages have not yet been packaged. The instructions below should help: 
 
 Run the following commands to install python-pip and flask:
+-----------------------------------------------------------
 
-* sudo apt-get install python-pip
-* sudo pip install flask
+  $ sudo apt-get install python-pip
+  $ sudo pip install flask
 
 In order to use the database backend, you'll also need postgresql. On a Ubuntu or Debian system, you can install this with the following command:
 
-* sudo apt-get install postgresql
+  $ sudo apt-get install postgresql
 
 PGAdmin 3 will simplify the process of managing databases you may use with the application. You can install this with:
 
-* sudo apt-get install pgadmin3
+  $ sudo apt-get install pgadmin3
 
 In order to build server-side applications (and configure psycopg2 for use by the Flask app) you'll need the postgresql server development package:
 
-* sudo apt-get install postgresql-server-dev-9.1
+  $ sudo apt-get install postgresql-server-dev-9.1
 
 You'll also need psycopg2 and SQLAlchemy to run the app:
+--------------------------------------------------------
 
-* sudo pip install -U psycopq2
-* sudo pip install Flask-SQLAlchemy
+  $ sudo pip install -U psycopq2
+  $ sudo pip install Flask-SQLAlchemy
+
+Now, you'll need to set up a databse:
+-------------------------------------
 
 To start off, we need to change the PostgreSQL postgres user password; we will not be able to access the server otherwise. As the “postgres” Linux user, we will execute the psql command. In a terminal, type: 
 
-* sudo -u postgres psql postgres
+  $ sudo -u postgres psql postgres
 
 Now, in the postgres prompt, type the following:
-* \password postgres
+  $ \password postgres
 
 You’ll need to enter a password, twice, for the “postgres” (master RDBMS control) user. You won’t see the password appear as you type it (twice). Our example below assumes you use the master user "bcadmin".
 
@@ -66,45 +71,47 @@ Now hit “Ctrl-D” to quit the pgsql prompt.
 
 Now, it’s time to create a new user who can create new databases but not other users (note that you won’t see the characters you type in as the password):
 
-* sudo -u postgres createuser -A -P bcadmin
-* Enter password for new role: bcadmin
-* Enter it again: bcadmin
-* Shall the new role be allowed to create databases? (y/n) y
-* Shall the new role be allowed to create more new roles? (y/n) n
+  $ sudo -u postgres createuser -A -P bcadmin
+  $ Enter password for new role: bcadmin
+  $ Enter it again: bcadmin
+  $ Shall the new role be allowed to create databases? (y/n) y
+  $ Shall the new role be allowed to create more new roles? (y/n) n
 
 Now, create a new database (in this example, we'll call it “bcdb”) with user access rights for the user we created earlier (the "bcadmin" user, in this example, and the -O in the following line is a capital letter O, not a zero): 
 
-* sudo -u postgres createdb -O bcadmin bcdb
+  $ sudo -u postgres createdb -O bcadmin bcdb
 
 Finally, do a full restart on the database, and you should be ready to go:
 
-* sudo /etc/init.d/postgresql restart
+  $ sudo /etc/init.d/postgresql restart
 
 Install libewf:
+---------------
 
 Download the current libewf code from the downloads link at https://code.google.com/p/libewf/. Unpack the .tar.gz file, change into the libewf directory, and run the following:
 
-* ./bootstrap
-* ./configure --enable-v1-api
-* make
-* sudo make install
-* sudo ldconfig
+  $ ./bootstrap
+  $ ./configure --enable-v1-api
+  $ make
+  $ sudo make install
+  $ sudo ldconfig
 
 Install The Sleuth Kit:
+-----------------------
 
-Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
+Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. (Note: There's an older version of The Sleuth Kit available as a Debian/Ubunut package. Don't use it! It's out of date!) Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
 
-* ./configure
-* make
-* sudo make install
-* sudo ldconfig
+  $ ./configure
+  $ make
+  $ sudo make install
+  $ sudo ldconfig
 
 Install The Sleuth Kit Python bindings:
 
 Download the current pytsk (TSK Python bindings) from https://code.google.com/p/pytsk/. Unpack the .tar.gz files, change into the pytsk directory, and run the following:
 
-* python setup.py build
-* sudo python setup.py install
+  $ python setup.py build
+  $ sudo python setup.py install
 
 (More coming soon...)
 
