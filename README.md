@@ -102,8 +102,11 @@ Install The Sleuth Kit:
 Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. (Note: There's an older version of The Sleuth Kit available as a Debian/Ubunut package. Don't use it! It's out of date!) Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
 
   $ ./configure
+
   $ make
+
   $ sudo make install
+
   $ sudo ldconfig
 
 Install The Sleuth Kit Python bindings:
