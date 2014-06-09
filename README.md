@@ -119,8 +119,6 @@ Download the current pytsk (TSK Python bindings) from https://code.google.com/p/
   * python setup.py build
   * sudo python setup.py install
 
-(More coming soon...)
-
 # DIMAC Documentation
 
 More documentation coming soon. DIMAC is currently in alpha; updates will be posted here and on our website at [http://access.bitcurator.net/](http://access.bitcurator.net/) as they become available.
