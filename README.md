@@ -26,7 +26,7 @@ Edit image\_browse.py and change the image\_dir directory to the appropriate dir
   * cd ../
   * python runserver.py
 
-Now, open a web browser and navigate to 127.0.0.1:5000. Of course, if you haven't installed the dependencies, below, you'll need them before you can get started.
+Now, open a web browser and navigate to 127.0.0.1:5000. If you're seeing errors (or the script bails out), you may need to check your dependencies (below).
 
 # Dependencies
 
