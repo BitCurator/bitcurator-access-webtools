@@ -17,18 +17,18 @@ Running the sample program is easy. First, you'll need to tell the Flask applica
 
 * cd dimac/dimac
 
-Now, edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
+Edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
 
 * cd ../
 * python runserver.py
 
-Now, open a web browser and navigate to 127.0.0.1:5000
+Now, open a web browser and navigate to 127.0.0.1:5000. Of course, if you haven't installed the dependencies, below, you'll need them before you can get started.
 
 # Dependencies
 
-DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.1 (but will likely work with other versions). If you're unsure whether you have the correct dependencies, see the "Dependencies" section below.
+DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.1 (but will likely work with other versions). DIMAC will *not* currently work with Python 3.x, as the PyTSK libraries have not yet been ported.
 
-On a Debian or Ubuntu system, fulfilling these dependencies is easy. Just run the following commands to install python-pip and flask:
+On a Debian or Ubuntu system, fulfilling the dependencies is easy. Just run the following commands to install python-pip and flask:
 
 * sudo apt-get install python-pip
 * sudo pip install flask
