@@ -55,10 +55,10 @@ You'll also need psycopg2 and SQLAlchemy to run the app:
   $ sudo pip install -U psycopq2
   $ sudo pip install Flask-SQLAlchemy
 
-Now, you'll need to set up a databse:
+Now, you'll need to set up the database:
 -------------------------------------
 
-To start off, we need to change the PostgreSQL postgres user password; we will not be able to access the server otherwise. As the “postgres” Linux user, we will execute the psql command. In a terminal, type: 
+We need to change the PostgreSQL postgres user password; we will not be able to access the server otherwise. As the “postgres” Linux user, execute the psql command. In a terminal, type: 
 
   $ sudo -u postgres psql postgres
 
@@ -107,6 +107,7 @@ Download the current master source from http://www.sleuthkit.org/sleuthkit/downl
   $ sudo ldconfig
 
 Install The Sleuth Kit Python bindings:
+---------------------------------------
 
 Download the current pytsk (TSK Python bindings) from https://code.google.com/p/pytsk/. Unpack the .tar.gz files, change into the pytsk directory, and run the following:
 
