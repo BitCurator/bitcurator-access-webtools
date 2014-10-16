@@ -1,3 +1,18 @@
+#!/usr/bin/python
+# coding=UTF-8
+#
+# DIMAC (Disk Image Access for the Web)
+# Copyright (C) 2014
+# All rights reserved.
+#
+# This code is distributed under the terms of the GNU General Public
+# License, Version 3. See the text file "COPYING" for further details
+# about the terms of this license.
+#
+# This file contains DIMAC database support.
+#
+
+
 from flask import Flask, render_template, url_for, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -84,7 +99,7 @@ def dbBrowseImages():
             # Till then the following three lines are not necessary.
             dm = dimac_utils.dimac()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.dimacGetPartInfoForImage(image_path, image_index)
+            dm.num_partitions = dm.dimacGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
                 print("No XML file generated for image info. Returning")
