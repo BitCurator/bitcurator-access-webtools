@@ -97,12 +97,11 @@ def dimacGetImageIndex(image, is_path):
 def image(image_name):
     print("Partitions: Rendering Template with partitions for img: ", image_name)
     num_partitions = dimac.num_partitions_ofimg[str(image_name)]
-    part_desc = [num_partitions]
-
+    part_desc = []
     image_index =  dimacGetImageIndex(image_name, is_path=False)
     for i in range(0, num_partitions):
-        part_desc[i] = dimac.partDictList[image_index][i]['desc']
-        ## print("D: part_disk[i={}]={}".format(i, part_desc[i]))
+        ## print("D: part_disk[i={}]={}".format(i, dimac.partDictList[image_index][i]))
+        part_desc.append(dimac.partDictList[image_index][i]['desc'])
 
     return render_template('fl_img_temp_ext.html',
                             image_name=str(image_name),

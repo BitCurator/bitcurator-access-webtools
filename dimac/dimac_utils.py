@@ -27,6 +27,19 @@ class dimac:
     partDictList = []
     num_partitions_ofimg = dict()
 
+    def dimacGetNumPartsForImage(self, image_path, image_index):
+        img = pytsk3.Img_Info(image_path)
+        volume = pytsk3.Volume_Info(img)
+        for part in volume:
+            if part.slot_num >= 0:
+                try:
+                    fs = pytsk3.FS_Info(img, offset=(part.start * 512))
+                except:
+                    ## print ">> Exception in pytsk3.FS_Info in partition: ", self.num_partitions
+                    continue
+                self.num_partitions += 1
+        return (self.num_partitions)
+
     def dimacGetPartInfoForImage(self, image_path, image_index):
         img = pytsk3.Img_Info(image_path)
         volume = pytsk3.Volume_Info(img)
@@ -38,8 +51,6 @@ class dimac:
             # and Primary and extended tables. So we will look for this
             # field to be >=0 to count partitions with valid file systems
             if part.slot_num >= 0:
-                self.num_partitions += 1
-
                 # Add the entry to the List of dictionaries, partDictList.
                 # The list will have one dictionary per partition. The image
                 # name is added as the first element of each partition to
@@ -49,14 +60,21 @@ class dimac:
                 print "D: part_slot_num: ", part.slot_num
                 print "D: part_start_offset: ", part.start
                 print "D: part_description: ", part.desc
+                # Open the file system for this image at the extracted
+                # start_offset.
+                try:
+                    fs = pytsk3.FS_Info(img, offset=(part.start * 512))
+                except:
+                    ## print "Exception in pytsk3.FS_Info for partition : ", self.num_partitions
+                    continue
                 self.partDictList[image_index].append({self.part_array[0]:image_path, \
                                      self.part_array[1]:part.addr, \
                                      self.part_array[2]:part.slot_num, \
                                      self.part_array[3]:part.start, \
                                      self.part_array[4]:part.desc })
     
-                # Open the file system for this image at the extracted
-                # start_offset.
+                self.num_partitions += 1
+
                 fs = pytsk3.FS_Info(img, offset=(part.start * 512))
 
                 # First level files and directories off the root

@@ -99,7 +99,7 @@ def dbBrowseImages():
             # Till then the following three lines are not necessary.
             dm = dimac_utils.dimac()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.dimacGetPartInfoForImage(image_path, image_index)
+            dm.num_partitions = dm.dimacGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
                 print("No XML file generated for image info. Returning")

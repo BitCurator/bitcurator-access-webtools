@@ -38,7 +38,6 @@
         document.write({{ image_name }});
         </script>
         <ul>
-          {% set num_partitions = 1 %}
           {% for number in range(0, num_partitions) %} 
             {% set part = number + 1 %}
             {% set partinfo_html = image_name ~ "/"~part %}
