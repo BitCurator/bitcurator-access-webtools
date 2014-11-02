@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# bca-webtools: Disk Image Access for the Web
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -21,13 +21,13 @@ import subprocess
 # this file. Eventually those routines will go away and the routines from 
 # this file will be called by both db and browse files.
 
-class dimac:
+class bca-webtools:
     num_partitions = 0
     part_array = ["image_path", "addr", "slot_num", "start_offset", "desc"]
     partDictList = []
     num_partitions_ofimg = dict()
 
-    def dimacGetPartInfoForImage(self, image_path, image_index):
+    def bcawGetPartInfoForImage(self, image_path, image_index):
         img = pytsk3.Img_Info(image_path)
         volume = pytsk3.Volume_Info(img)
         self.partDictList.append([])
@@ -61,7 +61,7 @@ class dimac:
 
                 # First level files and directories off the root
                 # returns file_list for the root directory
-                file_list_root = self.dimacListFiles(fs, "/", image_index, part.slot_num)
+                file_list_root = self.bcawListFiles(fs, "/", image_index, part.slot_num)
                 ## print(file_list_root)
     
         image_name = os.path.basename(image_path)
@@ -69,7 +69,7 @@ class dimac:
         ## print ("D: Number of Partitions for image = ", image_name, self.num_partitions)
         return (self.num_partitions)
 
-    def dimacGenFileList(self, image_path, image_index, partition_num, root_path):
+    def bcawGenFileList(self, image_path, image_index, partition_num, root_path):
         img = pytsk3.Img_Info(image_path)
         # Get the start of the partition:
         part_start = self.partDictList[int(image_index)][partition_num-1]['start_offset']
@@ -78,22 +78,22 @@ class dimac:
         # start_offset.
         fs = pytsk3.FS_Info(img, offset=(part_start * 512))
 
-        file_list_root = self.dimacListFiles(fs, root_path, image_index, partition_num)
+        file_list_root = self.bcawListFiles(fs, root_path, image_index, partition_num)
 
         return file_list_root, fs
         
 
-    dimacFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
+    bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
 
 
-    def dimacListFiles(self, fs, path, image_index, partition_num):
+    def bcawListFiles(self, fs, path, image_index, partition_num):
         file_list = []
         directory = fs.open_dir(path=path)
         i=0
         for f in directory:
             is_dir = False
             '''
-            print("Func:dimacListFiles:root_path:{} size: {} inode: {} \
+            print("Func:bcawListFiles:root_path:{} size: {} inode: {} \
             par inode: {} mode: {} type: {} ".format(f.info.name.name,\
             f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
             f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
@@ -116,18 +116,18 @@ class dimac:
                 else:
                     deleted = "No"
 
-                file_list.append({self.dimacFileInfo[0]:f.info.name.name, \
-                              self.dimacFileInfo[1]:f.info.meta.size, \
-                              self.dimacFileInfo[2]:f.info.meta.mode, \
-                              self.dimacFileInfo[3]:f.info.meta.addr, \
-                              self.dimacFileInfo[4]:f.info.name.par_addr, \
-                              self.dimacFileInfo[5]:mtime, \
-                              self.dimacFileInfo[6]:f.info.meta.atime, \
-                              self.dimacFileInfo[7]:f.info.meta.ctime, \
-                              self.dimacFileInfo[8]:is_dir, \
-                              self.dimacFileInfo[9]:deleted })
+                file_list.append({self.bcawFileInfo[0]:f.info.name.name, \
+                              self.bcawFileInfo[1]:f.info.meta.size, \
+                              self.bcawFileInfo[2]:f.info.meta.mode, \
+                              self.bcawFileInfo[3]:f.info.meta.addr, \
+                              self.bcawFileInfo[4]:f.info.name.par_addr, \
+                              self.bcawFileInfo[5]:mtime, \
+                              self.bcawFileInfo[6]:f.info.meta.atime, \
+                              self.bcawFileInfo[7]:f.info.meta.ctime, \
+                              self.bcawFileInfo[8]:is_dir, \
+                              self.bcawFileInfo[9]:deleted })
 
-        ##print("Func:dimacListFiles: Listing Directory for PATH: ", path)
+        ##print("Func:bcawListFiles: Listing Directory for PATH: ", path)
         ##print file_list
         ##print "\n\n"
         return file_list

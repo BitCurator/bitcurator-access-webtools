@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# bca-webtools: Disk Image Access for the Web
 # Copyright (C) 2014
 # All rights reserved.
 #
