@@ -108,7 +108,7 @@ Download the current libewf code from the downloads link at https://code.google.
 Install The Sleuth Kit:
 -----------------------
 
-Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. (Note: There's an older version of The Sleuth Kit available as a Debian/Ubunut package. Don't use it! It's out of date!) Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
+Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. (Note: There's an older version of The Sleuth Kit available as a package in Ubuntu 14.04LTS - don't use it) Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
 
   * ./configure
   * make
