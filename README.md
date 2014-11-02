@@ -1,25 +1,24 @@
-DIMAC: Disk Image Access for the Web
+BitCurator Access Webtools: Disk Image Access for the Web
 ------------------------------------
-DIMAC is a digital media access tool geared towards the needs of archives and libraries. DIMAC
-provides simple access to disk images over the web using open source software including
-The Sleuth Kit, PyTSK, the Flask web framework, and postgres.
+The bca-webtools project provides simple access to disk images over the web using open source 
+software including The Sleuth Kit, PyTSK, the Flask web framework, and postgres.
 
-Simply point DIMAC at a local directory that contains raw (dd) or forensically-packaged disk 
+Simply point bca-webtools at a local directory that contains raw (dd) or forensically-packaged disk 
 images, and it will create a web portal that allows you to browse the file systems, download 
 files, and examine disk image metadata.
 
 Find out more at <http://access.bitcurator.net/>
 
-See DIMAC in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>
+See bca-webtools in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>
 
 # Getting started
-To check out the DIMAC code repo, run:
+To check out the bca-webtools code repo, run:
 
-  * git clone https://github.com/kamwoods/dimac
+  * git clone https://github.com/kamwoods/bca-webtools
 
 Running the sample program is easy (but you probably want to check the dependencies in the next section before continuing). First, you'll need to tell the Flask application where the directory containing your disk images is.
 
-  * cd dimac/dimac
+  * cd bca-webtools/bca-webtools
 
 Edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
 
@@ -30,7 +29,7 @@ Now, open a web browser and navigate to 127.0.0.1:5000. If you're seeing errors 
 
 # Dependencies
 
-DIMAC is a Flask app. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). DIMAC will *not* currently work with Python 3.x, as the PyTSK libraries have not yet been ported.
+The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). DIMAC will *not* currently work with Python 3.x, as the PyTSK libraries have not yet been ported.
 You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions are not packaged. The instructions below should help, but keep in mind - this is an early version of the tool. If you run into trouble, post a message to the Github repo. 
@@ -124,13 +123,13 @@ Download the current pytsk (TSK Python bindings) from https://code.google.com/p/
   * python setup.py build
   * sudo python setup.py install
 
-# DIMAC Documentation
+# bca-webtools Documentation
 
-More documentation coming soon. DIMAC is currently in alpha; updates will be posted here and on our website at [http://access.bitcurator.net/](http://access.bitcurator.net/) as they become available.
+More documentation coming soon. bca-webtools is currently in alpha; updates will be posted here and on our website at [http://access.bitcurator.net/](http://access.bitcurator.net/) as they become available.
 
 # License(s)
 
-DIMAC project documentation, and other non-software products of the DIMAC team are subject to the the Creative Commons Attribution 3.0 Unported license (CC BY 3.0).
+bca-webtools project documentation, and other non-software products of the BitCurator Access team are subject to the the Creative Commons Attribution 3.0 Unported license (CC BY 3.0).
 
 Unless otherwise indicated, software objects in this repository are distributed under the terms of the GNU General Public License, Version 3. See the text file "COPYING" for further details about the terms of this license.
 
