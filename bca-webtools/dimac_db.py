@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# bca-webtools: Disk Image Access for the Web
+# DIMAC (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This file contains bca-webtools database support.
+# This file contains DIMAC database support.
 #
 
 
@@ -20,12 +20,12 @@ app = Flask(__name__)
 db = SQLAlchemy(app)
 #app.config.from_pyfile(config.py) 
 # FIXME: The above line gives error - so added the following 2 lines for now
-#SQLALCHEMY_DATABASE_URI = "postgresql://bcadmin:bcadmin@localhost/BCAWImages"
+#SQLALCHEMY_DATABASE_URI = "postgresql://bcadmin:bcadmin@localhost/DimacImages"
 #db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-#db_uri = "postgresql://bcadmin:bcadmin@localhost/BCAWImages"
+#db_uri = "postgresql://bcadmin:bcadmin@localhost/DimacImages"
 
 import os
-import bca-webtools_utils
+import dimac_utils
 import xml.etree.ElementTree as ET
 
 image_list = []
@@ -33,9 +33,9 @@ image_list = []
 image_dir = "/home/bcadmin/disk_images"
 
 #
-# bcawGetXmlInfo: Extracts information from the dfxml file
+# dimacGetXmlInfo: Extracts information from the dfxml file
 #
-def bcawGetXmlInfo(xmlfile):
+def dimacGetXmlInfo(xmlfile):
     result = ""
     try:
         tree = ET.parse( xmlfile )
@@ -97,9 +97,9 @@ def dbBrowseImages():
 
             # FIXME: Partition info will be added to the metadata info 
             # Till then the following three lines are not necessary.
-            dm = bca-webtools_utils.bca-webtools()
+            dm = dimac_utils.dimac()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
+            dm.num_partitions = dm.dimacGetPartInfoForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
                 print("No XML file generated for image info. Returning")
@@ -107,14 +107,14 @@ def dbBrowseImages():
             print("XML File {} generated for image {}".format(xmlfile, img))
 
             # Read the XML file and populate the record for this image
-            dbrec = bcawGetXmlInfo(xmlfile)
+            dbrec = dimacGetXmlInfo(xmlfile)
 
             ## print("D: Adding dbrec session to the DB: ", dbrec)
             dbrec['image_name'] = img
 
             # Populate the db:
             # Add the created record/session to the DB
-            bcawDbSessionAdd(dbrec)
+            dimacDbSessionAdd(dbrec)
 
             image_index +=1
         else:
@@ -123,8 +123,8 @@ def dbBrowseImages():
   
     print 'D: Image_list: ', image_list
 
-class BCAWImages(db.Model):
-    __tablename__ = 'bcaw-images'
+class DimacImages(db.Model):
+    __tablename__ = 'dimac-images'
     image_index = db.Column(db.Integer, primary_key=True)
     image_name = db.Column(db.String(60), unique=True)
     acq_date = db.Column(db.String(80), unique=True)
@@ -151,8 +151,8 @@ bps = None, media_size = None, md5 = None):
         self.media_size = media_size
         self.md5 = md5
 
-def bcawDbSessionAdd(dbrec):
-   db.session.add(BCAWImages(image_name=dbrec['image_name'], 
+def dimacDbSessionAdd(dbrec):
+   db.session.add(DimacImages(image_name=dbrec['image_name'], 
                          acq_date=dbrec['acq_date'],
                          sys_date=dbrec['sys_date'],
                          os=dbrec['os'], file_format=dbrec['file_format'],
@@ -167,7 +167,7 @@ def dbinit():
    db.drop_all()
    db.create_all()
 
-def bcawdb():
+def dimacdb():
     dbinit()
     dbBrowseImages()
 
@@ -177,7 +177,7 @@ def index(image_name = None):
     '''
     # Hardcode the image for now: FIXME
     image_name = "charlie-work-usb-2009-12-11.E01"
-    #image = BCAWImages.query.filter_by(image_name=image_name).first()
+    #image = DimacImages.query.filter_by(image_name=image_name).first()
     print("Querying the DB ...")
     #image = bcdb.query.filter_by(image_name=image_name).first()
     image = bcdb.query.filter_by(image_name=image_name).first()
