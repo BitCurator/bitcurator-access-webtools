@@ -1,8 +1,8 @@
 BitCurator Access Webtools: Disk Image Access for the Web
 ---------------------------------------------------------
-<http://wiki.bitcurator.net/dimac>
+Up-to-date information can be found at:
 
-# Full documentation coming soon...
+<http://access.bitcurator.net/>
 
 # License(s)
 
