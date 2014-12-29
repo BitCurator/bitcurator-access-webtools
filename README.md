@@ -118,7 +118,11 @@ Download the current master source from http://www.sleuthkit.org/sleuthkit/downl
 Install The Sleuth Kit Python bindings:
 ---------------------------------------
 
-Download the current pytsk (TSK Python bindings) from https://code.google.com/p/pytsk/. Unpack the .tar.gz files, change into the pytsk directory, and run the following:
+Download the current pytsk (TSK Python bindings):
+
+  * git clone https://github.com/py4n6/pytsk
+
+Change into the pytsk directory, and run the following:
 
   * python setup.py build
   * sudo python setup.py install
