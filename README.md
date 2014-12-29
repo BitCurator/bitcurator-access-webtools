@@ -108,7 +108,15 @@ Download the current libewf code from the downloads link at https://code.google.
 Install The Sleuth Kit:
 -----------------------
 
-Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. (Note: There's an older version of The Sleuth Kit available as a package in Ubuntu 14.04LTS - don't use it) Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
+Download the current master source from http://www.sleuthkit.org/sleuthkit/download.php. 
+
+Note 1: There's an older version of The Sleuth Kit available as a package in Ubuntu 14.04LTS - don't use it.
+
+Note 2: As of TSK 4.1.3, you will need to apply a minor patch in order for pytsk to build in a later step. You can find this patch at:
+
+  * https://4a014e8976bcea5c2cd7bfa3cac120c3dd10a2f1.googledrive.com/host/0B3fBvzttpiiScUxsUm54cG02RDA/tsk4.1.3_external_type.patch
+
+Unpack the .tar.gz file, change into the sleuthkit directory, and run the following:
 
   * ./configure
   * make
