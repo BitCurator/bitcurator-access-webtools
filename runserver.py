@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# BitCurator Access Webtools (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -11,9 +11,9 @@
 #
 # This is a python script to run the main app server
 
-from dimac import app
-#from dimac import dimac_db
-#dimac_db.dimacdb()
+from bcaw import app
+#from bcaw import bcaw_db
+#bcaw_db.bcawdb()
 
 app.run(debug=True)
 
