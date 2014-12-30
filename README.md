@@ -18,7 +18,7 @@ To check out the bca-webtools code repo, run:
 
 Running the sample program is easy (but you probably want to check the dependencies in the next section before continuing). First, you'll need to tell the Flask application where the directory containing your disk images is.
 
-  * cd bca-webtools/bca-webtools
+  * cd bca-webtools/bcaw
 
 Edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
 
