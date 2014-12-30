@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# BitCurator Access Webtools (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This file contains the main DIMAC application.
+# This file contains the main BitCurator Access Webtools application.
 #
 
 from flask import Flask, render_template, url_for, Response, stream_with_context, request
@@ -17,10 +17,10 @@ import pytsk3
 import os, sys, string, time, re
 from mimetypes import MimeTypes
 from datetime import date
-from dimac_utils import dimac
+from bcaw_utils import bcaw
 
-from dimac import app
-import dimac_db
+from bcaw import app
+import bcaw_db
 from sqlalchemy import *
 '''
 from sqlalchemy.ext.declarative import declarative_base
@@ -38,7 +38,7 @@ image_db = []
 
 @app.route("/")
 
-def dimacBrowseImages():
+def bcawBrowseImages():
     global image_dir
     image_index = 0
 
@@ -51,7 +51,7 @@ def dimacBrowseImages():
     # Create the DB. FIXME: This needs to be called from runserver.py 
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
-    session = dimac_db.dimacdb()
+    session = bcaw_db.bcawdb()
 
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
@@ -59,10 +59,10 @@ def dimacBrowseImages():
             global image_list
             image_list.append(img)
 
-            dm = dimac()
+            dm = bcaw()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.dimacGetPartInfoForImage(image_path, image_index)
-            idb = dimac_db.DimacImages.query.filter_by(image_name=img).first()
+            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
+            idb = bcaw_db.DimacImages.query.filter_by(image_name=img).first()
             image_db.append(idb)
             ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5)) 
             image_index +=1
@@ -76,7 +76,7 @@ def dimacBrowseImages():
 
     return render_template('fl_temp_ext.html', image_list=image_list, np=dm.num_partitions, image_db=image_db)
 
-def dimacGetImageIndex(image, is_path):
+def bcawGetImageIndex(image, is_path):
     global image_list
     if (is_path == True):
         image_name = os.path.basename(image_path)
@@ -96,12 +96,12 @@ def dimacGetImageIndex(image, is_path):
 @app.route('/image/<image_name>')
 def image(image_name):
     print("Partitions: Rendering Template with partitions for img: ", image_name)
-    num_partitions = dimac.num_partitions_ofimg[str(image_name)]
+    num_partitions = bcaw.num_partitions_ofimg[str(image_name)]
     part_desc = []
-    image_index =  dimacGetImageIndex(image_name, is_path=False)
+    image_index =  bcawGetImageIndex(image_name, is_path=False)
     for i in range(0, num_partitions):
-        ## print("D: part_disk[i={}]={}".format(i, dimac.partDictList[image_index][i]))
-        part_desc.append(dimac.partDictList[image_index][i]['desc'])
+        ## print("D: part_disk[i={}]={}".format(i, bcaw.partDictList[image_index][i]))
+        part_desc.append(bcaw.partDictList[image_index][i]['desc'])
 
     return render_template('fl_img_temp_ext.html',
                             image_name=str(image_name),
@@ -112,7 +112,7 @@ def image(image_name):
 def image_psql(image_name):
     ## print("D: Rendering DB template for image: ", image_name)
 
-    image_index =  dimacGetImageIndex(image_name, is_path=False)
+    image_index =  bcawGetImageIndex(image_name, is_path=False)
 
     return render_template("db_image_template.html", 
                            image_name = image_name,
@@ -125,10 +125,10 @@ def image_psql(image_name):
 def root_directory_list(image_name, image_partition):
     print("Files: Rendering Template with files for partition: ",
                             image_name, image_partition)
-    image_index = dimacGetImageIndex(str(image_name), False)
-    dm = dimac()
+    image_index = bcawGetImageIndex(str(image_name), False)
+    dm = bcaw()
     image_path = image_dir+'/'+image_name
-    file_list_root, fs = dm.dimacGenFileList(image_path, image_index,
+    file_list_root, fs = dm.bcawGenFileList(image_path, image_index,
                                              int(image_partition), '/')
     return render_template('fl_part_temp_ext.html',
                            image_name=str(image_name),
@@ -154,7 +154,7 @@ def file_clicked(image_name, image_partition, path):
     print("Files: Rendering Template for subdirectory or contents of a file: ",
           image_name, image_partition, path)
     
-    image_index = dimacGetImageIndex(str(image_name), False)
+    image_index = bcawGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
 
     file_name_list = path.split('/')
@@ -174,8 +174,8 @@ def file_clicked(image_name, image_partition, path):
     print("D: Invoking TSK API to get files under parent_dir: ", parent_dir)
 
     # Generate File_list for the parent directory to see if the
-    dm = dimac()
-    file_list, fs = dm.dimacGenFileList(image_path, image_index,
+    dm = bcaw()
+    file_list, fs = dm.bcawGenFileList(image_path, image_index,
                                         int(image_partition), parent_dir)
 
     # Look for file_name in file_list
@@ -191,7 +191,7 @@ def file_clicked(image_name, image_partition, path):
         # We will send the file_list under this directory to the template.
         # So calling once again the TSK API ipen_dir, with the current
         # directory, this time.
-        file_list, fs = dm.dimacGenFileList(image_path, image_index,
+        file_list, fs = dm.bcawGenFileList(image_path, image_index,
                                         int(image_partition), path)
 
         # Generate the URL to communicate to the template:
@@ -248,6 +248,6 @@ def file_clicked(image_name, image_partition, path):
 # FIXME: This is never called (since we run runserver.py)
 # Remove once confirmed to be deleted
 if __name__ == "__main__":
-    dm = dimac()
-    dimac_db.dimacdb()
+    dm = bcaw()
+    bcaw_db.bcawdb()
     app.run()

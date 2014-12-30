@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# BitCurator Access Webtools (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #

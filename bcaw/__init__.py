@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# BitCurator Access Webtools (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -26,6 +26,6 @@ app = Flask(__name__)
 # the line below, as an alternative.
 
 app.config['IMAGEDIR'] = "/home/bcadmin/disk_images"
-# app.config.from_envvar('DIMAC_SETTINGS')
+# app.config.from_envvar('BCAW_SETTINGS')
 
-import dimac.image_browse
+import bcaw.image_browse

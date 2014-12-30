@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=UTF-8
 #
-# DIMAC (Disk Image Access for the Web)
+# BitCurator Access Webtools (Disk Image Access for the Web)
 # Copyright (C) 2014
 # All rights reserved.
 #
@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This file contains DIMAC database support.
+# This file contains BitCurator Access Webtools database support.
 #
 
 
@@ -25,7 +25,7 @@ db = SQLAlchemy(app)
 #db_uri = "postgresql://bcadmin:bcadmin@localhost/DimacImages"
 
 import os
-import dimac_utils
+import bcaw_utils
 import xml.etree.ElementTree as ET
 
 image_list = []
@@ -33,9 +33,9 @@ image_list = []
 image_dir = "/home/bcadmin/disk_images"
 
 #
-# dimacGetXmlInfo: Extracts information from the dfxml file
+# bcawGetXmlInfo: Extracts information from the dfxml file
 #
-def dimacGetXmlInfo(xmlfile):
+def bcawGetXmlInfo(xmlfile):
     result = ""
     try:
         tree = ET.parse( xmlfile )
@@ -97,9 +97,9 @@ def dbBrowseImages():
 
             # FIXME: Partition info will be added to the metadata info 
             # Till then the following three lines are not necessary.
-            dm = dimac_utils.dimac()
+            dm = bcaw_utils.bcaw()
             image_path = image_dir+'/'+img
-            dm.num_partitions = dm.dimacGetNumPartsForImage(image_path, image_index)
+            dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
                 print("No XML file generated for image info. Returning")
@@ -107,14 +107,14 @@ def dbBrowseImages():
             print("XML File {} generated for image {}".format(xmlfile, img))
 
             # Read the XML file and populate the record for this image
-            dbrec = dimacGetXmlInfo(xmlfile)
+            dbrec = bcawGetXmlInfo(xmlfile)
 
             ## print("D: Adding dbrec session to the DB: ", dbrec)
             dbrec['image_name'] = img
 
             # Populate the db:
             # Add the created record/session to the DB
-            dimacDbSessionAdd(dbrec)
+            bcawDbSessionAdd(dbrec)
 
             image_index +=1
         else:
@@ -124,7 +124,7 @@ def dbBrowseImages():
     print 'D: Image_list: ', image_list
 
 class DimacImages(db.Model):
-    __tablename__ = 'dimac-images'
+    __tablename__ = 'bcaw-images'
     image_index = db.Column(db.Integer, primary_key=True)
     image_name = db.Column(db.String(60), unique=True)
     acq_date = db.Column(db.String(80), unique=True)
@@ -151,7 +151,7 @@ bps = None, media_size = None, md5 = None):
         self.media_size = media_size
         self.md5 = md5
 
-def dimacDbSessionAdd(dbrec):
+def bcawDbSessionAdd(dbrec):
    db.session.add(DimacImages(image_name=dbrec['image_name'], 
                          acq_date=dbrec['acq_date'],
                          sys_date=dbrec['sys_date'],
@@ -167,7 +167,7 @@ def dbinit():
    db.drop_all()
    db.create_all()
 
-def dimacdb():
+def bcawdb():
     dbinit()
     dbBrowseImages()
 
