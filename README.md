@@ -9,7 +9,7 @@ files, and examine disk image metadata.
 
 Find out more at <http://access.bitcurator.net/>
 
-See bca-webtools in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>
+See a previous version of bca-webtools (DIMAC) in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>
 
 # Getting started
 To check out the bca-webtools code repo, run:
