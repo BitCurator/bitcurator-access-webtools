@@ -29,7 +29,7 @@ Now, open a web browser and navigate to 127.0.0.1:5000. If you're seeing errors 
 
 # Dependencies
 
-The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). DIMAC will *not* currently work with Python 3.x, as the PyTSK libraries have not yet been ported.
+The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 support is coming soon, as the pytsk library has recently been updated.
 You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions are not packaged. The instructions below should help, but keep in mind - this is an early version of the tool. If you run into trouble, post a message to the Github repo. 

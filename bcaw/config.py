@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This file contains items that can be configured in DIMAC.
+# This file contains items that can be configured in BitCurator Access Webtools.
 #
 # IMAGEDIR - the local directory containing your disk images
 # SQLALCHEMY_DATABASE_URI - the local db URI (you must configure a postgres
