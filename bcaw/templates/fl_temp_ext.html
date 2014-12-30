@@ -40,9 +40,11 @@
           <table>
           {#<caption><i>Image List</i></caption>#}
           <tr>
-              <th align="left"></th>
+              <!-- <th align="left"></th> -->
               <th align="left">Image Name</th>
-              <th align="left">Actions</th>
+              <th align="left">Image Info</th>
+              <th align="left">Browse</th>
+              <th align="left">Download</th>
               <th> </th>
           </tr>
           {% set item_num = 0 %}
@@ -51,10 +53,12 @@
             {% set img_md_html = "image/metadata/" ~ item  %} 
             <p style='font-size:9'>
             <tr>
-               <td><a href={{ img_md_html }}><img src="{{ url_for('static', filename ='diskman.gif') }}" height="20" width="20" align="center" border="0" </a> 
                <td>{{ item }}</td>
-               <td><a href={{ imginfo_html }}>Browse</a></td>
-               <td><a href=imgdnld.html>Download</a></td>
+               <td><a href={{ img_md_html }}><img src="{{ url_for('static', filename ='metadata.png') }}" height="20" width="20" align="center" border="0" </a> 
+               <td><a href={{ imginfo_html }}><img src="{{ url_for('static', filename ='browse.png') }}" height="20" width="20" align="center" border="0" </a> 
+               <td><a href=imgdnld.html><img src="{{ url_for('static', filename ='download.png') }}" height="20" width="20" align="center" border="0" </a> 
+               <!-- <td><a href={{ imginfo_html }}>Browse</a></td> -->
+               <!-- <td><a href=imgdnld.html>Download</a></td> -->
             </tr>
             </p>
             {% set item_num = item_num + 1 %}
