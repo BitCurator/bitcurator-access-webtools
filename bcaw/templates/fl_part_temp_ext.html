@@ -47,6 +47,7 @@
               <th>Size</th>
               <th>Modified time</th>
               <th>Deleted?</th>
+              <th>More Info</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}
@@ -55,6 +56,7 @@
                 {% set column1 = 'r' %}
             {% endif %}
             {% set fileinfo_html = partition_num ~'/'~ item.name %}
+            {% set file_md_html = "item/metadata/" ~ item.name  %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
@@ -62,6 +64,7 @@
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
+              <td><a href={{ file_md_html }}><img src="{{ url_for('static', filename ='metadata.png') }}" height="20" width="20" align="center" border="0" </a></td>
             </tr>
             </p>
           {% endfor %}
