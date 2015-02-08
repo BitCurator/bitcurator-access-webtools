@@ -55,11 +55,11 @@ class bcaw:
                 # The list will have one dictionary per partition. The image
                 # name is added as the first element of each partition to
                 # avoid a two-dimentional list.
-                print "D: image_path: ", image_path
-                print "D: part_addr: ", part.addr
-                print "D: part_slot_num: ", part.slot_num
-                print "D: part_start_offset: ", part.start
-                print "D: part_description: ", part.desc
+                #print "D: image_path: ", image_path
+                #print "D: part_addr: ", part.addr
+                #print "D: part_slot_num: ", part.slot_num
+                #print "D: part_start_offset: ", part.start
+                #print "D: part_description: ", part.desc
                 # Open the file system for this image at the extracted
                 # start_offset.
                 try:
@@ -155,13 +155,13 @@ class bcaw:
             #ewfinfo_xmlfile = os.getcwd() +"/"+ image_name+".xml"
             ewfinfo_xmlfile = image_name+".xml"
             cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
-            print("CMD: ", ewfinfo_xmlfile, cmd)
+            #print("CMD: ", ewfinfo_xmlfile, cmd)
             subprocess.check_output(cmd, shell=True)
             return ewfinfo_xmlfile
         elif image.endswith(".AFF") or image.endswith(".aff"):
             # FIXME: does affinfo create xml output?
             cmd = "affinfo "+image_name
             subprocess.check_output(cmd, shell=True)
-            print("Need an E01 file to return xml file")
+            #print("Need an E01 file to return xml file")
             return None
         

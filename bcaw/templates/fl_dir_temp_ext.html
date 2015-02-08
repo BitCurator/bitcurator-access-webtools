@@ -27,12 +27,12 @@
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='bcalogo.png') }}" height="40" width="380" align="center" >
-    <h3 align="left">bca-webtools: Disk Image Access for the Web</h3>
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+    <h3 align="left">bca-webtools</h3>
     {#<BR>&nbsp;<BR>#}
     <BR>&nbsp;<BR> 
     <p class="important">
-      Browse directories and download files:
+      Files to browse or download:
 
       <BR>&nbsp;<BR> 
         {#
@@ -54,7 +54,6 @@
               <th>Size</th>
               <th>Modified time</th>
               <th>Deleted?</th>
-              <th>More Info</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}
@@ -70,7 +69,6 @@
             {#{% set temp = url | replace('/','%') %}#}
             {#{% set filepath_string = temp | replace('%', '/', 4) %}#}
             {% set filepath_string = url %}
-            {% set file_md_html = "item/metadata/" ~ item.name  %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
@@ -78,7 +76,6 @@
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
-              <td><a href={{ item_md_html }}><img src="{{ url_for('static', filename ='metadata.png') }}" height="20" width="20" align="center" border="0" </a></td>
               {#<td> <a href={{ filepath_string~'%'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td>  #}
  
             </tr>

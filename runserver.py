@@ -15,5 +15,6 @@ from bcaw import app
 #from bcaw import bcaw_db
 #bcaw_db.bcawdb()
 
-app.run(debug=True)
+app.debug=True
+app.run('0.0.0.0')
 

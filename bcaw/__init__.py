@@ -25,7 +25,7 @@ app = Flask(__name__)
 # export command is executed. The default setting can be changed in 
 # the line below, as an alternative.
 
-app.config['IMAGEDIR'] = "/home/bcadmin/disk_images"
+app.config['IMAGEDIR'] = "/vagrant/disk-images"
 # app.config.from_envvar('BCAW_SETTINGS')
 
 import bcaw.image_browse

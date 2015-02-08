@@ -32,7 +32,7 @@ image_list = []
 file_list_root = []
 
 ####image_dir = app.config['IMAGEDIR'] FIXME
-image_dir = "/home/bcadmin/disk_images"
+image_dir = "/vagrant/disk-images"
 num_images = 0
 image_db = []
 
@@ -55,7 +55,7 @@ def bcawBrowseImages():
 
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
-            print img
+            #print img
             global image_list
             image_list.append(img)
 
@@ -70,7 +70,7 @@ def bcawBrowseImages():
             continue
   
     # Render the template for main page.
-    print 'D: Image_list: ', image_list
+    #print 'D: Image_list: ', image_list
     global num_images
     num_images = len(image_list)
 
@@ -95,7 +95,7 @@ def bcawGetImageIndex(image, is_path):
 #
 @app.route('/image/<image_name>')
 def image(image_name):
-    print("Partitions: Rendering Template with partitions for img: ", image_name)
+    #print("Partitions: Rendering Template with partitions for img: ", image_name)
     num_partitions = bcaw.num_partitions_ofimg[str(image_name)]
     part_desc = []
     image_index =  bcawGetImageIndex(image_name, is_path=False)
@@ -123,8 +123,8 @@ def image_psql(image_name):
 #
 @app.route('/image/<image_name>/<image_partition>')
 def root_directory_list(image_name, image_partition):
-    print("Files: Rendering Template with files for partition: ",
-                            image_name, image_partition)
+    #print("Files: Rendering Template with files for partition: ",
+                            #image_name, image_partition)
     image_index = bcawGetImageIndex(str(image_name), False)
     dm = bcaw()
     image_path = image_dir+'/'+image_name
@@ -137,7 +137,7 @@ def root_directory_list(image_name, image_partition):
 
 # FIXME: Retained for possible later use
 def stream_template(template_name, **context):
-    print("In stream_template(): ", template_name)
+    #print("In stream_template(): ", template_name)
     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
@@ -151,8 +151,8 @@ def stream_template(template_name, **context):
 @app.route('/image/<image_name>/<image_partition>/<path:path>')
 
 def file_clicked(image_name, image_partition, path):
-    print("Files: Rendering Template for subdirectory or contents of a file: ",
-          image_name, image_partition, path)
+    #print("Files: Rendering Template for subdirectory or contents of a file: ",
+          #image_name, image_partition, path)
     
     image_index = bcawGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
@@ -160,7 +160,7 @@ def file_clicked(image_name, image_partition, path):
     file_name_list = path.split('/')
     file_name = file_name_list[len(file_name_list)-1]
 
-    print "D: File_path after manipulation = ", path
+    #print "D: File_path after manipulation = ", path
 
     # To verify that the file_name exsits, we need the directory where
     # the file sits. That is if tje file name is $Extend/$RmData, we have
@@ -171,7 +171,7 @@ def file_clicked(image_name, image_partition, path):
     temp_list = file_name_list[0:(len(temp_list)-1)]
     parent_dir = '/'.join(temp_list)
 
-    print("D: Invoking TSK API to get files under parent_dir: ", parent_dir)
+    #print("D: Invoking TSK API to get files under parent_dir: ", parent_dir)
 
     # Generate File_list for the parent directory to see if the
     dm = bcaw()
@@ -182,11 +182,12 @@ def file_clicked(image_name, image_partition, path):
     for item in file_list:
         ## print("D: item-name={} file_name={} ".format(item['name'], file_name))
         if item['name'] == file_name:
-            print("D : File {} Found in the list: ".format(file_name))
+            #print("D : File {} Found in the list: ".format(file_name))
             break
     else:
         print("D: File_clicked: File {} not found in file_list".format(file_name))
-            
+        #continue            
+
     if item['isdir'] == True:
         # We will send the file_list under this directory to the template.
         # So calling once again the TSK API ipen_dir, with the current
@@ -198,7 +199,7 @@ def file_clicked(image_name, image_partition, path):
         with app.test_request_context():
             url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, path=path )
 
-        print (">> Rendering template with URL: ", url)
+        #print (">> Rendering template with URL: ", url)
         return render_template('fl_dir_temp_ext.html',
                    image_name=str(image_name),
                    partition_num=image_partition,
@@ -207,7 +208,7 @@ def file_clicked(image_name, image_partition, path):
                    url=url)
 
     else:
-        print("Downloading File: ", item['name'])
+        #print("Downloading File: ", item['name'])
         # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
     
@@ -221,12 +222,12 @@ def file_clicked(image_name, image_partition, path):
             available_to_read = min(BUFF_SIZE, size - offset)
             data = f.read_random(offset, available_to_read)
             if not data:
-                print("Done with reading")
+                #print("Done with reading")
                 break
 
             offset += len(data)
             total_data = total_data+data 
-            print "Length OF TOTAL DATA: ", len(total_data)
+            #print "Length OF TOTAL DATA: ", len(total_data)
            
 
         mime = MimeTypes()

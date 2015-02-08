@@ -30,7 +30,7 @@ import xml.etree.ElementTree as ET
 
 image_list = []
 #image_dir = app.config['IMAGEDIR']  # FIXME: This is giving keyerror.
-image_dir = "/home/bcadmin/disk_images"
+image_dir = "/vagrant/disk-images"
 
 #
 # bcawGetXmlInfo: Extracts information from the dfxml file
@@ -76,7 +76,7 @@ def bcawGetXmlInfo(xmlfile):
                             dbrec['media_size'] = minfo_child.text
                 elif (echild.tag == 'hashdigest'):
                     hash_type = echild.text  ## FIXME
-                    print("HASH TYPE: ", hash_type)
+                    #print("HASH TYPE: ", hash_type)
                     dbrec['md5'] = hash_type 
  
     return dbrec
@@ -91,7 +91,7 @@ def dbBrowseImages():
 
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
-            print "\n IMAGE: ", img
+            #print "\n IMAGE: ", img
             global image_list
             image_list.append(img)
 
@@ -102,9 +102,9 @@ def dbBrowseImages():
             dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
-                print("No XML file generated for image info. Returning")
+                #print("No XML file generated for image info. Returning")
                 return
-            print("XML File {} generated for image {}".format(xmlfile, img))
+            #print("XML File {} generated for image {}".format(xmlfile, img))
 
             # Read the XML file and populate the record for this image
             dbrec = bcawGetXmlInfo(xmlfile)
@@ -121,20 +121,23 @@ def dbBrowseImages():
             continue
     db.session.commit()
   
-    print 'D: Image_list: ', image_list
+    #print 'D: Image_list: ', image_list
 
 class DimacImages(db.Model):
     __tablename__ = 'bcaw-images'
     image_index = db.Column(db.Integer, primary_key=True)
     image_name = db.Column(db.String(60), unique=True)
-    acq_date = db.Column(db.String(80), unique=True)
-    sys_date = db.Column(db.String(80), unique=True)
+    #acq_date = db.Column(db.String(80), unique=True)
+    #sys_date = db.Column(db.String(80), unique=True)
+    acq_date = db.Column(db.String(80))
+    sys_date = db.Column(db.String(80))
     os = db.Column(db.String(20))
     file_format = db.Column(db.String)
     media_type = db.Column(db.String(100))
     is_physical = db.Column(db.String(10))
     bps = db.Column(db.Integer)
-    media_size = db.Column(db.String(100), unique=True)
+    media_size = db.Column(db.String(100))
+    #media_size = db.Column(db.String(100), unique=True)
     md5 = db.Column(db.String(100))
 
     def __init__(self, image_name = None, acq_date = None, sys_date = None,
@@ -163,7 +166,7 @@ def bcawDbSessionAdd(dbrec):
                          md5 = dbrec['md5'])) 
     
 def dbinit(): 
-   print(">>> Creating tables ")
+   #print(">>> Creating tables ")
    db.drop_all()
    db.create_all()
 
