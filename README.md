@@ -12,24 +12,29 @@ Find out more at <http://access.bitcurator.net/>
 See a previous version of bca-webtools (DIMAC) in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>.
 
 # Getting started
+This software uses Vagrant to provision a virtual machine in which bca-webtools runs. To start, make sure you have VirtualBox installed:
+
+  * http://www.virtualbox.org/
+
+and Vagrant installed:
+
+  * https://vagrantup.com
+
 To check out the bca-webtools code repo, run:
 
   * git clone https://github.com/kamwoods/bca-webtools
 
-Running the sample program is easy (but you probably want to check the dependencies in the next section before continuing). First, you'll need to tell the Flask application where the directory containing your disk images is.
+Once you have this repository cloned out, simply run "vagrant up" from within the bca-webtools directory. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
-  * cd bca-webtools/bcaw
+  * 127.0.0.1:8080
 
-Edit image\_browse.py and change the image\_dir directory to the appropriate directory on your host. Now:
-
-  * cd ../
-  * python runserver.py
-
-Now, open a web browser and navigate to 127.0.0.1:5000. If you're seeing errors (or the script bails out), you may need to check your dependencies (below).
+to see the flask application running.
 
 # Dependencies
 
-The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 support is coming soon, as the pytsk library has recently been updated.
+The dependencies listed below are automatically downloaded and installed (or compiled) when Vagrant provisions the virtual machine. They are included here for reference.
+
+The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work..
 You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions are not packaged. The instructions below should help, but keep in mind - this is an early version of the tool. If you run into trouble, post a message to the Github repo. 
