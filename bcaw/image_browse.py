@@ -14,7 +14,7 @@
 
 from flask import Flask, render_template, url_for, Response, stream_with_context, request
 import pytsk3
-import os, sys, string, time, re
+import os, sys, string, time, re, urllib
 from mimetypes import MimeTypes
 from datetime import date
 from bcaw_utils import bcaw
@@ -237,7 +237,8 @@ def file_clicked(image_name, image_partition, path):
         return Response(stream_with_context(generator),
                         mimetype=mime_type,
                         headers={"Content-Disposition":
-                                    "attachment;filename=" + file_name })
+                                    "attachment;filename=" + urllib.quote(file_name) })
+                                    #"attachment;filename=" + file_name })
         '''
         return render_template('fl_filecat_temp_ext.html',
         image_name=str(image_name),
