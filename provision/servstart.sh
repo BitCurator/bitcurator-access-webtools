@@ -13,6 +13,12 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 # combination.  See the README for further detais.
 ##
 
-#start the server
+# Start the bokeh server (needed for live graphing)
+# bokeh-server --backend=redis
+
+# Start the Flask server / app
 cd /vagrant
 python runserver.py &
+
+
+
