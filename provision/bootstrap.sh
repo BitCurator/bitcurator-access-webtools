@@ -83,6 +83,54 @@ cd pytsk
 python setup.py build
 sudo python setup.py install
 
+# Dependencies for Python Bokeh
+# See http://bokeh.pydata.org/en/latest/docs/installation.html#install-dependencies
+# Some are already satsified from earlier Flask install
+sudo apt-get install -y redis-server
+
+# Minimum deps for scipy in pip
+sudo apt-get install -y python python-dev libatlas-base-dev gcc gfortran g++
+
+# Install scipy
+sudo pip install scipy
+
+sudo pip install numpy
+sudo pip install pandas
+sudo pip install redis
+sudo pip install tornado
+sudo pip install greenlet
+sudo pip install pyzmq
+# Already have dateutil
+#sudo pip install python-dateutil
+
+# Bokeh testing dependencies
+sudo pip install beautifulsoup
+sudo pip install colorama
+# Couldn't find pdiff???
+#sudo pip install pdiff
+sudo pip install boto
+sudo pip install nose
+sudo pip instal mock
+sudo pip install coverage
+sudo pip install websocket-client
+
+# Install blaze for future stuff
+sudo pip install blaze
+
+# Now install some additional deps and bokeh itself (npm and node)
+sudo apt-get install -y npm node
+sudo pip install bokeh
+
+# FOR REFERENCE ONLY - download bokeh samples
+#>>> import bokeh.sampledata
+#>>> bokeh.sampledata.download()
+
+# Now install Bokeh from source
+##cd /tmp
+##git clone https://github.com/bokeh/bokeh.git
+##cd bokeh/bokehjs
+# More instruction here if we decide to do this in the future. For now, pip.
+
 # link to the shared image folder
 #sudo mkdir /home/bcadmin
 #sudo ln -s /vagrant/disk-images /home/bcadmin/disk_images

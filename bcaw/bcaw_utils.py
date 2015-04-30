@@ -12,7 +12,7 @@
 # Utilities for the BitCurator Access Webtools application
 
 import pytsk3
-import os, sys, string, time, re
+import os, sys, string, time, re, urllib
 import subprocess
 
 #FIXME: Note: This file is created to be the common utils file. A few 
@@ -101,7 +101,7 @@ class bcaw:
         return file_list_root, fs
         
 
-    bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
+    bcawFileInfo = ['name', 'nameasurl', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
 
 
     def bcawListFiles(self, fs, path, image_index, partition_num):
@@ -134,16 +134,25 @@ class bcaw:
                 else:
                     deleted = "No"
 
-                file_list.append({self.bcawFileInfo[0]:f.info.name.name, \
-                              self.bcawFileInfo[1]:f.info.meta.size, \
-                              self.bcawFileInfo[2]:f.info.meta.mode, \
-                              self.bcawFileInfo[3]:f.info.meta.addr, \
-                              self.bcawFileInfo[4]:f.info.name.par_addr, \
-                              self.bcawFileInfo[5]:mtime, \
-                              self.bcawFileInfo[6]:f.info.meta.atime, \
-                              self.bcawFileInfo[7]:f.info.meta.ctime, \
-                              self.bcawFileInfo[8]:is_dir, \
-                              self.bcawFileInfo[9]:deleted })
+
+                if (str(f.info.name.name) != "." and str(f.info.name.name) != ".."):
+
+                    nameUrlified = urllib.quote(f.info.name.name)
+                    #print("TEST: ", testsample)
+
+                    file_list.append({self.bcawFileInfo[0]:f.info.name.name, \
+                                  self.bcawFileInfo[1]:nameUrlified, \
+                                  self.bcawFileInfo[2]:f.info.meta.size, \
+                                  self.bcawFileInfo[3]:f.info.meta.mode, \
+                                  self.bcawFileInfo[4]:f.info.meta.addr, \
+                                  self.bcawFileInfo[5]:f.info.name.par_addr, \
+                                  self.bcawFileInfo[6]:mtime, \
+                                  self.bcawFileInfo[7]:f.info.meta.atime, \
+                                  self.bcawFileInfo[8]:f.info.meta.ctime, \
+                                  self.bcawFileInfo[9]:is_dir, \
+                                  self.bcawFileInfo[10]:deleted})
+                
+                    #print("FILE LIST: ", file_list)
 
         ##print("Func:bcawListFiles: Listing Directory for PATH: ", path)
         ##print file_list

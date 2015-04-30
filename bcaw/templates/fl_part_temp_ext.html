@@ -42,26 +42,26 @@
           <table>
           <!--<caption><i> File List </i></caption>-->
           <tr>
-              <th>d/r</th>
-              <th>Filename</th>
-              <th>Size</th>
-              <th>Modified time</th>
-              <th>Deleted?</th>
+              <th align="left">Filename</th>
+              <th align="left">Size</th>
+              <th align="left">Last Modified</th>
+              <th align="left">Deleted?</th>
+              <th align="left">Dir (d) or File (r)</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}
-                {% set column1 = 'd' %}
+                {% set itemtype = 'd' %}
             {% else %}
-                {% set column1 = 'r' %}
+                {% set itemtype = 'r' %}
             {% endif %}
-            {% set fileinfo_html = partition_num ~'/'~ item.name %}
+            {% set fileinfo_html = partition_num ~'/'~ item.nameasurl %}
             <p style="font-size:9">
             <tr>
-              <td>{{ column1 }}</td>
               <td> <a href={{ fileinfo_html }}>{{ item.name }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
+              <td>{{ itemtype }}</td>
             </tr>
             </p>
           {% endfor %}
