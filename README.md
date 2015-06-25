@@ -22,7 +22,7 @@ and Vagrant installed:
 
 To check out the bca-webtools code repo, run:
 
-  * git clone https://github.com/kamwoods/bca-webtools
+  * git clone https://github.com/bitcurator/bca-webtools
 
 Once you have this repository cloned out, simply run "vagrant up" from within the bca-webtools directory. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
