@@ -13,6 +13,13 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 # combination.  See the README for further detais.
 ##
 
+# Update and upgrade
+sudo apt-get update -y
+sudo apt-get upgrade -y
+
+# Install build-essential
+sudo apt-get install -y build-essential
+
 # Install python-dev
 sudo apt-get install -y python-dev
 
@@ -21,7 +28,7 @@ sudo apt-get install -y python-pip
 sudo pip install flask
 
 # Needed for libewf
-sudo apt-get install zlib1g-dev
+sudo apt-get install -y zlib1g-dev
 
 # Install Postgress as back end database
 sudo apt-get install -y postgresql
