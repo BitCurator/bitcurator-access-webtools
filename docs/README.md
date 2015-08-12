@@ -1,8 +1,10 @@
 BitCurator Access Webtools: Disk Image Access for the Web
 ---------------------------------------------------------
-Up-to-date information can be found at:
+General project information can be found at:
 
 <http://access.bitcurator.net/>
+
+For build instructions, see the README.md file in the parent directory.
 
 # License(s)
 
