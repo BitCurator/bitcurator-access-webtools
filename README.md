@@ -24,7 +24,12 @@ To check out the bca-webtools code repo, run:
 
   * git clone https://github.com/bitcurator/bca-webtools
 
-Once you have this repository cloned out, simply run "vagrant up" from within the bca-webtools directory. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
+Once you have this repository cloned, make sure the associated Vagrant box (ubuntu/trusty64) is up to date:
+
+  * cd bca-webtools
+  * vagrant box update
+
+You can then start the service by running "vagrant up" from within the bca-webtools directory. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
   * 127.0.0.1:8080
 
@@ -34,8 +39,8 @@ to see the flask application running.
 
 The dependencies listed below are automatically downloaded and installed (or compiled) when Vagrant provisions the virtual machine. They are included here for reference.
 
-The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work..
-You'll also need a range of other forensics tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
+The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
+You'll also need several other libraries and tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 On a Debian or Ubuntu system, fulfilling the some of these dependencies is easy. Others are a bit more involved, as the required versions are not packaged. The instructions below should help, but keep in mind - this is an early version of the tool. If you run into trouble, post a message to the Github repo. 
 
