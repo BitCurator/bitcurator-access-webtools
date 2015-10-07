@@ -18,7 +18,7 @@ sudo apt-get update -y
 sudo apt-get upgrade -y
 
 # Install subversion
-sudo apt-get install subversion
+sudo apt-get install -y subversion
 
 # Install build-essential and autotools
 sudo apt-get install -y build-essential
@@ -74,15 +74,10 @@ sudo apt-get install -y redis-server
 # Minimum deps for scipy in pip
 sudo apt-get install -y python python-dev libatlas-base-dev gcc gfortran g++
 
-# Oracle Java 8 silent install
-sudo apt-get -y -q install software-properties-common htop
-sudo add-apt-repository -y ppa:webupd8team/java
-sudo apt-get -y -q update
-echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-sudo apt-get -y -q install oracle-java8-installer
-#apt-get -y -q install oracle-java7-installer
-sudo update-java-alternatives -s java-8-oracle
+# Install java JDK:  (Installs in  /usr/lib/jvm/java-7-openjdk)¬
+sudo apt-get install -y openjdk-7-jdk
+sudo apt-get install -y openjdk-7-jre-headless
+sudo apt-get install -y openjdk-7-jre-lib
 
 # Install ant: (installs in /usr/bin/ant)
 sudo apt-get install -y ant
@@ -97,6 +92,7 @@ sudo apt-get install -y ivy-doc
 sudo ldconfig
 
 # Install pylucene (also installs JCC)
+cd /tmp
 sudo wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz
 tar -zxvf pylucene-4.10.1-1-src.tar.gz
 cd pylucene-4.10.1-1
@@ -230,7 +226,24 @@ sudo pip install blaze
 sudo apt-get install -y npm node
 sudo pip install bokeh
 
-# FOR REFERENCE ONLY - download bokeh samples
+#start the server
+#cd /vagrant
+#python runserver.py &
+
+# Reference Sections
+
+# For reference only - do not uncomment
+# Oracle Java 8 silent install
+#sudo apt-get -y -q install software-properties-common htop
+#sudo add-apt-repository -y ppa:webupd8team/java
+#sudo apt-get -y -q update
+#echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+#echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+#sudo apt-get -y -q install oracle-java8-installer
+##apt-get -y -q install oracle-java7-installer
+#sudo update-java-alternatives -s java-8-oracle
+
+# For reference only - download bokeh samples
 #>>> import bokeh.sampledata
 #>>> bokeh.sampledata.download()
 
@@ -243,7 +256,3 @@ sudo pip install bokeh
 # link to the shared image folder
 #sudo mkdir /home/bcadmin
 #sudo ln -s /vagrant/disk-images /home/bcadmin/disk_images
-
-#start the server
-#cd /vagrant
-#python runserver.py &
