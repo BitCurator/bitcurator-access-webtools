@@ -1,4 +1,4 @@
-# -*- mode: ruby -*-
+#-*- mode: ruby -*-
 # vi: set ft=ruby :
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
@@ -24,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 5000
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools"
+      vb.name = "bca-webtools-rev6"
       vb.memory = 4096
       vb.cpus = 2
     end
