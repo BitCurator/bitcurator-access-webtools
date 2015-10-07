@@ -13,11 +13,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.hostname = "bca-webtools-rev6"
 
     # Run the provisioning script	
-    # config.vm.provision :shell, :path => "./provision/bootstrap.sh"
+    config.vm.provision :shell, :path => "./provision/bootstrap.sh"
 
     # Run the other provisioning script	
-    # config.vm.provision :shell, :path => "./provision/servstart.sh",
-    #  run: "always"
+    config.vm.provision :shell, :path => "./provision/servstart.sh",
+     run: "always"
 
 
     # Port forward HTTP (80) to host 2020
