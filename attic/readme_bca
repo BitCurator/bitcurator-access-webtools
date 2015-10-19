@@ -1,0 +1,47 @@
+Notes on setting up the Database for bca-webtools
+
+Install postgresql:
+    bcaw-webtools/provision/bootstrap.sh installs this.
+
+ssh to vagrant (after running vagrant up):
+  $ vagrant ssh
+
+
+Create the database bca_db with owner vagrant.
+(superuser is 'postgres')
+
+  First create user "vagrant":
+    $ sudo -u postgres createuser -D -A -P vagrant
+
+  Now create the database
+    $ sudo -u postgres createdb -O vagrant bca_db
+
+Run the python script (if not run by provision/serverstart.sh):
+  $ cd /vagrant
+  $ pytnon runserver.py
+
+On  a browser navigate to "127.0.0.1:8080"
+
+Once the web-page comes up, check the database to see the three tables created.
+
+  $ mysql bca_db
+  bca_db=>\dt
+
+  Ex: 
+bca_db=> \dt
+             List of relations
+ Schema |      Name      | Type  |  Owner  
+--------+----------------+-------+---------
+ public | bcaw_dfxmlinfo | table | vagrant
+ public | bcaw_images    | table | vagrant
+ public | users          | table | vagrant
+(3 rows)
+
+
+
+-----------------------------
+vagrant:
+ssh to vagrant:
+$ vagrant ssh
+
+The bca-webtools directory is mapped to /vagrant.
