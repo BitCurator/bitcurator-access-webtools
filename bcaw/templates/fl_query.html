@@ -1,0 +1,15 @@
+{% extends "flask_template.html" %}
+ 
+{% block content %}
+  <h3> Search </h3>
+ 
+  <form action="{{ url_for('query') }}" method=post>
+    {{ form.hidden_tag() }}
+     
+    {{ form.search_text.label }}
+    {{ form.search_text }}
+     
+    {{ form.submit }}
+  </form>
+     
+{% endblock %}

@@ -30,27 +30,29 @@
             right: 350px;
         }
 
+
     </style>
 {% endblock %}
 {% block content %}
     <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
     <h3 align="left">bca-webtools</h3>
 
-    <p> 
+    <p>         
       <form action="{{ url_for('query') }}" method=post>
         {{ form.hidden_tag() }}
-         
+                 
         {{ form.search_text.label }}
         {{ form.search_text }}
         {{ form.radio_option }}
-         
+                 
         {{ form.submit }}
-      </form>
-    </p>
+      </form> 
+    </p>    
+
     <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'>
-       <!--<td><a href="/home">home</a></td>> -->
-       <td><a href="{{ url_for('home') }}">Home</a></td>
+       <td><a href="/">Home</a></td>
     </p>
+
 
     {#<BR>&nbsp;<BR>#} 
     <BR>&nbsp;<BR> 
@@ -61,12 +63,9 @@
         <p style="position:absolute; top:5px; Right:50px; color:#eeeeee;">
           <!<p style="position:absolute; top:5px; Left-50px;color:#eeeeee;">
           <tr>
-            <!<p style=' position:absolute; top:5px; right:150px; color:#eeeeee; font-wright:bold'>
-
             <p style=' position:absolute; top:5px; right:150px; color:#eeeeee; font-wright:bold'>
               <!-- <td><a href=signin>Sign In</a></td>-->
               <td><a href=signin>{{ user }}</a></td>
-            </p>
             <p style='position:absolute; top:5px; right:50px; color:#eeeeee; font-wright:normal'>
             <!--<td><a href=signup>Sign Up</a></td>-->
             {% if signup_out in "Sign Up" %}
@@ -74,39 +73,34 @@
             {% elif signup_out in "Sign Out" %}
               <td><a href=signout>Sign Out</a></td>
             {% endif %}
-            </p>
             
           </tr>
           </p>
           <!--<table style="width:300px"> -->
+            <p style='font-size:12; color:Green'>
+                Found {{num_results}} search results for {{ searched_phrase }} 
+            </p> 
           <table>
-          {#<caption><i>Image List</i></caption>#}
-          <tr>
+            <tr>
               <!-- <th align="left"></th> -->
-              <th align="left">Image Name</th>
-              <th align="left">Image Info</th>
-              <th align="left">Browse</th>
-              <th align="left">Download</th>
-              <th> </th>
-          </tr>
+              <th style="padding:0 15px 0 15px;" align="center">File Name</th>
+              <th style="padding:0 15px 0 15px;" align="center">Image </th>
+            </tr>
+          {#<caption><i>Image List</i></caption>#}
           {% set item_num = 0 %}
-          {% for item in image_list %}
-            {% set imginfo_html = "image/" ~ item  %} 
-            {% set img_md_html = "image/metadata/" ~ item  %} 
+          {% for item in search_result_file_list %}
             <p style='font-size:9'>
             <tr>
-               <td>{{ item }}</td>
-               <td><a href={{ img_md_html }}><img src="{{ url_for('static', filename ='metadata.png') }}" height="20" width="20" align="center" border="0" </a> 
-               <td><a href={{ imginfo_html }}><img src="{{ url_for('static', filename ='browse.png') }}" height="20" width="20" align="center" border="0" </a> 
-               <td><a href=imgdnld.html><img src="{{ url_for('static', filename ='download.png') }}" height="20" width="20" align="center" border="0" </a> 
-               <!-- <td><a href={{ imginfo_html }}>Browse</a></td> -->
-               <!-- <td><a href=imgdnld.html>Download</a></td> -->
+                <td style="padding:0 15px 0 15px;"> {{ search_result_file_list[item_num] }} </td>
+                <td style="padding:0 15px 0 15px;"> {{ search_result_image_list[item_num] }} </td>
+                {#{% set item_num = item_num + 1 %#}
             </tr>
             </p>
             {% set item_num = item_num + 1 %}
 {#            <li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>#}
 
           {% endfor %}
+          </table>
         </ul>
       {# {% endraw %} #}
     </p>

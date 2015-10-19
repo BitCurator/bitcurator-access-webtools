@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  </head>
+  <body>
+ 
+  <header>
+    <div class="container">
+      <!--<img src="{{ url_for('static', filename ='dimac.png') }}" height="120" width="300" align="center" > -->
+      <!--<h2 align="left">Disk Image Access for the Web</h2> -->
+      <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+      <h3 align="left">bca-webtools</h3>
+
+      <nav>
+        <ul class="menu">
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ url_for('about') }}">About</a></li>
+          <li><a href="{{ url_for('contact') }}">Contact</a></li>
+          {% if 'email' in session %}
+          <li><a href="{{ url_for('profile') }}">Profile</a></li>
+          <li><a href="{{ url_for('signin') }}">Sign Out</a></li>
+          {% else %}
+          <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+          <li><a href="{{ url_for('signin') }}">Sign In</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+ 
+    <div class="container">
+      {% block content %}
+      {% endblock %}
+    </div>
+ 
+  </body>
+</html>
+

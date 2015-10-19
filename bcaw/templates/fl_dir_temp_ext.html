@@ -52,7 +52,7 @@
               <th>d/r</th>
               <th>Filename</th>
               <th>Size</th>
-              <th>Last Modified</th>
+              <th>Modified time</th>
               <th>Deleted?</th>
           </tr>
           {% for item in file_list %} 
@@ -68,15 +68,21 @@
               {#<td> <a href={{ url~'-'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
             {#{% set temp = url | replace('/','%') %}#}
             {#{% set filepath_string = temp | replace('%', '/', 4) %}#}
+            {% if ' ' in item.name %}
+              {% set itemname = item.name.replace(' ', "_") %}
+            {% else %}
+              {% set itemname = item.name %}
+            {% endif %}
+
             {% set filepath_string = url %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
-              <td> <a href={{ filepath_string~'/'~item.nameasurl }}>{{ item.name }}</a>  </td>
+              <td> <a href={{ filepath_string~'/'~itemname~'-'~item.inode }}>{{ itemname}}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
-              {#<td> <a href={{ filepath_string~'%'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td>  #}
+              <td>{{ itemname }}</td>
  
             </tr>
             </p>

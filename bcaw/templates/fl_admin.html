@@ -1,0 +1,24 @@
+{% extends "flask_template.html" %}
+
+{% block content %}
+  <header>
+    <div class="container">
+      <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+      <h3 align="left">bca-webtools - Admin Tools</h3>
+
+        <!--<ul class="menu"> -->
+          <form action="{{ url_for('admin') }}" method=post>
+            {{ form.radio_option }}
+            {{ form.submit }}
+          </form>
+          <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'>
+              <td><a href="{{ url_for('home') }}">Home</a></td>
+          </p>
+
+
+        <!--</ul> -->
+    </div>
+  </header>
+{% endblock %}
+ 
+
