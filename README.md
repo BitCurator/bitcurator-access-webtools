@@ -20,11 +20,15 @@ and Vagrant installed:
 
   * https://vagrantup.com
 
-To check out the bca-webtools code repo, run:
+You can download the latest release of the bca-webtools application here:
+
+  * https://github.com/BitCurator/bca-webtools/releases
+
+(or, if you'd like to test the development branch, you can check the current commit out directly):
 
   * git clone https://github.com/bitcurator/bca-webtools
 
-Once you have this repository cloned, make sure the associated Vagrant box (ubuntu/trusty64) is up to date:
+Once you have the source code, unzip it, change directory into bca-webtools, and make sure the associated Vagrant box (ubuntu/trusty64) is up to date:
 
   * cd bca-webtools
   * vagrant box update
