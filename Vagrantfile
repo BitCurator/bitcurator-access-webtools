@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.box = "ubuntu/trusty64"
 
     # Set the box host-name
-    config.vm.hostname = "bca-webtools-rev7"
+    config.vm.hostname = "bca-webtools"
 
     # Run the provisioning script	
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
