@@ -14,18 +14,42 @@
 
 from flask import Flask
 app = Flask(__name__)
+import bcaw.image_browse
+
+# main_app = app
 
 # Config file:
-# For the from_envvar to work, dimac_settings.cfg is to be populated 
-# and the env variable BCAW_SETTINGS is to be set to this path:
-# Ex: cat /home/bcadmin/myflask/dimac/dimac/settings.cfg
-# IMAGEDIR = "/home/bcadmin/disk_images"
-# export BCAW_SETTINGS=/home/bcadmin/myflask/dimac/dimac/settings.cfg
-# It is commented out here. IT can be uncommented once the above
-# export command is executed. The default setting can be changed in 
-# the line below, as an alternative.
 
-app.config['IMAGEDIR'] = "/vagrant/disk-images"
-# app.config.from_envvar('BCAW_SETTINGS')
+# Adding the following line will allow the econfigurations  to be
+# defined in the specified file - bcaw_default_settings.py. Doing so
+# will add the corresponding elements to the dectionary app.config
+# and populate them with the given values.
+# app.config['element_name']
 
+app.config.from_object('bcaw_default_settings')
+
+# NOTE: The following line should be uncommented when the env variable
+# BCAW_SETTINGS is set to a file with configs which override the default
+# settings specified by bcaw_default_settings.py file.
+###app.config.from_envvar('BCAW_SETTINGS')
+
+# NOTE: From another site: http://code.tutsplus.com/tutorials/intro-to-flask-signing-in-and-out--net-29982
+# FIXME: Config info in app.confic dictionary could be moved to the
+# default config file.
+app.secret_key = 'development key'
+ 
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_SSL"] = True
+app.config["MAIL_USERNAME"] = 'contact@example.com'
+app.config["MAIL_PASSWORD"] = 'your-password'
+ 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://vagrant:vagrant@localhost/bca_db'
+ 
+from bcaw_userlogin_db import db_login
+db_login.init_app(app)
 import bcaw.image_browse
+
+''' Under construction
+app.register_blueprint(admin.bp, url_prefix='/admin')
+'''
