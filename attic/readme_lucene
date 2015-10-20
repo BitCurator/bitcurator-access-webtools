@@ -1,0 +1,100 @@
+Steps to install lucene:
+
+(Ref: http://ubuntuhandbook.org/index.php/2014/02/install-oracle-java-6-7-or-8-ubuntu-14-04/
+and http://sixarm.com/about/java-install-openjdk-ant-ivy-on-ubuntu-linux.html )
+
+
+1. First install Java
+    1-1Add the PPA (Personal Package Archive) repository into your system.
+        $ sudo add-apt-repository ppa:webupd8team/java
+
+    1-2 Update the package lists:
+        $ sudo apt-get update
+
+    1-3 To install Oracle Java 8 (or 7), run:
+        $ sudo apt-get install oracle-java8-installer
+
+    1-4 Test for successful java installation:
+        $ java -version
+vagrant@bca-webtools:/vagrant$ java -version
+
+java version "1.8.0_45"
+
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)
+
+
+
+(While installation, you’ll be asked to agree the license and then the installer start downloading Java file from oracle website and install it on your system.) - How to handle this in vagrant bootstrap script??
+
+2. Instal java jdk:  (Installs in  /usr/lib/jvm/java-6-openjdk)
+  sudo apt-get install openjdk-7-jdk
+  sudo apt-get install openjdk-7-jre-headless
+  sudo apt-get install openjdk-7-jre-lib
+
+3. Install ant: (installs in /usr/bin/ant)
+
+  sudo apt-get install ant
+  sudo apt-get install ant-doc
+  sudo apt-get install ant-optional
+
+4. Install ivy
+
+  sudo apt-get install ivy
+  sudo apt-get install ivy-doc
+
+(2 and 3 before installing java?)
+
+
+5. Install pylucene. It also installs JCC. So the step 4-2 is not needed.
+Ref: http://lucene.apache.org/pylucene/
+
+Notes: Clicking on DOWNLOAD puts us on a list of mirror sites to download from. The following is the suggested one:
+http://www.trieuvan.com/apache/lucene/pylucene/
+
+Clicking on it lists the various pylucene versions.
+We need the latest: 
+
+So the following command is executed from cmd line to download the gz file for pylucene:
+  $ sudo wget http://www.trieuvan.com/apache/lucene/pylucene/pylucene-4.9.0-0-src.tar.gz
+
+  $ tar xzf pylucene-4.9.0-0-src.tar.gz  
+
+  $ pushd jcc
+
+  (Note: It says we need to edit setup.py to reflect our platform – linux2 – there was nothing to edit)
+  $python setup.py build
+  $ python setup.py install
+
+  $ popd
+(puts us back on pylucene directory)
+
+ Here we have to edit the Makefile to uncomment the config info for Linux. (It is originally commented): See below: This is how it looks after modifying.
+
+# Linux     (Ubuntu 11.10 64-bit, Python 2.7.2, OpenJDK 1.7, setuptools 0.6.16)
+
+# Be sure to also set JDK['linux2'] in jcc's setup.py to the JAVA_HOME value
+
+# used below for ANT (and rebuild jcc after changing it).
+
+PREFIX_PYTHON=/usr
+
+ANT=JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 /usr/bin/ant
+
+PYTHON=$(PREFIX_PYTHON)/bin/python
+
+JCC=$(PYTHON) -m jcc --shared
+
+NUM_FILES=8
+
+
+Now run make cmd:
+  $ make
+(runs for a long time)
+
+Test to make sure there were no failures: (takes a long time)
+  $ make test 
+
+Make install:
+  $sudo make install
