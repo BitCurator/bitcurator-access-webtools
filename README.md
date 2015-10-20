@@ -37,11 +37,17 @@ You can then start the service by running the command:
 
   * vagrant up
 
-from within the bca-webtools directory. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
+from within the bca-webtools directory. This step can take a long time the first time you run the software (15-30 minutes depending on your computer). The installation script will provide feedback in the console as it installs each package. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
   * 127.0.0.1:8080
 
 to see the bca-webtools service running.
+
+If you need to stop the service, you can type:
+
+  * vagrant halt
+
+in the console on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. If you need to delete the VM entirely, you can issue a "vagrant destroy" command after "vagrant halt".
 
 # Dependencies
 
