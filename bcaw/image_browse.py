@@ -1148,6 +1148,7 @@ def admin():
                 # First check if the dfxml table entry exists for this image.
                 print ">> Table bcaw_dfxmlinfo already exists in the DB "
                 db_option_msg = "Table bcaw_dfxmlinfo already exists for image " + image_name
+            else:
                 print ">> Building DFXML table for image ", image_name 
                 retval, db_option_msg = bcaw_db.dbBuildTableForImage(image_name, bld_imgdb = False, bld_dfxmldb = True)
                 if retval == 0:
