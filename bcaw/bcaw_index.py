@@ -81,7 +81,7 @@ class IndexFiles(object):
         for root, dirnames, filenames in os.walk(root):
             for filename in filenames:
                 # We can index only a certain types of files
-                if not (filename.endswith('.txt') or filename.endswith('.pdf') or filename.endswith('.xml') or filename.endswith('.doc')):
+                if not (filename.endswith('.txt') or filename.endswith('.pdf') or filename.endswith('.xml') or filename.endswith('.doc') or filename.endswith('.odt')):
                     continue
                 try:
                     file_path = os.path.join(root, filename)
@@ -89,19 +89,27 @@ class IndexFiles(object):
 
                     # First convert PDF and DOC files to text
                     if filename.endswith('.pdf'):
-                        ## print "D2: indexDocs: It Is a PDF file" , filename
+                        ## print "[D2]: indexDocs: It Is a PDF file" , filename
                         outfile = filename.replace('.pdf', '.txt')
                         outfile_path = os.path.join(root, outfile)
                         cmd = 'pdftotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
-                        ## print "D1: indexDocs: pdftotext Command: ", cmd
+                        ## print "[D1]: indexDocs: pdftotext Command: ", cmd
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
                     elif filename.endswith('.doc'):
-                        ## print "D2: indexDocs: It Is a .DOC file" , filename
+                        ## print "[D2]: indexDocs: It Is a .DOC file" , filename
                         outfile = filename.replace('.doc', '.txt')
                         outfile_path = os.path.join(root, outfile)
                         cmd = 'antiword ' +  file_path + ' >> ' + outfile_path
-                        ## print "D1: indexDocs: antiword Command: ", cmd
+                        ## print "[D1]: indexDocs: antiword Command: ", cmd
+                        subprocess.check_output(cmd, shell=True)
+                        file_path = outfile_path
+                    elif filename.endswith('.odt'):
+                        ## print "[D2]: indexDocs: It Is a ODT file" , filename
+                        outfile = filename.replace('.odt', '.txt')
+                        outfile_path = os.path.join(root, outfile)
+                        cmd = 'odttotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
+                        ## print "[D1]: indexDocs: odttotext Command: ", cmd
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
 
@@ -116,7 +124,7 @@ class IndexFiles(object):
                     else:
                         print "warning: no content in %s" % filename
                     writer.addDocument(doc)
-                    ## print "indexDocs: Added Document for ", filename
+                    ## print "[D]: IndexDocs: Added Doc {}, numDocs: {} ".format(file_path, writer.numDocs())
                 except Exception, e:
                     print "Failed in indexDocs:", e
 

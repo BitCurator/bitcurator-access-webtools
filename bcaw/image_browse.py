@@ -130,20 +130,25 @@ def bcawPopulateImgInfoTable(image_index, img, imgdb_flag, dfxmldb_flag, index_f
     if img:
         img_db_exists = False
         dfxml_db_exists = False
+        img_is_indexed = False
 
         # Query the DB to see if tables exist for the given image.
         if bcaw_db.dbu_does_table_exist_for_img(img, "bcaw_images"):
             img_db_exists = True
+
+            # Query the DB to see this image is indexed. We use a field in the
+            # image table to store this information.
+            if bcawIsImageIndexedInDb(img) == True:
+                print("[D2]:bcawPopulateImgInfoTable: Image {} is indexed ".format(img))
+                img_is_indexed = True
+
         if bcaw_db.dbu_does_table_exist_for_img(img, "bcaw_dfxmlinfo"):
             dfxml_db_exists = True
 
-        # Add the querried info to the matrix.
-        image_matrix.append({bcaw_imginfo[0]:image_index, bcaw_imginfo[1]:img, bcaw_imginfo[2]:img_db_exists, bcaw_imginfo[3]:dfxml_db_exists, bcaw_imginfo[4]:0})
 
-    ''' FIXME: REMOVE AFTER TESTING as this is not used
-    if imgdb_flag:
-        image_matrix.append({bcaw_imginfo[0]:image_index, bcaw_imginfo[1]:img})
-    '''
+        # Add the querried info to the matrix.
+        image_matrix.append({bcaw_imginfo[0]:image_index, bcaw_imginfo[1]:img, bcaw_imginfo[2]:img_db_exists, bcaw_imginfo[3]:dfxml_db_exists, bcaw_imginfo[4]:img_is_indexed})
+
     ## print "[D] bcawPopulateImgInfoTable: ", image_matrix
 
 #FIXME: The following line should be called in __init__.py once.
@@ -877,17 +882,68 @@ def bcaw_generate_file_list():
     print "Returning outfile: ", os.path.dirname(outfile)
     return os.path.dirname(outfile)
 
-def bcawSetIndexFlag(image_index):
+def bcawSetIndexFlag(image_index, img):
     """ This routine sets the index flag in the image matrix, for the image
         corresponding to the given image_index.
     """
+
+    # Get the index info from the DB:
+    indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
+
     for img_tbl_item in image_matrix:
         if img_tbl_item['img_index'] == image_index:
-            img_tbl_item.update({bcaw_imginfo[4]:1})
+            #img_tbl_item.update({bcaw_imginfo[4]:1})
+            img_tbl_item.update({bcaw_imginfo[4]:indexed})
             ## print "[D] Image Matrix After setting Index flag: ", image_matrix
             break
     else:
         print ">> bcawSetIndexFlag: image_index not found ", image_index
+
+def bcawIsImageIndexed(img):
+    """ A flag to tell if an image is indexed, is maintained in the global image
+        matrix. This routine checks this flag in the matrix
+    """
+    for img_tbl_item in image_matrix:
+        if img_tbl_item['img_name'] == img:
+            return img_tbl_item['index_exists']
+    else:
+        print ">> [bcawIsImageIndexed]: Image {} not found in the matrix ".format(img)
+        return False #FIXME
+
+def bcawIsImageIndexedInDb(img):
+    """ A flag to tell if an image is indexed, is maintained in the image table of
+        the bcaw_db database. This flag should be in sync with the one in the image
+        matrix. The reason it is replicated in the db is that it needs to be persistent
+        between application's running and retunning. 
+    """
+    if bcaw_db.bcawDbGetIndexFlagForImage(img):
+        print ">> Image {} is already indexed ".format(img)
+        return True
+    else:
+        print ">> Image {} is NOT indexed ".format(img)
+        return False
+
+def bcawClearIndexing():
+    """ This cleans up the directory contents where lucene index is stored,
+        and also clears the flags in both the database (bcaw_images) and the
+        image matrix
+    """
+    ##indexDir = app.config['INDEX_DIR']
+    rmcmd = "cd "+ indexDir + ";" + "rm -rf *"
+    if os.path.exists(indexDir):
+        print ">> Warning: Deleting all index files in directory ", indexDir
+        ## subprocess.check_output(rmcmd, shell=True, stderr=subprocess.STDOUT)
+        ## XXXX FIXME Needs to uncomment after making sure cmd is correct
+
+    # If the indexing flags are set in the db and in img matrix, clear them.
+    for img in os.listdir(image_dir):
+        if img.endswith(".E01") or img.endswith(".AFF"):
+            # Clear the flag in the matrix first
+            bcawSetFlagInMatrix('img_index', False, img)
+
+            # Clear the flag in the Db now
+            if bcawIsImageIndexedInDb(img) == True:
+                bcaw_db.bcawSetIndexForImageInDb(img, 0)
 
 def bcawSetFlagInMatrix(flag, value, image_name):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
@@ -897,9 +953,9 @@ def bcawSetFlagInMatrix(flag, value, image_name):
     print "[D] bcawSetFlagInMatrix: Image Matrix Before: ", image_matrix
     i = 0
     for img_tbl_item in image_matrix:
-        if flag == 'img_name':
+        if flag == 'img_index':
             if img_tbl_item['img_name'] == image_name:
-                img_tbl_item.update({bcaw_imginfo[4]:1})
+                img_tbl_item.update({bcaw_imginfo[4]:value})
                 break
 
         elif flag == 'img_db_exists':
@@ -984,6 +1040,9 @@ def bcawIndexAllFiles():
             # FIXME: Query lucene to check the existance of indexing for this 
             # image and continue to the next image if indexing exiss for this img.
             # Code needs to be added.
+            if bcawIsImageIndexedInDb(img) == True:
+                print "Image {} is already indexed ".format(img)
+                continue
 
             dm = bcaw()
             image_path = image_dir+'/'+img
@@ -1000,12 +1059,17 @@ def bcawIndexAllFiles():
                 file_list_root, fs = dm.bcawGenFileList(image_path, image_index,
                                              int(p), '/')
                 ## print("D: Calling bcawDnldRepo with root ", file_list_root)
-                # NOTE: The following is under construction. Hence commented out.
-                ####bcawDnldRepo(file_list_root, part_dir, image_index, p, image_path, '/')
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
 
             # If successfully indexed, set the flag to "indexed" in the image table
-            bcawSetIndexFlag(image_index)
+            # First set the index flag in the DB
+            indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
+
+            print ">> Setting the index for the image {}. Original value was: {}".format(img, indexed)
+            bcaw_db.bcawSetIndexForImageInDb(img, True)
+
+            # Now Set the index flag in the matrix
+            bcawSetIndexFlag(image_index, img)
 
             image_index += 1
 
@@ -1103,8 +1167,13 @@ def admin():
             print ">> Building Indexes for contents in ", dirFilesToIndex
             bcaw_index.IndexFiles(dirFilesToIndex, indexDir)
             print ">> Built indexes for contents in ", indexDir
-    elif (form.radio_option.data.lower() == 'show_image_matrix'):
+    elif (form.radio_option.data.lower() == "clear_index"):
+        bcawClearIndexing()
         db_option = 7
+        db_option_msg = "Index Cleared "
+
+    elif (form.radio_option.data.lower() == 'show_image_matrix'):
+        db_option = 8
         db_option_msg = "Image Matrix "
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
@@ -1148,6 +1217,7 @@ def admin():
                 # First check if the dfxml table entry exists for this image.
                 print ">> Table bcaw_dfxmlinfo already exists in the DB "
                 db_option_msg = "Table bcaw_dfxmlinfo already exists for image " + image_name
+            else:
                 print ">> Building DFXML table for image ", image_name 
                 retval, db_option_msg = bcaw_db.dbBuildTableForImage(image_name, bld_imgdb = False, bld_dfxmldb = True)
                 if retval == 0:

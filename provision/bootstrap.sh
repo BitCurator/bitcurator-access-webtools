@@ -245,6 +245,7 @@ libtalloc2
 libtalloc-dev 
 antiword 
 poppler-utils 
+odt2txt
 redis-server 
 openjdk-7-jdk 
 openjdk-7-jre-headless 
