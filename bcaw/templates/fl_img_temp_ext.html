@@ -50,11 +50,11 @@
         <script>
         document.write({{ image_name }});
         </script>
-        <ul>
+        <ul style="list-style: none;">
           {% for number in range(0, num_partitions) %} 
             {% set part = number + 1 %}
             {% set partinfo_html = image_name ~ "/"~part %}
-            <li>Partition# {{ part }} [ {{part_desc[number]}} ] <a href={{ partinfo_html }}>Browse</a> </li>
+            <li>Partition #{{ part }} [ {{part_desc[number]}} ] <a href={{ partinfo_html }}>Browse</a> </li>
           {% endfor %}
         </ul>
       {# {% endraw %} #}
