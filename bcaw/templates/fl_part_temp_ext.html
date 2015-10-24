@@ -20,20 +20,32 @@
             margin-left: 5%;
             margin-right: 5%;
             border: 0px dotted gray;;
-            font-family: sans-serif;
+            font-family: Verdana, Geneva, sans-serif;
             font-size:14px;
         }
 
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+
+<div id="wrap">
+
+  <div id="header">
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
     <h3 align="left">bca-webtools</h3>
-    {#<BR>&nbsp;<BR>#} 
-    <BR>&nbsp;<BR> 
+  </div>
+
+  <div id="nav">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+    </ul>
+  </div>
+
+  <div id="main">
+
     <p class="important">
-	Browse directories and download files:
-      <BR>&nbsp;<BR> 
+	Browse directories and download files. Items marked "r" in the first column are regular files. Items marked "d" are directories.
+      <!--<BR>&nbsp;<BR> -->
         <script>
         document.write({{ file_list }});
         </script>
@@ -73,7 +85,21 @@
             </tr>
             </p>
           {% endfor %}
+        </table>
         </ul>
       {# {% endraw %} #}
     </p>
+
+  </div>
+
+  <div id="sidebar">
+    <p></p>
+  </div>
+
+  <div id="footer">
+    <p>BitCurator Access, 2015</p>
+  </div>
+
+</div>
+
 {% endblock %}
