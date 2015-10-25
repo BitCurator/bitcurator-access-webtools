@@ -44,7 +44,15 @@
 
   <div id="nav">
     <ul>
+
       <li><a href="{{ url_for('home') }}">Home</a></td></li>
+      <li><a href=signin>{{ user }}</a></li>
+      {% if signup_out in "Sign Up" %}
+        <li><a href=signup>Sign Up</a></li>
+      {% elif signup_out in "Sign Out" %}
+        <li><a href=signout>Sign Out</a></li>
+      {% endif %}
+
     </ul>
   </div>
 
