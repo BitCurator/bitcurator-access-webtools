@@ -3,7 +3,7 @@
 {% block head %}
     {{ super() }}
     <style type="text/css">
-        .important { color: #336699; }
+        .important { color: #704040; }
         <style type="text/css">
         h1.categories
         {
@@ -26,12 +26,14 @@
 
     </style>
 {% endblock %}
+<!-- .important { color: #336699; } -->
+
 {% block content %}
 
 <div id="wrap">
 
   <div id="header">
-    <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="880" align="center" >
     <h3 align="left">bca-webtools</h3>
   </div>
 
@@ -50,26 +52,15 @@
 
       <BR>&nbsp;<BR> 
         <table>
-           <tr> <td>Acquisition Date: </td>  <td><b>{{ image.acq_date }}</b>   </td> </tr>
-           <tr> <td>System Date:      </td>  <td><b>{{ image.sys_date }}</b>   </td> </tr>
-           <tr> <td>OS:               </td>  <td><b>{{ image.os }}</b>         </td> </tr>
-           <tr> <td>File Format:      </td>  <td><b>{{ image.file_format }}</b></td> </tr>
-           <tr> <td>Media Type:       </td>  <td><b>{{ image.media_type }}</b> </td> </tr>
-           <tr> <td>Is Physical?:     </td>  <td><b>{{ image.is_physical }}</b></td> </tr>
-           <tr> <td>Blocks Per Sector:</td>  <td><b>{{ image.bps }}</b>        </td> </tr>
-           <tr> <td>Media Size:       </td>  <td><b>{{ image.media_size }}</b> </td> </tr>
-           <tr> <td>MD5:              </td>  <td><b>{{ image.md5 }}</b>        </td> </tr>
-<!--
-            <li>Acquisition Date:  <b>{{ image.acq_date }} </b> </li>
-            <li>System Date:       <b>{{ image.sys_date }} </b> </li>
-            <li>OS:                <b>{{ image.os }}</b> </li>
-            <li>File Format:       <b>{{ image.file_format }}</b> </li>
-            <li>Media Type:        <b>{{ image.media_type }}</b> </li>
-            <li>Is Physical?:      <b>{{ image.is_physical }}</b> </li>
-            <li>Blocks Per Sector: <b>{{ image.bps }}</b> </li>
-            <li>Media Size:        <b>{{ image.media_size }}</b> </li>
-            <li>MD5:               <b>{{ image.md5 }}</b> </li>
--->
+           <tr> <td>Acquisition Date:        </td>  <td><b>{{ image.acq_date }}</b>   </td> </tr>
+           <tr> <td>Acquisition System Date: </td>  <td><b>{{ image.sys_date }}</b>   </td> </tr>
+           <tr> <td>Acquisition OS:          </td>  <td><b>{{ image.os }}</b>         </td> </tr>
+           <tr> <td>File Format:             </td>  <td><b>{{ image.file_format }}</b></td> </tr>
+           <tr> <td>Media Type:              </td>  <td><b>{{ image.media_type }}</b> </td> </tr>
+<!--       <tr> <td>Is Physical?:       </td>  <td><b>{{ image.is_physical }}</b></td> </tr> -->
+           <tr> <td>Blocks Per Sector:       </td>  <td><b>{{ image.bps }}</b>        </td> </tr>
+           <tr> <td>Media Size (bytes):      </td>  <td><b>{{ image.media_size }}</b> </td> </tr>
+           <tr> <td>MD5:                     </td>  <td><b>{{ image.md5 }}</b>        </td> </tr>
         </table>
     </p>
   </div>

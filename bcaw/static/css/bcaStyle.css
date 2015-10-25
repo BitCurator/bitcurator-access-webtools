@@ -3,7 +3,7 @@ html {
 		margin:0;
 		padding:0;
 		color:#000;
-		background:#eee;
+		background:#fff;
 		<!--background:#a7a09a;-->
 	}
 	#wrap {
@@ -14,7 +14,8 @@ html {
 	}
 	#header {
     padding:5px 10px;
-		background:#99c;
+		background:#a0a0c0;
+		<!--background:#99c;-->
 		<!--background:#eee;-->
 	}
 	h1 {
