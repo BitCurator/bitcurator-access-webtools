@@ -25,57 +25,43 @@
             font-size:14px;
         }
         form {
-            position: absolute;
+            list-style-type: none;
             top: 15px;
             right: 350px;
+            <!--position: absolute;-->
         }
-
 
     </style>
 {% endblock %}
 {% block content %}
-    <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
+
+<div id="wrap">
+
+  <div id="header">
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
     <h3 align="left">bca-webtools</h3>
+  </div>
 
-    <p>         
-      <form action="{{ url_for('query') }}" method=post>
-        {{ form.hidden_tag() }}
-                 
-        {{ form.search_text.label }}
-        {{ form.search_text }}
-        {{ form.radio_option }}
-                 
-        {{ form.submit }}
-      </form> 
-    </p>    
+  <div id="nav">
+    <ul>
 
-    <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'>
-       <td><a href="/">Home</a></td>
-    </p>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+      <li><a href=signin>{{ user }}</a></li>
+      {% if signup_out in "Sign Up" %}
+        <li><a href=signup>Sign Up</a></li>
+      {% elif signup_out in "Sign Out" %}
+        <li><a href=signout>Sign Out</a></li>
+      {% endif %}
 
+    </ul>
+  </div>
 
-    {#<BR>&nbsp;<BR>#} 
-    <BR>&nbsp;<BR> 
+  <div id="main">
+
     <p class="important">
-      The bca-webtools software provides access to forensically-packaged and raw disk images. Supported file systems include FAT16, FAT32, NTFS, HFS+, ISO9660, and EXT2/3/4. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
+      The bca-webtools application provides access to forensically-packaged and raw disk images. Supported file systems include FAT16, FAT32, NTFS, HFS+, ISO9660, and EXT2/3/4. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
       <BR>&nbsp;<BR> 
-        <ul>
-        <p style="position:absolute; top:5px; Right:50px; color:#eeeeee;">
-          <!<p style="position:absolute; top:5px; Left-50px;color:#eeeeee;">
-          <tr>
-            <p style=' position:absolute; top:5px; right:150px; color:#eeeeee; font-wright:bold'>
-              <!-- <td><a href=signin>Sign In</a></td>-->
-              <td><a href=signin>{{ user }}</a></td>
-            <p style='position:absolute; top:5px; right:50px; color:#eeeeee; font-wright:normal'>
-            <!--<td><a href=signup>Sign Up</a></td>-->
-            {% if signup_out in "Sign Up" %}
-              <td><a href=signup>Sign Up</a></td>
-            {% elif signup_out in "Sign Out" %}
-              <td><a href=signout>Sign Out</a></td>
-            {% endif %}
-            
-          </tr>
-          </p>
+
           <!--<table style="width:300px"> -->
             <p style='font-size:12; color:Green'>
                 Found {{num_results}} search results for {{ searched_phrase }} 
@@ -101,7 +87,28 @@
 
           {% endfor %}
           </table>
-        </ul>
-      {# {% endraw %} #}
+  </div>
+
+  <div id="sidebar">
+
+    <p>Search contents of all images by filename or file contents. (Currently indexing all filenames, contents of .doc, .odt, .pdf, and .txt)
+ 
+    <p> 
+      <form action="{{ url_for('query') }}" method=post>
+        {{ form.hidden_tag() }}
+        <!--{{ form.search_text.label }}-->
+        {{ form.search_text }}
+        {{ form.radio_option }}
+        {{ form.submit }}
+      </form>
     </p>
+
+  </div>
+
+  <div id="footer">
+    <p>BitCurator Access, 2015</p>
+  </div>
+
+</div>
+
 {% endblock %}
