@@ -1,71 +1,125 @@
 {% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:black;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 0px dotted gray;;
+            font-family: Verdana, Geneva, sans-serif;
+            font-size:14px;
+            <!--background-color: #d2b48c;-->
+        }
+        form {
+            list-style-type: none;
+            top: 15px;
+            right: 350px;
+            <!--position: absolute;-->
+        }
 
-{% block content %}
-  <header>
-    <div class="container">
-      <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
-      <h3 align="left">bca-webtools - Admin Tools</h3>
-
-        <nav>
-        <!--<ul class="menu"> -->
-          <form action="{{ url_for('admin') }}" method=post>
-            {{ form.radio_option }}
-            {{ form.submit }}
-          </form>
-
-          <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'>
-              <td><a href="{{ url_for('home') }}">Home</a></td>
-          </p>
-    
-          <ul>
-          <!--<caption><i> Image Matrix </i></caption> -->
-          <table style="width:800px">
-          <tr>
-              <th>Index</th>
-              <th>Image name</th>
-              <th>Image DB?</th>
-              <th>DFXML DB?</th>
-              <th> Indexed? </th>
-              <th> Add Table </th>
-              <th> Delete Table </th>
-          </tr>
-          {% for item in image_matrix %}
-            <p style="font-size:9">
-            <tr>
-              <td>{{ item.img_index }}</td>
-              <td>{{ item.img_name }}</td>
-              <td>{{ item.img_db_exists }}</td>
-              <td>{{ item.dfxml_db_exists }}</td>
-              <td>{{ item.index_exists }}</td>
-              <td>
-                <form role="form" method="post">
-                  <input type=checkbox name=build_table value={{ item.img_name }} name='build_table'>
-                  <button type="submit" name="build_table" value="submit">Add</button>
-                </form>
-              </td>
-              <td>
-                <form role="form" method="post">
-                  <input type=checkbox name=delete_table value={{ item.img_name }} name='delete_table'>
-                  <button type="submit" name="delete_table" value="submit">Delete</button>
-                </form>
-              </td>
-              <!-- <td>{{ build_form.radio_option}} {{build_form.submit }} </td> -->
-
-            </tr>
-            </p>
-
-          {% endfor %}
-          </ul>
-
-          <p style='font-size:12; color:Green'>
-                <!--Option {{ db_option }} chosen : {{ db_option_msg }}-->
-                <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > {{ db_option_msg }}
-          </p>
-        
-        <!--</ul> -->
-        </nav>
-    </div>
-  </header>
+    </style>
 {% endblock %}
- 
+{% block content %}
+
+<div id="wrap">
+
+  <div id="header">
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
+    <h3 align="left">bca-webtools</h3>
+  </div>
+
+  <div id="nav">
+    <ul>
+
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+
+    </ul>
+  </div>
+
+  <div id="main">
+
+    <h3 align="left">bca-webtools - Admin Tools</h3>
+
+    <!--<ul class="menu"> -->
+    <form action="{{ url_for('admin') }}" method=post>
+      {{ form.radio_option }}
+      {{ form.submit }}
+    </form>
+
+    <p style='font-size:12; color:Green'>
+    <!--Option {{ db_option }} chosen : {{ db_option_msg }}-->
+    <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > {{ db_option_msg }}
+    </p>
+
+    <ul>
+      <!--<caption><i> Image Matrix </i></caption> -->
+      <table style="width:800px">
+        <tr>
+          <th>Index</th>
+          <th>Image name</th>
+          <th>Image DB?</th>
+          <th>DFXML DB?</th>
+          <th> Indexed? </th>
+          <th> Add Table </th>
+          <th> Delete Table </th>
+        </tr>
+        {% for item in image_matrix %}
+        <p style="font-size:9">
+        <tr>
+          <td>{{ item.img_index }}</td>
+          <td>{{ item.img_name }}</td>
+          <td>{{ item.img_db_exists }}</td>
+          <td>{{ item.dfxml_db_exists }}</td>
+          <td>{{ item.index_exists }}</td>
+
+          <td>
+            <form role="form" method="post">
+              <input type=checkbox name=build_table value={{ item.img_name }} name='build_table'>
+              <button type="submit" name="build_table" value="submit">Add</button>
+            </form>
+          </td>
+          
+          <td>
+            <form role="form" method="post">
+              <input type=checkbox name=delete_table value={{ item.img_name }} name='delete_table'>
+              <button type="submit" name="delete_table" value="submit">Delete</button>
+            </form>
+          </td>
+          <!-- <td>{{ build_form.radio_option}} {{build_form.submit }} </td> -->
+
+        </tr>
+        </p>
+
+        {% endfor %}
+      </table>
+    </ul>
+
+  </div>
+
+  <div id="sidebar">
+    <p></p>
+  </div>
+
+  <div id="footer">
+    <p>BitCurator Access, 2015</p>
+  </div>
+
+</div>
+
+{% endblock %}
+
 
