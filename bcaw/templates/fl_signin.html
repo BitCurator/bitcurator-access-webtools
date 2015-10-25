@@ -1,26 +1,96 @@
 {% extends "fl_signup_template.html" %}
- 
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:black;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 0px dotted gray;;
+            font-family: Verdana, Geneva, sans-serif;
+            font-size:14px;
+            <!--background-color: #d2b48c;-->
+        }
+
+    </style>
+{% endblock %}
 {% block content %}
-  <h3>Sign In</h3>
+
+<div id="wrap">
+
+  <div id="header">
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
+    <h3 align="left">bca-webtools</h3>
+  </div>
+
+  <div id="nav">
+    <ul>
+
+       <li><a href="{{ url_for('home') }}">Home</a></li>
+       <li><a href="{{ url_for('about') }}">About</a></li>
+       <li><a href="{{ url_for('contact') }}">Contact</a></li>
+       {% if 'email' in session %}
+       <li><a href="{{ url_for('profile') }}">Profile</a></li>
+       <li><a href="{{ url_for('signin') }}">Sign Out</a></li>
+       {% else %}
+       <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+       <li><a href="{{ url_for('signin') }}">Sign In</a></li>
+       {% endif %}
+
+    </ul>
+  </div>
+
+  <div id="main">
  
-  {% for message in form.email.errors %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
+    <h3>Sign In</h3>
+ 
+    {% for message in form.email.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
    
-  {% for message in form.password.errors %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
+    {% for message in form.password.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
    
-  <form action="{{ url_for('signin') }}" method=post>
-    {{ form.hidden_tag() }}
+    <form action="{{ url_for('signin') }}" method=post>
+      {{ form.hidden_tag() }}
      
-    {{ form.email.label }}
-    {{ form.email }}
-     
-    {{ form.password.label }}
-    {{ form.password }}
-     
-    {{ form.submit }}
-  </form>
+      <p>
+      {{ form.email.label }}
+      {{ form.email }}
+      </p>
+
+      <p>
+      {{ form.password.label }}
+      {{ form.password }}
+      </p>     
+
+      {{ form.submit }}
+    </form>
+
+  </div>
+
+  <div id="sidebar">
+    <p></p>
+  </div>
+
+  <div id="footer">
+    <p>BitCurator Access, 2015</p>
+  </div>
+
+</div>
      
 {% endblock %}
