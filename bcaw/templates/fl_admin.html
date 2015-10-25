@@ -1,24 +1,77 @@
 {% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:black;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 0px dotted gray;;
+            font-family: Verdana, Geneva, sans-serif;
+            font-size:14px;
+            <!--background-color: #d2b48c;-->
+        }
+        form {
+            list-style-type: none;
+            top: 15px;
+            right: 350px;
+            <!--position: absolute;-->
+        }
 
+    </style>
+{% endblock %}
 {% block content %}
-  <header>
-    <div class="container">
-      <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
-      <h3 align="left">bca-webtools - Admin Tools</h3>
 
-        <!--<ul class="menu"> -->
-          <form action="{{ url_for('admin') }}" method=post>
-            {{ form.radio_option }}
-            {{ form.submit }}
-          </form>
-          <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'>
-              <td><a href="{{ url_for('home') }}">Home</a></td>
-          </p>
+<div id="wrap">
 
+  <div id="header">
+    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
+    <h3 align="left">bca-webtools</h3>
+  </div>
 
-        <!--</ul> -->
-    </div>
-  </header>
+  <div id="nav">
+    <ul>
+
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+
+    </ul>
+  </div>
+
+  <div id="main">
+
+    <h3 align="left">bca-webtools - Admin Tools</h3>
+
+    <!--<ul class="menu"> -->
+    <form action="{{ url_for('admin') }}" method=post>
+      {{ form.radio_option }}
+      {{ form.submit }}
+    </form>
+    
+  </div>
+
+  <div id="sidebar">
+    <p></p>
+  </div>
+
+  <div id="footer">
+    <p>BitCurator Access, 2015</p>
+  </div>
+
+</div>
+
 {% endblock %}
  
 
