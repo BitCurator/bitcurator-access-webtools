@@ -76,26 +76,28 @@
     <form action="{{ url_for('signup') }}" method=post>
       {{ form.hidden_tag() }}
 
-      <p>
-      {{ form.firstname.label }}
-      {{ form.firstname }}
-      </p>     
+      <table>
+        <tr>
+          <td>{{ form.firstname.label }}</td>
+          <td>{{ form.firstname }}</td>
+        </tr>
 
-      <p>
-      {{ form.lastname.label }}
-      {{ form.lastname }}
-      </p>
+        <tr>
+          <td>{{ form.lastname.label }}</td>
+          <td>{{ form.lastname }}</td>
+        </tr>
 
-      <p>
-      {{ form.email.label }}
-      {{ form.email }}
-      </p>
+        <tr>
+          <td>{{ form.email.label }}</td>
+          <td>{{ form.email }}</td>
+        </tr>
 
-      <p>
-      {{ form.password.label }}
-      {{ form.password }}
-      </p>     
-
+        <tr>
+          <td>{{ form.password.label }}</td>
+          <td>{{ form.password }}</td>
+        </tr>
+      </table>
+ 
       {{ form.submit }}
     </form>
     

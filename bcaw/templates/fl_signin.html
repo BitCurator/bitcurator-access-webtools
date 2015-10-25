@@ -67,16 +67,18 @@
    
     <form action="{{ url_for('signin') }}" method=post>
       {{ form.hidden_tag() }}
-     
-      <p>
-      {{ form.email.label }}
-      {{ form.email }}
-      </p>
 
-      <p>
-      {{ form.password.label }}
-      {{ form.password }}
-      </p>     
+      <table>
+        <tr>
+          <td>{{ form.email.label }}</td>
+          <td>{{ form.email }}</td>
+        </tr>
+
+        <tr>
+          <td>{{ form.password.label }}</td>
+          <td>{{ form.password }}</td>
+        </tr>
+      </table>
 
       {{ form.submit }}
     </form>
