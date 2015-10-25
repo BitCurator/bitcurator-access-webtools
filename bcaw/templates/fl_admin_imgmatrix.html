@@ -56,8 +56,19 @@
 
     <!--<ul class="menu"> -->
     <form action="{{ url_for('admin') }}" method=post>
-      {{ form.radio_option }}
+
+      <table>
+        {% for subfield in form.radio_option %}
+        <tr>
+          <td>{{ subfield }}</td>
+          <td>{{ subfield.label }}</td>
+        </tr>
+        {% endfor %}
+        <!--{{ form.radio_option }}-->
+      </table>
+
       {{ form.submit }}
+
     </form>
 
     <p style='font-size:12; color:Green'>
@@ -69,13 +80,13 @@
       <!--<caption><i> Image Matrix </i></caption> -->
       <table style="width:800px">
         <tr>
-          <th>Index</th>
-          <th>Image name</th>
-          <th>Image DB?</th>
-          <th>DFXML DB?</th>
-          <th> Indexed? </th>
-          <th> Add Table </th>
-          <th> Delete Table </th>
+          <th align="left">Index</th>
+          <th align="left">Image name</th>
+          <th align="left">Image DB?</th>
+          <th align="left">DFXML DB?</th>
+          <th align="left"> Indexed? </th>
+          <th align="left"> Add Table </th>
+          <th align="left"> Delete Table </th>
         </tr>
         {% for item in image_matrix %}
         <p style="font-size:9">
