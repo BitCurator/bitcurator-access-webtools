@@ -58,14 +58,14 @@
 
         <ul>
           <!--<table style="width:300px"> -->
-          <table>
+          <table class="tight">
           <!--<caption><i> Directory Listing </i></caption>-->
           <tr>
-              <th>d/r</th>
-              <th>Filename</th>
-              <th>Size</th>
-              <th>Modified time</th>
-              <th>Deleted?</th>
+              <th align="left">d/r</th>
+              <th align="left">Filename</th>
+              <th align="left">Size</th>
+              <th align="left">Last Modified</th>
+              <th align="left">Deleted?</th>
           </tr>
           {% for item in file_list %} 
             {% if item.isdir %}

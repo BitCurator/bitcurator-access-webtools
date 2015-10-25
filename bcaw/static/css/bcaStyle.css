@@ -65,4 +65,25 @@ html {
 	* html #footer {
 		height:1px;
 	}
-	
+ 
+  table.spaced td {
+    margin: 10px 10px 10px 10px;
+    padding: 10px 10px 10px 0px;
+    <!-- background-color: lime; -->
+  }
+  table.spaced {
+    border-collapse: separate;
+    border-spacing: 8px;
+    *border-collapse: expression('separate', cellSpacing = '8px');
+  }
+  
+  table.tight td {
+    margin: 10px 10px 10px 10px;
+    padding: 0px 10px 0px 00px;
+    <!-- background-color: lime; -->
+  }
+  table.tight {
+    border-collapse: separate;
+    border-spacing: 8px;
+    *border-collapse: expression('separate', cellSpacing = '8px');
+  }
