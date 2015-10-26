@@ -332,7 +332,7 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
         # FIXME: Retained temporarily. Probably not needed.
         ##dbu_create_table_if_doesntexist("bcaw_images")
         dbrec['image_name'] = img
-        dbrec['indexed'] = False # Just initialize to something
+        dbrec['indexed'] = 0 # Just initialize to something
 
         # Populate the db:
         # Add the created record/session to the DB
@@ -482,7 +482,7 @@ def bcawDbGetIndexFlagForImage(img):
         not for a particular image, from the image matrix.
     """
     idb = BcawImages.query.filter_by(image_name=img).first()
-    print "[D]: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
+    print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
     return idb.indexed
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
