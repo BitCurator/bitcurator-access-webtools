@@ -26,6 +26,7 @@ from java.io import File
 from org.apache.lucene.analysis.standard import StandardAnalyzer
 from org.apache.lucene.index import DirectoryReader
 from org.apache.lucene.util import Version
+import os
  
 class ContactForm(Form):
   name = TextField("Name")
@@ -143,6 +144,11 @@ class QueryForm(Form):
                 indexDir = app.config['FILE_INDEXDIR']
             else:
                 indexDir = app.config['INDEX_DIR']
+                # If no index files exist in the index directory, chances are
+                # that index is not built. Return in that case.
+                if os.listdir(indexDir) == []:
+                    print ">> Index files do not exist in ", indexDir
+                    return None, 'contents'
 
             print("D: BCAW: It is a Content Search: indexDir: ", indexDir)
             print 'lucene', lucene.VERSION
@@ -182,7 +188,7 @@ class adminForm(Form):
             return None, self.radio_option.data.lower()
 
 class buildForm(Form):
-    radio_option = RadioField('Label', choices=[('build_db_table', 'Build DB Table'), ('rmove_db_table', 'Remove dB Table')], default='')
+    radio_option = RadioField('Label', choices=[('build_db_table', 'Build DB Table'), ('rmove_db_table', 'Remove dB Table'), ('build_index', 'Build Index')], default='')
     submit = SubmitField("Submit")
 
     def __init__(self, *args, **kwargs):
@@ -193,3 +199,7 @@ class buildForm(Form):
             print(">> bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
 
+'''
+class buildIndexForm(Form):
+    radio_option = RadioField('Label', choices=[('build_db_table', 'Build DB Table'), ('rmove_db_table', 'Remove dB Table')], default='')
+'''
