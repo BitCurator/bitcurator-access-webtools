@@ -889,11 +889,15 @@ def bcawSetIndexFlag(image_index, img):
 
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
+    if indexed == 0:
+        indexed_string = "False"
+    else:
+        indexed_string = "True"
 
     for img_tbl_item in image_matrix:
         if img_tbl_item['img_index'] == image_index:
             #img_tbl_item.update({bcaw_imginfo[4]:1})
-            img_tbl_item.update({bcaw_imginfo[4]:indexed})
+            img_tbl_item.update({bcaw_imginfo[4]:indexed_string})
             ## print "[D] Image Matrix After setting Index flag: ", image_matrix
             break
     else:
@@ -916,12 +920,14 @@ def bcawIsImageIndexedInDb(img):
         matrix. The reason it is replicated in the db is that it needs to be persistent
         between application's running and retunning. 
     """
-    if bcaw_db.bcawDbGetIndexFlagForImage(img):
-        print ">> Image {} is already indexed ".format(img)
-        return True
-    else:
+    indexed =  int(bcaw_db.bcawDbGetIndexFlagForImage(img))
+    #if bcaw_db.bcawDbGetIndexFlagForImage(img):
+    if indexed == 0:
         print ">> Image {} is NOT indexed ".format(img)
         return False
+    else:
+        print ">> Image {} is already indexed ".format(img)
+        return True
 
 def bcawClearIndexing():
     """ This cleans up the directory contents where lucene index is stored,
@@ -931,8 +937,9 @@ def bcawClearIndexing():
     ##indexDir = app.config['INDEX_DIR']
     rmcmd = "cd "+ indexDir + ";" + "rm -rf *"
     if os.path.exists(indexDir):
+        print "[D]: Executing psql cmd: ", rmcmd
         print ">> Warning: Deleting all index files in directory ", indexDir
-        ## subprocess.check_output(rmcmd, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(rmcmd, shell=True, stderr=subprocess.STDOUT)
         ## XXXX FIXME Needs to uncomment after making sure cmd is correct
 
     # If the indexing flags are set in the db and in img matrix, clear them.
@@ -943,7 +950,7 @@ def bcawClearIndexing():
 
             # Clear the flag in the Db now
             if bcawIsImageIndexedInDb(img) == True:
-                bcaw_db.bcawSetIndexForImageInDb(img, 0)
+                bcaw_db.bcawSetIndexForImageInDb(img, False)
 
 def bcawSetFlagInMatrix(flag, value, image_name):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
@@ -1041,8 +1048,11 @@ def bcawIndexAllFiles():
             # image and continue to the next image if indexing exiss for this img.
             # Code needs to be added.
             if bcawIsImageIndexedInDb(img) == True:
-                print "Image {} is already indexed ".format(img)
+                print "IndexFiles: Image {} is already indexed ".format(img)
                 continue
+
+            # If user has chosen not to build index for this image, skip it.
+            # FIXME: Add code here
 
             dm = bcaw()
             image_path = image_dir+'/'+img
@@ -1148,6 +1158,8 @@ def admin():
         db_option = 6
         db_option_msg = "Option not yet supported"
         dirFileNamesToIndex = bcaw_generate_file_list()
+
+        # Index the filenames first
         if os.path.exists(dirFileNamesToIndex):
             ## print("[D]: Indexing Filenames ")
             index_dir = app.config['FILENAME_INDEXDIR']
@@ -1155,6 +1167,13 @@ def admin():
             print(">> Filename Index built in directory ", index_dir)
             db_option_msg = "Index built"
         # Now build the indexes for the content files fromn directory files_to-index
+
+        '''
+        # First get the checked images to build indexes of:
+        build_form = buildForm()
+        checked_index = 'build_index' in request.form
+        '''
+
 
         # First get the files starting from the root, for each image listed
         bcawIndexAllFiles()
@@ -1198,6 +1217,7 @@ def admin():
 
     checked_build = 'build_table' in request.form
     checked_delete = 'delete_table' in request.form
+    checked_index = 'build_index' in request.form
 
     if checked_build or checked_delete:
 
@@ -1238,6 +1258,7 @@ def admin():
                 print ">> Deleting Entries for image {} from dfxml table".format(image_name)
                 retval, db_option_msg = \
                    bcaw_db.dbu_execute_dbcmd("bcaw_dfxmlinfo", "delete_entries_for_image", image_name)
+        ##elif checked_index == True:
 
     return render_template('fl_admin_results.html',
                            db_option=str(db_option),
