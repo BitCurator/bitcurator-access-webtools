@@ -486,7 +486,8 @@ def bcawDbGetIndexFlagForImage(img):
     return idb.indexed
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
-    db_login.session.add(BcawDfxmlInfo(image_name=d_dbrec['image_name'],
+    try:
+        db_login.session.add(BcawDfxmlInfo(image_name=d_dbrec['image_name'],
                    partition_offset=d_dbrec['partition_offset'],
                    ##sector_size=d_dbrec['sector_size'],
                    block_size=d_dbrec['block_size'],
@@ -512,6 +513,8 @@ def bcawDfxmlDbSessionAdd(d_dbrec):
                    fo_uid=d_dbrec['uid'],
                    fo_gid=d_dbrec['gid'],
                    fo_mtime=d_dbrec['mtime']))
+    except:
+        print ">> Exception while adding the record: ", d_dbrec
     db_login.session.commit()
 
     
