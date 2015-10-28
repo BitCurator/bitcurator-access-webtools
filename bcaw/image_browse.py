@@ -920,7 +920,8 @@ def bcawIsImageIndexedInDb(img):
         matrix. The reason it is replicated in the db is that it needs to be persistent
         between application's running and retunning. 
     """
-    indexed =  int(bcaw_db.bcawDbGetIndexFlagForImage(img))
+    #indexed =  int(bcaw_db.bcawDbGetIndexFlagForImage(img))
+    indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
     #if bcaw_db.bcawDbGetIndexFlagForImage(img):
     if indexed == 0:
         print ">> Image {} is NOT indexed ".format(img)
@@ -993,29 +994,31 @@ def bcawSetFlagInMatrix(flag, value, image_name):
     ## print "[D] bcawSetFlagInMatrix: Image Matrix After setting the falg: ", image_matrix
 def bcawSetFlagInMatrixPerImage(flag, value, image):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
-        in the image matrix, for all the images present.
+        in the image matrix, for the given image
     """
-    ## print "[D] bcawSetFlagInMatrix: flag, value: ", flag, value
-    ## print "[D] bcawSetFlagInMatrix: Image Marix Before: ", image_matrix
+    print "[D] bcawSetFlagInMatrixPerImage: flag, value: ", flag, value, image
+    print "[D2] bcawSetFlagInMatrixPerImage: Image Marix Before: ", image_matrix
     i = 0
     for img_tbl_item in image_matrix:
-        if flag == 'img_index':
-            if img_tbl_item['img_index'] == image_index:
-                img_tbl_item.update({bcaw_imginfo[4]:1})
-                break
+        if image == img_tbl_item['img_name']:
+            if flag == 'img_index':
+                if img_tbl_item['img_index'] == image_index:
+                    img_tbl_item.update({bcaw_imginfo[4]:1})
+                    break
 
-        elif flag == 'img_db_exists':
-            ## print "[D] Setting flag img_db_exists in the image matrix"
-            # Set img_db_exists to the given value for every image in the image_table
-            img_tbl_item.update({bcaw_imginfo[2]:value})
+            elif flag == 'img_db_exists':
+                ## print "[D] Setting flag img_db_exists in the image matrix"
+                # Set img_db_exists to the given value for every image in the image_table
+                img_tbl_item.update({bcaw_imginfo[2]:value})
 
-        elif flag == 'dfxml_db_exists':
-            ## print "[D] Setting flag dfxml_db_exists in the image matrix"
-            # Set dfxml_db_exists to the given value for every image in the image_table
-            img_tbl_item.update({bcaw_imginfo[3]:value})
+            elif flag == 'dfxml_db_exists':
+                ## print "[D] Setting flag dfxml_db_exists in the image matrix"
+                # Set dfxml_db_exists to the given value for every image in the image_table
+                img_tbl_item.update({bcaw_imginfo[3]:value})
 
-        i += 1
-
+            i += 1
+    else:
+        print ">> bcawSetFlagMatrixPerImage: Image {} not found".format(image)
 def bcawIsImgInMatrix(img):
     for img_tbl_item in image_matrix:
         if img_tbl_item['img_name'] == img:

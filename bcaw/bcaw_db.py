@@ -486,7 +486,8 @@ def bcawDbGetIndexFlagForImage(img):
     return idb.indexed
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
-    db_login.session.add(BcawDfxmlInfo(image_name=d_dbrec['image_name'],
+    try:
+        db_login.session.add(BcawDfxmlInfo(image_name=d_dbrec['image_name'],
                    partition_offset=d_dbrec['partition_offset'],
                    ##sector_size=d_dbrec['sector_size'],
                    block_size=d_dbrec['block_size'],
@@ -512,6 +513,8 @@ def bcawDfxmlDbSessionAdd(d_dbrec):
                    fo_uid=d_dbrec['uid'],
                    fo_gid=d_dbrec['gid'],
                    fo_mtime=d_dbrec['mtime']))
+    except:
+        print ">> Exception while adding the record: ", d_dbrec
     db_login.session.commit()
 
     
@@ -613,7 +616,7 @@ def dbu_execute_dbcmd(table_name, function, image_name):
 
         # update the image_matrix
         ## print "[D]: dbu_execute_cmd: Updating the matrix for img_db_exists " 
-        image_browse.bcawSetFlagInMatrix('dfxml_db_exists', False, image_name)
+        image_browse.bcawSetFlagInMatrixPerImage('dfxml_db_exists', False, image_name)
 
         ## print "[D]:dbu_execute_cmd: returning message_str ", message_string
         return(0, message_string)
