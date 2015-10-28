@@ -613,7 +613,7 @@ def dbu_execute_dbcmd(table_name, function, image_name):
 
         # update the image_matrix
         ## print "[D]: dbu_execute_cmd: Updating the matrix for img_db_exists " 
-        image_browse.bcawSetFlagInMatrix('dfxml_db_exists', False, image_name)
+        image_browse.bcawSetFlagInMatrixPerImage('dfxml_db_exists', False, image_name)
 
         ## print "[D]:dbu_execute_cmd: returning message_str ", message_string
         return(0, message_string)
