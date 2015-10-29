@@ -33,6 +33,7 @@ from werkzeug.routing import BaseConverter
 
 import subprocess
 from subprocess import Popen,PIPE
+from flask import send_from_directory
 
 '''
 from sqlalchemy.ext.declarative import declarative_base
@@ -379,6 +380,11 @@ def image(image_name):
                             image_name=str(image_name),
                             num_partitions=num_partitions,
                             part_desc=part_desc)
+
+@app.route('/image/imgdnld/<image_name>')
+def image_dnld(image_name):
+    source_dir = app.config['IMAGEDIR']
+    return send_from_directory(source_dir, image_name, as_attachment=True)
 
 @app.route('/image/metadata/<image_name>')
 def image_psql(image_name):
