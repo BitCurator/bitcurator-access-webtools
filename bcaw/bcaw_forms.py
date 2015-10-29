@@ -89,7 +89,7 @@ class QueryForm(Form):
     """
     #search_text = TextField("Search", [validators.Required("Please enter the search phrase"), validators.DataRequired("Please enter the search phrase") )
     search_text = TextField("Search" )
-    radio_option = RadioField('Label', choices=[('filename', 'filename'), ('contents', 'contents')], default='contents')
+    radio_option = RadioField('Label', choices=[('filename', 'Search by filename'), ('contents', 'Search by content')], default='contents')
     submit = SubmitField("Search")
     search_result = []
     q1 = []

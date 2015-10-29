@@ -65,7 +65,7 @@ html {
 	}
 	#footer {
 		clear:both;
-		background:#444;
+		background:#eee;
 		padding:0px 15px;
 		<!--background:#cc9;-->
 	}
@@ -76,7 +76,7 @@ html {
 		height:1px;
 	}
   #footer a {
-    color:#eee
+    color:#333
   }
  
   table.spaced td {
