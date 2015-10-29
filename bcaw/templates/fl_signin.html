@@ -15,13 +15,15 @@
             text-align:center;
         }
         body {
-            color:black;
+            color:#222;
             background-color: white;
             margin-left: 5%;
             margin-right: 5%;
             border: 0px dotted gray;;
-            font-family: Verdana, Geneva, sans-serif;
+            font-family: Roboto, sans-serif;
+            line-height: 1.6
             font-size:14px;
+            <!--font-family: Verdana, Geneva, sans-serif;-->
             <!--background-color: #d2b48c;-->
         }
 
@@ -32,9 +34,19 @@
 <div id="wrap">
 
   <div id="header">
-    <img src="{{ url_for('static', filename ='dheader.png') }}" height="78" width="880" align="center" >
-    <h3 align="left">bca-webtools</h3>
+    <div style="width: 30%; display: table;">
+      <div style="display: table-row">
+        <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" h
+eight="80" width="80" align="center" > </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+      </div>
+    </div>    
+
+      <!--<h3 align="left">BCA Webtools</h3>-->
+      <!--<div id="btext">BCA Webtools</div>-->
+      <!--<img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="72" width="72" align="center" >-->
   </div>
+
 
   <div id="nav">
     <ul>

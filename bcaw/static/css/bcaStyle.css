@@ -6,6 +6,12 @@ html {
 		background:#fff;
 		<!--background:#a7a09a;-->
 	}
+  #btext {
+    color:#333;
+    text-align:left;
+    font-family: Roboto, sans-serif;
+    font-size: 36px;
+  }
 	#wrap {
 		width:900px;
 		margin:0 auto;
@@ -14,7 +20,8 @@ html {
 	}
 	#header {
     padding:5px 10px;
-		background:#a0a4bf;
+		background:#eee;
+		<!--background:#a0a4bf;-->
 		<!--background:#a0a0c0;-->
 		<!--background:#99c;-->
 	}
@@ -23,7 +30,7 @@ html {
 	}
 	#nav {
 		padding:5px 10px;
-		background:#ddd;
+		background:#444;
 		<!--background:#c99;-->
 	}
 	#nav ul {
@@ -36,6 +43,9 @@ html {
 		margin:0;
 		padding:0;
 	}
+  #nav a {
+    color:#eee
+  }
 	#main {
 		float:left;
 		width:640px;
@@ -50,13 +60,13 @@ html {
 		float:right;
 		width:200px;
 		padding:10px;
-		background:#ccc;
+		background:#eee;
 		<!--background:#99c;-->
 	}
 	#footer {
 		clear:both;
-		background:#ddd;
-		padding:0px 10px;
+		background:#444;
+		padding:0px 15px;
 		<!--background:#cc9;-->
 	}
 	#footer p {
@@ -65,6 +75,9 @@ html {
 	* html #footer {
 		height:1px;
 	}
+  #footer a {
+    color:#eee
+  }
  
   table.spaced td {
     margin: 10px 10px 10px 10px;

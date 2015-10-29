@@ -1,13 +1,75 @@
 {% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #704040; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:#222;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 0px dotted gray;;
+            font-family: Roboto, sans-serif;
+            line-height: 1.6
+            font-size:14px;
+            <!--font-family: Verdana, Geneva, sans-serif;-->
+            <!--background-color: #d2b48c;-->
+        }
+        form {
+            list-style-type: none;
+            top: 15px;
+            right: 350px;
+            <!--position: absolute;-->
+        }
+
+    </style>
+{% endblock %}
 
 {% block content %}
-  <header>
-    <div class="container">
-      <img src="{{ url_for('static', filename ='dheader.png') }}" height="80" width="760" align="center" >
-      <h3 align="left">bca-webtools - Admin Tools</h3>
 
-        <nav>
-        <!--<ul class="menu"> -->
+<div id="wrap">
+
+  <div id="header">
+    <div style="width: 30%; display: table;">
+      <div style="display: table-row">
+        <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="80" width="80" align="center" > </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+      </div>
+    </div>    
+
+      <!--<h3 align="left">BCA Webtools</h3>-->
+      <!--<div id="btext">BCA Webtools</div>-->
+      <!--<img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="72" width="72" align="center" >-->
+  </div>
+
+  <div id="nav">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+
+      <!-- Sign in/up currently disabled -->
+      <!-- <li><a href=signin>{{ user }}</a></li> -->
+      <!-- {% if signup_out in "Sign Up" %} -->
+      <!--  <li><a href=signup>Sign Up</a></li> -->
+      <!-- {% elif signup_out in "Sign Out" %} -->
+      <!--  <li><a href=signout>Sign Out</a></li> -->
+      <!-- {% endif %} -->
+
+    </ul>
+  </div>
+
+  <div id="main">
+
           <form action="{{ url_for('admin') }}" method=post>
             {{ form.radio_option }}
             {{ form.submit }}
@@ -21,11 +83,20 @@
                 <!--Option {{ db_option }} chosen : {{ db_option_msg }}-->
                 <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > {{ db_option_msg }}
           </p>
-        
-        <!--</ul> -->
-        </nav>
-    </div>
-  </header>
+
+  </div>
+
+  <div id="sidebar">
+    <p></p>
+  </div>
+
+  <div id="footer">
+    <a href={{ admin }}>Admin</a>
+    <!-- <p>BitCurator Access, 2015</p> -->
+  </div>
+
+</div>
+
 {% endblock %}
  
 
