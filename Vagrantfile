@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.box = "ubuntu/trusty64"
 
     # Set the box host-name
-    config.vm.hostname = "bca-webtools-0.3.0"
+    config.vm.hostname = "bca-webtools-0.3.4"
 
     # Run the provisioning script	
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
@@ -24,8 +24,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 5000
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.3.0"
-      vb.memory = 4096
-      vb.cpus = 2
+      vb.name = "bca-webtools-0.3.4"
+      vb.memory = 8192
+      vb.cpus = 4
     end
 end
