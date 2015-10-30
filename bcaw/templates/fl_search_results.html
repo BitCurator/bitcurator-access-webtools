@@ -57,12 +57,13 @@ eight="80" width="80" align="center" > </div>
     <ul>
 
       <li><a href="{{ url_for('home') }}">Home</a></td></li>
-      <li><a href=signin>{{ user }}</a></li>
-      {% if signup_out in "Sign Up" %}
-        <li><a href=signup>Sign Up</a></li>
-      {% elif signup_out in "Sign Out" %}
-        <li><a href=signout>Sign Out</a></li>
-      {% endif %}
+
+      <!-- <li><a href=signin>{{ user }}</a></li> -->
+      <!-- {% if signup_out in "Sign Up" %} -->
+      <!--  <li><a href=signup>Sign Up</a></li> -->
+      <!-- {% elif signup_out in "Sign Out" %} -->
+      <!--  <li><a href=signout>Sign Out</a></li> -->
+      <!-- {% endif %} -->
 
     </ul>
   </div>
@@ -102,14 +103,24 @@ eight="80" width="80" align="center" > </div>
 
   <div id="sidebar">
 
-    <p>Search contents of all images by filename or file contents. (Currently indexing all filenames, contents of .doc, .odt, .pdf, and .txt)
- 
+    <p>Select an option below to search available disk images by filename or file contents. (Currently indexing all filenames, contents of .doc, .odt, .pdf, and .txt)
+
     <p> 
       <form action="{{ url_for('query') }}" method=post>
         {{ form.hidden_tag() }}
         <!--{{ form.search_text.label }}-->
+
+        <table>
+        {% for subfield in form.radio_option %}
+        <tr>
+          <td>{{ subfield }}</td>
+          <td>{{ subfield.label }}</td>
+        </tr>
+        {% endfor %}
+        <!--{{ form.radio_option }}-->
+        </table>
+
         {{ form.search_text }}
-        {{ form.radio_option }}
         {{ form.submit }}
       </form>
     </p>
