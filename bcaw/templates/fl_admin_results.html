@@ -48,22 +48,22 @@
       </div>
     </div>    
 
-      <!--<h3 align="left">BCA Webtools</h3>-->
+      {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
-      <!--<img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="72" width="72" align="center" >-->
+      <!--<img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="72" width="72" align="center" >--> #}
   </div>
 
   <div id="nav">
     <ul>
-      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li                                                                 >
 
-      <!-- Sign in/up currently disabled -->
-      <!-- <li><a href=signin>{{ user }}</a></li> -->
-      <!-- {% if signup_out in "Sign Up" %} -->
-      <!--  <li><a href=signup>Sign Up</a></li> -->
-      <!-- {% elif signup_out in "Sign Out" %} -->
-      <!--  <li><a href=signout>Sign Out</a></li> -->
-      <!-- {% endif %} -->
+      {# <!-- Sign in/up currently disabled --> #}
+      {# <!-- <li><a href=signin>{{ user }}</a></li> --> #} 
+      {# <!-- {% if signup_out in "Sign Up" %} --> #}
+      {# <!--  <li><a href=signup>Sign Up</a></li> --> #}
+      {# <!-- {% elif signup_out in "Sign Out" %} --> #}
+      {# <!--  <li><a href=signout>Sign Out</a></li> --> #}
+      {# <!-- {% endif %} --> #}
 
     </ul>
   </div>
@@ -91,7 +91,6 @@
   </div>
 
   <div id="footer">
-    <!-- <a href={{ admin }}>Admin</a> -->
     <li><a href="{{ url_for('admin') }}">Admin</a></td></li>
     <!-- <p>BitCurator Access, 2015</p> -->
   </div>
