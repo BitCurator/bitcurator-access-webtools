@@ -895,7 +895,8 @@ def bcawSetIndexFlag(image_index, img):
 
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
-    if indexed == 0:
+    #if indexed == 0:
+    if not indexed:
         indexed_string = "False"
     else:
         indexed_string = "True"
@@ -928,8 +929,9 @@ def bcawIsImageIndexedInDb(img):
     """
     #indexed =  int(bcaw_db.bcawDbGetIndexFlagForImage(img))
     indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
+    ## print "D bcawIsImageIndexedInDb: Indexed: ", indexed
     #if bcaw_db.bcawDbGetIndexFlagForImage(img):
-    if indexed == 0:
+    if not indexed:
         print ">> Image {} is NOT indexed ".format(img)
         return False
     else:
