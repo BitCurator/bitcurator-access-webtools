@@ -28,12 +28,16 @@ You can download the latest release of the bca-webtools application here:
 
   * git clone https://github.com/bitcurator/bca-webtools
 
-Once you have the source code, unzip it, change directory into bca-webtools, and make sure the associated Vagrant box (ubuntu/trusty64) is up to date:
+Once you have the source code (and you have unzipped it if you're using a release), change directory into bca-webtools, and make sure the associated Vagrant box (ubuntu/trusty64) is up to date:
 
   * cd bca-webtools
   * vagrant box update
 
-You can then start the service by running the command: 
+The first time you run "vagrant box update" may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date.
+
+The bca-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes two sample images (in the bca-webtools/disk-images directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
+
+Once the base box is downloaded, you can start the service by running the command: 
 
   * vagrant up
 
