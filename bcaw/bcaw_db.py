@@ -25,8 +25,12 @@ import image_browse
 app = Flask(__name__)
 
 import os
+import logging
 import bcaw_utils
 import xml.etree.ElementTree as ET
+
+# Set up logging location for anyone importing these utils
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
 ##########
 '''
@@ -65,7 +69,8 @@ def bcawGetXmlInfo(xmlfile):
     try:
         tree = ET.parse( xmlfile )
     except IOError, e:
-        print "Failure Parsing %s: %s" % (xmlfile, e)
+        logging.debug('Failure parsing %s: %s', xmlfile, e)
+        # print "Failure Parsing %s: %s" % (xmlfile, e)
 
     dbrec = dict()
     root = tree.getroot() # root node
@@ -115,7 +120,9 @@ def bcawGetDfxmlInfo(dfxmlfile, img):
     try:
         tree = ET.parse( dfxmlfile )
     except IOError, e:
-        print "Failure Parsing %s: %s" % (dfxmlfile, e)
+        logging.debug('Failure parsing %s', dfxmlfile)
+        logging.debug('error code: %s', e)
+        # print "Failure Parsing %s: %s" % (dfxmlfile, e)
 
     d_dbrec = dict()
     root = tree.getroot() # root node
@@ -175,9 +182,11 @@ def dbBrowseImages():
 
             # Check if table entry already exists for this image:
             if dbu_does_table_exist_for_img(img, 'bcaw_images'):
-                print ">> Table already exists for Image ", img
+                logging.debug('>> Table already exists for Image %s', img)
+                # print ">> Table already exists for Image ", img
                 continue
-            print "D: dbBrowseImages: Table doesnot exist for img {}. Proceeding.".format(img) 
+            logging.debug('D: dbBrowseImages: Table does not exist for image. Proceeding.')
+            # print "D: dbBrowseImages: Table doesnot exist for img {}. Proceeding.".format(img) 
 
             # FIXME: Partition info will be added to the metadata info
             # Till then the following three lines are not necessary.
@@ -186,18 +195,23 @@ def dbBrowseImages():
             dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
-                print("No XML file generated for image info. Returning")
+                logging.debug('No XML file generated for image info. Returning')
+                # print("No XML file generated for image info. Returning")
                 # FIXME: This was a return stmt, but it should move on to 
                 # the next image. So replaced it with continue. Need to test
                 # some relevant scenarios to confirm this is what we want.
                 continue
-            print("XML File {} generated for image {}".format(xmlfile, img))
+            logging.debug('XML file %s generated', xmlfile)
+            logging.debug('for image %s', img)
+            # print("XML File {} generated for image {}".format(xmlfile, img))
 
             dfxmlfile = dm.dbGetInfoFromDfxml(image_path)
             if (dfxmlfile == None):
-                print("No DFXML file generated for image info. Returning")
+                logging.debug('No DFXML file generated for image info. Returning')
+                # print("No DFXML file generated for image info. Returning")
                 continue
-            print("DFXML File {} generated for image {}".format(dfxmlfile, img))
+            logging.debug('DFXML File %s generated for image', dfxmlfile)
+            # print("DFXML File {} generated for image {}".format(dfxmlfile, img))
 
             # Read the XML file and populate the record for this image
             dbrec = bcawGetXmlInfo(xmlfile)
@@ -217,7 +231,8 @@ def dbBrowseImages():
             continue
     #db.session.commit()
 
-    print 'D: Image_list: ', image_list
+    logging.debug('D: Image_list %s', image_list)
+    # print 'D: Image_list: ', image_list
 
 def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
     """ Depending on the arguments set, this functioon generates the table
@@ -245,12 +260,14 @@ def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
     table_added = 0
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
-            print "\nD: Generating table contents for Image: ", img
+            logging.debug('\nD: Generating table contents for image: %s', img)
+            # print "\nD: Generating table contents for Image: ", img
             ###global image_list
             ###image_list.append(img)
             retval, return_msg = dbBuildTableForImage(img, bld_imgdb, bld_dfxmldb)
             if retval < 0:
-                print "Table NOT generated for image {}, reason: {} ".format(img, return_msg)
+                logging.debug('Table NOT generated for image, Reason: %s ', return_msg)
+                # print "Table NOT generated for image {}, reason: {} ".format(img, return_msg)
                 continue
             else:
                 image_index += 1
@@ -283,28 +300,33 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
             return(-1, "No DB Specified")
 
     if not img.endswith(".E01") or img.endswith(".AFF"):
-        print ">> Not building Table: Wrong image type: ", img
+        logging.debug('>> Not building Table: Wrong image type: %s', img)
+        # print ">> Not building Table: Wrong image type: ", img
         return(-1, "Wrong Image Type")
 
     # No need to create table if it already exists
     if dbu_does_table_exist_for_img(img, table_name):
-        print ">> Table already exists for image " , img
+        logging.debug('>> Table already exists for image %s', img)
+        # print ">> Table already exists for image " , img
         return(-2, "Table entry exists for the image")
     else:
-        print ">> Table for image {} does not exist: ".format(img)
+        logging.debug('>> Table for image %s does not exist', img)
+        # print ">> Table for image {} does not exist: ".format(img)
         db_login.create_all()
         table_added += 1
 
     if bld_imgdb:
         # update the image_matrix
-        print "D: dbBuildTableForImage: Updating the matrix for img_db_exists "
+        logging.debug('D: dbBuildTableForImage: Updating the matrix for img_db_exists')
+        # print "D: dbBuildTableForImage: Updating the matrix for img_db_exists "
 
         # By setting image to None, it sets the flags for all images. We don't 
         # do individual flag setting for imgdb.
         image_browse.bcawSetFlagInMatrix('img_db_exists', bld_imgdb, None)
 
     if bld_dfxmldb:
-        print "D: dbBuildTableForImage: Updating the matrix for dfxml_db_exists "
+        logging.debug('D: dbBuildTableForImage: Updating the matrix for dfxml_db_exists')
+        # print "D: dbBuildTableForImage: Updating the matrix for dfxml_db_exists "
         image_browse.bcawSetFlagInMatrix('dfxml_db_exists', bld_dfxmldb, img)
     # FIXME: Partition info will be added to the metadata info
     # Till then the following three lines are not necessary.
@@ -314,16 +336,20 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
     dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
     xmlfile = dm.dbGetImageInfoXml(image_path)
     if (xmlfile == None):
-        print("No XML file generated for image info. Returning")
+        logging.debug('No XML file generated for image info. Returning')
+        # print("No XML file generated for image info. Returning")
         return (-1, "No Image XML File generated")
-    print("XML File {} generated for image {}".format(xmlfile, img))
+    logging.debug('XML File %s generated for image', xmlfile)
+    # print("XML File {} generated for image {}".format(xmlfile, img))
 
     dfxmlfile = dm.dbGetInfoFromDfxml(image_path)
     if (dfxmlfile == None):
-        print(">> No DFXML file generated for image info. Returning")
+        logging.debug('>> No DFXML file generated for image info. Returning')
+        # print(">> No DFXML file generated for image info. Returning")
         return (-1, "No DFXML generated")
 
-    print(">> DFXML File {} generated for image {}".format(dfxmlfile, img))
+    logging.debug('>> DFXML File %s generated for image', dfxmlfile)
+    # print(">> DFXML File {} generated for image {}".format(dfxmlfile, img))
 
     # Read the XML file and populate the record for this image
     if bld_imgdb:
@@ -469,20 +495,24 @@ def bcawSetIndexForImageInDb(img, value):
     conn = dbu_get_conn()
     c = conn.cursor()
     psql_cmd = "update bcaw_images SET indexed = " + str(value) + " where image_name = '" + img + "'; "
-    print "bcawSetIndexForImageInDb: cmd: ", psql_cmd
+    logging.debug('bcawSetIndexForImageInDb: cmd: %s', psql_cmd)
+    # print "bcawSetIndexForImageInDb: cmd: ", psql_cmd
     try:
         c.execute(psql_cmd)
-        print ">> Set the Index for image ", img
+        logging.debug('>> Set the Index for the image %s', img)
+        # print ">> Set the Index for image ", img
         conn.commit()
     except:
-        print "psql cmd failed ", psql_cmd
+        logging.debug('psql cmd failed %s', psql_cmd)
+        # print "psql cmd failed ", psql_cmd
 
 def bcawDbGetIndexFlagForImage(img):
     """ This routine gets the flag which indicates whether index is generated or
         not for a particular image, from the image matrix.
     """
     idb = BcawImages.query.filter_by(image_name=img).first()
-    print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
+    logging.debug('[D]: GetIndexFlag: Value of the field indexed for the image is %s ', idb.indexed)
+    # print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
     return idb.indexed
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
@@ -514,7 +544,8 @@ def bcawDfxmlDbSessionAdd(d_dbrec):
                    fo_gid=d_dbrec['gid'],
                    fo_mtime=d_dbrec['mtime']))
     except:
-        print ">> Exception while adding the record: ", d_dbrec
+        logging.debug('>> Exception while adding the record ', d_dbrec)
+        # print ">> Exception while adding the record: ", d_dbrec
     db_login.session.commit()
 
     
@@ -561,7 +592,8 @@ def dbu_print_records():
         import pprint
         pprint.pprint(records)
     except:
-        print "Tables dont exist"
+        logging.debug('Tables do not exist')
+        # print "Tables dont exist"
 
 def dbu_drop_table(table_name):
     """ DB utility function to drop the specified table from the DB
@@ -571,7 +603,8 @@ def dbu_drop_table(table_name):
     psql_cmd = "drop table " + table_name
     try:
         c.execute(psql_cmd)
-        print ">> Dropped table ", table_name
+        logging.debug('>> Dropped table %s', table_name)
+        # print ">> Dropped table ", table_name
         conn.commit()
         message_string = "Dropped table "+ table_name
 
@@ -586,7 +619,8 @@ def dbu_drop_table(table_name):
         return(0, message_string)
     except:
         # Table doesn't exist
-        print ">> Table {} does not exist ".format(table_name)
+        logging.debug('>> Table %s does not exist ', table_name)
+        # print ">> Table {} does not exist ".format(table_name)
         message_string = "Table "+ table_name + " does not exist"
         return(-1, message_string)
 
@@ -601,17 +635,21 @@ def dbu_execute_dbcmd(table_name, function, image_name):
         message_string = "Dropped table "+ table_name
     elif function in "delete_entries_for_image":
         psql_cmd = "delete from "+table_name+" where image_name like '"+ image_name + "'"
-        print "D: Psql cmd: ", psql_cmd
+        logging.debug('D: Psql cmd %s', psql_cmd)
+        # print "D: Psql cmd: ", psql_cmd
         message_string = "Deleted rows from table "+ table_name
     else:
-        print "D: psql function {} not supported".format(function)
+        logging.debug('D: psql function %s not supported ', function)
+        # print "D: psql function {} not supported".format(function)
         message_string = "psql function " + function + " not supported"
         return(-1, message_string)
 
-    print ">> Executing DB Command: ", psql_cmd
+    logging.debug('>> Executing DB command %s', psql_cmd)
+    # print ">> Executing DB Command: ", psql_cmd
     try:
         c.execute(psql_cmd)
-        print ">> PSQL function {} Executed ".format(function)
+        logging.debug('>> PSQL function Executed %s', function)
+        # print ">> PSQL function {} Executed ".format(function)
         conn.commit()
 
         # update the image_matrix
@@ -622,7 +660,8 @@ def dbu_execute_dbcmd(table_name, function, image_name):
         return(0, message_string)
     except IOError as err:
         # Table doesn't exist
-        print ">> Table {} does not exist ".format(table_name)
+        logging.debug('>> Table %s does not exist ', table_name)
+        # print ">> Table {} does not exist ".format(table_name)
         message_string = "Table "+ table_name + " does not exist"
         return(-1, message_string)
 
@@ -660,9 +699,13 @@ def dbu_does_table_exist_for_img(image_name, table):
     ## print "  python type of image data is", type(row[2])
     return False
 
+
+
 ## FIXME: Just for testing - Will be removed
-@app.route('/')
-def index(image_name = None):
+
+# @app.route('/')
+# def index(image_name = None):
+
     '''
     # Hardcode the image for now: FIXME
     image_name = "charlie-work-usb-2009-12-11.E01"

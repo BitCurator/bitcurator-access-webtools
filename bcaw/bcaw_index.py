@@ -17,6 +17,7 @@
 INDEX_DIR = "IndexFiles.index"
 
 import sys, os, lucene, threading, time
+import logging
 from datetime import datetime
 import subprocess
 from subprocess import Popen,PIPE
@@ -29,6 +30,9 @@ from org.apache.lucene.index import FieldInfo, IndexWriter, IndexWriterConfig
 from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.util import Version
 from org.apache.lucene.queryparser.classic import QueryParser
+
+# Set up logging location for anyone importing these utils
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
 class IndexFiles(object):
     """ IndexFiles takes the root of a directory structure and the destination
@@ -122,25 +126,30 @@ class IndexFiles(object):
                     if len(contents) > 0:
                         doc.add(Field("contents", contents, t2))
                     else:
-                        print "warning: no content in %s" % filename
+                        logging.debug('warning: no content in %s', filename)
+                        # print "warning: no content in %s" % filename
                     writer.addDocument(doc)
                     ## print "[D]: IndexDocs: Added Doc {}, numDocs: {} ".format(file_path, writer.numDocs())
                 except Exception, e:
-                    print "Failed in indexDocs:", e
+                    logging.debug('Failed in indexDocs: %s', e)
+                    # print "Failed in indexDocs:", e
 
 def searchIndexedFiles(searcher, analyzer, search_text):
     """ Searces the Lucene index created by indexDocs for the given string,
         search_text
     """
     search_list = []
-    print "Searching for:", search_text
+    logging.debug('Searching for: %s', search_text)
+    # print "Searching for:", search_text
     query = QueryParser(Version.LUCENE_CURRENT, "contents",
                         analyzer).parse(search_text)
     scoreDocs = searcher.search(query, 50).scoreDocs
-    print "%s total matching documents." % len(scoreDocs)
+    logging.debug('%s total matching documents', len(scoreDocs))
+    # print "%s total matching documents." % len(scoreDocs)
 
     if len(scoreDocs) == 0:
-        print "Query: Not found for : ",search_text
+        logging.debug('Query: Not found for : %s', search_text)
+        # print "Query: Not found for : ",search_text
         return None
     else:
         for scoreDoc in scoreDocs:

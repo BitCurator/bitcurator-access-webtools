@@ -12,10 +12,14 @@
 # This file contains the user login routines for BitCurator Access webtools.
 # Ref: http://code.tutsplus.com/tutorials/intro-to-flask-signing-in-and-out--net-29982
 #
+import logging
+
 from flask import Flask, render_template, url_for, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
 
+# Set up logging location for anyone importing these utils
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
 #app = Flask(__name__)
 #db_login = SQLAlchemy(app)
@@ -45,6 +49,7 @@ class User(db_login.Model):
     return check_password_hash(self.pwdhash, password)
 
 def dbinit(): 
-   print(">>> Creating tables ")
+   logging.debug('>>> Creating tables ')
+   # print(">>> Creating tables ")
    #db_login.drop_all()
    #db_login.create_all()
