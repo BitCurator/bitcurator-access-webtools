@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.vm.provider :virtualbox do |vb|
       vb.name = "bca-webtools-0.3.0"
-      vb.memory = 4096
-      vb.cpus = 2
+      vb.memory = 8192
+      vb.cpus = 4
     end
 end

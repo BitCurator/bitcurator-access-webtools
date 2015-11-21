@@ -27,6 +27,10 @@ from org.apache.lucene.analysis.standard import StandardAnalyzer
 from org.apache.lucene.index import DirectoryReader
 from org.apache.lucene.util import Version
 import os
+import logging
+
+# Set up logging location for anyone importing these utils
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
  
 class ContactForm(Form):
   name = TextField("Name")
@@ -95,8 +99,10 @@ class QueryForm(Form):
     q1 = []
     q2 = []
 
-    print "D: Search_text: ", search_text
-    print "D: Radio Option: ", radio_option
+    logging.debug('D: Search_text: %s', search_text)
+    # print "D: Search_text: ", search_text
+    logging.debug('D: Radio Option: %s', radio_option)
+    # print "D: Radio Option: ", radio_option
 
     def __init__(self, *args, **kwargs):
         Form.__init__(self, *args, **kwargs)
@@ -106,15 +112,19 @@ class QueryForm(Form):
             the radio button selected, looking for the search string. 
         """
 
-        print "D: Search_text: ", self.search_text.data.lower()
-        print "D: radio_option: ", self.radio_option.data.lower()
+        logging.debug('D: Search_text: %s', self.search_text.data.lower())
+        # print "D: Search_text: ", self.search_text.data.lower()
+        logging.debug('D: radio_option: %s', self.radio_option.data.lower())
+        # print "D: radio_option: ", self.radio_option.data.lower()
 
         if not Form.validate(self):
-            print("bcaw_forms: Validate failed. returning ");
+            logging.debug('bcaw_forms: Validate failed. returning ')
+            # print("bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
 
         search_text_query = '%' + self.search_text.data.lower() + '%'
-        print "D: bcaw_forms: search_text_query = ", search_text_query
+        logging.debug('D: bcaw_forms: search_text_query = %s', search_text_query)
+        # print "D: bcaw_forms: search_text_query = ", search_text_query
 
         # If radio_button indicates 'filename', do a filename search. 
         # Otherwise (contents), do a lucene index search
@@ -124,16 +134,19 @@ class QueryForm(Form):
         # Currently the index is built from the list of all files. That doesn't
         # give information on the path of the file, etc. That will be addressed soon.
         if self.radio_option.data.lower() in "filename" and app.config["FILESEARCH_DB"]:
-            print("D: bcaw_forms: It is a filename Search ")
+            logging.debug('D: bcaw_forms: It is a filename Search')
+            # print("D: bcaw_forms: It is a filename Search ")
 
             # Method#1: Using DB Query for file-name search
             # This works just fine.
             q1 = bcaw_db.BcawDfxmlInfo.query.filter(bcaw_db.BcawDfxmlInfo.fo_filename.ilike(search_text_query))
-            print("D: bcaw_forms: Query: ", q1.limit(5).all())
+            logging.debug('D: bcaw_forms: Query: %s', q1.limit(5).all())
+            # print("D: bcaw_forms: Query: ", q1.limit(5).all())
     
             q2 = q1.all()
             if len(q2) == 0:
-                print "Query: Not found: ", self.search_text.data.lower()
+                logging.debug('Query: Not found: %s', self.search_text.data.lower())
+                # print "Query: Not found: ", self.search_text.data.lower()
                 return None, 'filename'
             last_elem = len(q2) - 1
             ## print "D: Length-1: ", last_elem
@@ -147,11 +160,14 @@ class QueryForm(Form):
                 # If no index files exist in the index directory, chances are
                 # that index is not built. Return in that case.
                 if os.listdir(indexDir) == []:
-                    print ">> Index files do not exist in ", indexDir
+                    logging.debug('>> Index files do not exist in %s', indexDir)
+                    # print ">> Index files do not exist in ", indexDir
                     return None, 'contents'
 
-            print("D: BCAW: It is a Content Search: indexDir: ", indexDir)
-            print 'lucene', lucene.VERSION
+            logging.debug('D: BCAW: It is a Content Search: indexDir: %s', indexDir)
+            # print("D: BCAW: It is a Content Search: indexDir: ", indexDir)
+            logging.debug('lucene %s', lucene.VERSION)
+            # print 'lucene', lucene.VERSION
             #base_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
             #directory = SimpleFSDirectory(File(os.path.join(base_dir, INDEX_DIR)))
   
@@ -164,7 +180,8 @@ class QueryForm(Form):
             # VM needs to be started.
             vm_env = lucene.getVMEnv()
             if vm_env == None:
-                print "D: baw_forms: Sarting Lucene VM: "
+                logging.debug('D: bcaw_forms: Starting Lucene VM: ')
+                # print "D: baw_forms: Sarting Lucene VM: "
                 lucene.initVM()
 
             directory = SimpleFSDirectory(File(indexDir))
@@ -184,7 +201,8 @@ class adminForm(Form):
 
     def adminAction(self):
         if not Form.validate(self):
-            print(">> bcaw_forms: Validate failed. returning ");
+            logging.debug('>> bcaw_forms: Validate failed. returning ')
+            # print(">> bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
 
 class buildForm(Form):
@@ -196,7 +214,8 @@ class buildForm(Form):
 
     def buildAction(self):
         if not Form.validate(self):
-            print(">> bcaw_forms: Validate failed. returning ");
+            logging.debug('>> bcaw_forms: Validate failed. returning ')
+            # print(">> bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
 
 '''

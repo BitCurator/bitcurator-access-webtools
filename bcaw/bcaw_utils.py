@@ -17,6 +17,7 @@ import string
 
 import pytsk3
 import os, sys, string, time, re
+import logging
 import subprocess
 import fileinput
 import xml.etree.ElementTree as ET
@@ -26,6 +27,9 @@ import xml.etree.ElementTree as ET
 # in that file for now, because image_browse part is not yet tested with
 # this file. Eventually those routines will go away and the routines from 
 # this file will be called by both db and browse files.
+
+# Set up logging location for anyone importing these utils
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
 class bcaw:
     num_partitions = 0
@@ -61,11 +65,16 @@ class bcaw:
                 # The list will have one dictionary per partition. The image
                 # name is added as the first element of each partition to
                 # avoid a two-dimentional list.
-                print "D: image_path: ", image_path
-                print "D: part_addr: ", part.addr
-                print "D: part_slot_num: ", part.slot_num
-                print "D: part_start_offset: ", part.start
-                print "D: part_description: ", part.desc
+                logging.debug('D: image_path: %s', image_path)
+                # print "D: image_path: ", image_path
+                logging.debug('D: part_addr: %s', part.addr)
+                # print "D: part_addr: ", part.addr
+                logging.debug('D: part_slot_num: %s', part.slot_num)
+                # print "D: part_slot_num: ", part.slot_num
+                logging.debug('D: part_start_offset: %s', part.start)
+                # print "D: part_start_offset: ", part.start
+                logging.debug('D: part_description: %s', part.desc)
+                # print "D: part_description: ", part.desc
                 # Open the file system for this image at the extracted
                 # start_offset.
                 try:
@@ -94,7 +103,11 @@ class bcaw:
         return (self.num_partitions)
 
     def bcawGenFileList(self, image_path, image_index, partition_num, root_path):
-        print("D1: image_path: {} index: {} part: {} rootpath: {}".format(image_path, image_index, partition_num, root_path))
+        logging.debug('D1: image_path: %s', image_path)
+        logging.debug('D1: index: %s', image_index)
+        logging.debug('D1: part: %s', partition_num)
+        logging.debug('D1: root_path: %s', root_path)
+        # print("D1: image_path: {} index: {} part: {} rootpath: {}".format(image_path, image_index, partition_num, root_path))
         img = pytsk3.Img_Info(image_path)
         # Get the start of the partition:
         part_start = self.partDictList[int(image_index)][partition_num-1]['start_offset']
@@ -173,14 +186,17 @@ class bcaw:
             #ewfinfo_xmlfile = os.getcwd() +"/"+ image_name+".xml"
             ewfinfo_xmlfile = image_name+".xml"
             cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
-            print("CMD: ", ewfinfo_xmlfile, cmd)
+            logging.debug('CMD xmlfile: %s', ewfinfo_xmlfile)
+            logging.debug('CMD: %s', cmd)
+            # print("CMD: ", ewfinfo_xmlfile, cmd)
             subprocess.check_output(cmd, shell=True)
             return ewfinfo_xmlfile
         elif image.endswith(".AFF") or image.endswith(".aff"):
             # FIXME: does affinfo create xml output?
             cmd = "affinfo "+image_name
             subprocess.check_output(cmd, shell=True)
-            print("Need an E01 file to return xml file")
+            logging.debug('Need an E01 file to return xml file')
+            # print("Need an E01 file to return xml file")
             return None
 
     def fixup_dfxmlfile_temp(self, dfxmlfile):
@@ -197,7 +213,8 @@ class bcaw:
 
         cmd = "mv tempfile " + dfxmlfile
         subprocess.check_output(cmd, shell=True)
-        print(">> : Updated dfxmlfile ")
+        logging.debug('>> : Updated dfxmlfile ')
+        # print(">> : Updated dfxmlfile ")
         return dfxmlfile
 
     def fixup_dfxmlfile(self, dfxmlfile):
@@ -214,7 +231,8 @@ class bcaw:
         for line in fileinput.input (dfxmlfile, inplace=1):
             linenumber += 1
             if "xmlns" in line:
-                print "",
+                logging.debug('Why is this here??? ')
+                # print "",
             if linenumber > 6:
                 break
 
@@ -235,14 +253,17 @@ class bcaw:
 
         if not os.path.exists(dfxmlfile):
             printstr = "WARNING!!! DFXML FIle " + dfxmlfile + " does NOT exist. Creating one"
-            print (printstr)
+            logging.debug('Warning: %s ', printstr)
+            # print (printstr)
             cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_name]
-            print ("CMD: ", dfxmlfile, cmd)
+            logging.debug('CMD: %s ', cmd)
+            # print ("CMD: ", dfxmlfile, cmd)
             subprocess.check_output(cmd)
 
         # Remove the name space info as the xml parsing won't give proper
         # tags with the name space prefix attached.
-        print("D: Fiwalk generated dfxml file. Fixing it up now ")
+        logging.debug('D: Fiwalk generated dfxml file. Fixing it up now ')
+        # print("D: Fiwalk generated dfxml file. Fixing it up now ")
         #self.fixup_dfxmlfile(dfxmlfile)
         dfxmlfile = self.fixup_dfxmlfile_temp(dfxmlfile)
         
@@ -283,7 +304,8 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
     try:
         tree = ET.parse( dfxmlfile )
     except IOError, e:
-        print "Failure Parsing %s: %s" % (dfxmlfile, e)
+        logging.debug('Failure parsing DFXML file %s ', e)
+        # print "Failure Parsing %s: %s" % (dfxmlfile, e)
 
     root = tree.getroot() # root node
     for child in root:
