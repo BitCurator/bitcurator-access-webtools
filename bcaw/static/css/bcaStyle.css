@@ -67,6 +67,7 @@ html {
 		clear:both;
 		background:#eee;
 		padding:0px 15px;
+		list-style:none;
 		<!--background:#cc9;-->
 	}
 	#footer p {
