@@ -1148,8 +1148,7 @@ def bcawIndexAllFiles():
 
                 ## print("Part Dir: ", part_dir)
                 #os.makedir(part_dir)
-                file_list_root, fs = dm.bcawGenFileList(image_path, image_index,
-                                             int(p), '/')
+                file_list_root, fs = dm.bcawGenFileList(image_path, image_index,int(p), '/')
                 ## print("D: Calling bcawDnldRepo with root ", file_list_root)
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
 
