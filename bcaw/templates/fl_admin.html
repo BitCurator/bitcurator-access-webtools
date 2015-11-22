@@ -45,12 +45,10 @@
             background: url(/static/loadingimage.gif) no-repeat ;
             cursor: wait;
         }
-
-
-
     </style>
 
-    <script type="text/javascript">// <![CDATA[
+    <script type="text/javascript">
+        // <![CDATA[
         function preloader(){
             //window.alert("preloader")
             document.getElementById("loading").style.display = "none";
@@ -63,12 +61,14 @@
             document.getElementById("content").style.display = "block";
         }//preloader function
         window.onload = preloader;
+        // ]]>
+    </script>
 
-// ]]></script>
 {% endblock %}
+
 {% block content %}
 
-<div id="loading"></div>
+{# <div id="loading"></div> #}
 
 <div id="content">
 
@@ -102,6 +102,7 @@ eight="80" width="80" align="center" > </div>
     <form action="{{ url_for('admin') }}" method=post>
       {{ form.radio_option }}
       {# {{ form.submit }} #}
+      <div id="loading"></div>
       <input type="submit" name="loading" value="Submit" onclick="loader_func();">
     </form>
     
