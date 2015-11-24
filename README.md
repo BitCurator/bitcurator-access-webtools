@@ -20,6 +20,10 @@ and Vagrant installed:
 
   * https://vagrantup.com
 
+You'll need a base Vagrant box to install the bca-webtools application on. You can download a premade box from the Vagrant box repository with the following command:
+ 
+  * vagrant box add ubuntu/trusty64
+
 You can download the latest release of the bca-webtools application here:
 
   * https://github.com/BitCurator/bca-webtools/releases
