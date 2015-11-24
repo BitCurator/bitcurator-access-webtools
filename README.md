@@ -41,11 +41,11 @@ Once the base box is downloaded, you can start the service by running the comman
 
   * vagrant up
 
-from within the bca-webtools directory. This step can take a long time the first time you run the software (15-30 minutes depending on your computer). The installation script will provide feedback in the console as it installs each package. There's a sample image in the "disk-images" directory to get you started. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
+from within the bca-webtools directory. This step can take a long time the first time you run the software (15-30 minutes depending on your computer). The installation script will provide feedback in the console as it installs each package. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
   * 127.0.0.1:8080
 
-to see the bca-webtools service running.
+to see the bca-webtools service running. In the current beta release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. Click on the "Admin" link at the bottom left of the window, select "Generate Index", and click "Submit". The index generation process may take some time.
 
 If you need to stop the service, you can type:
 
