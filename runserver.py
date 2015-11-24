@@ -7,7 +7,10 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This is a python script to run the main application server
+# This script starts the main application server. It is called by
+# the servstart.sh bash script (in the provision directory) which is
+# run each time the Vagrant machine is brought up.
+#
 
 from bcaw import app
 #from bcaw import bcaw_db
