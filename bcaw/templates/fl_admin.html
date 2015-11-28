@@ -46,7 +46,6 @@
             cursor: wait;
         }
     </style>
-
     <script type="text/javascript">
         // <![CDATA[
         function preloader(){
@@ -55,9 +54,10 @@
             document.getElementById("content").style.display = "block";
         }//preloader function
 
-        function loader_func(){
+        function loader_func(id){
             //window.alert("loader_function")
-            document.getElementById("loading").style.display = "inline";
+            //document.getElementById("loading").style.display = "inline";
+            document.getElementById(id).style.display = "inline";
             document.getElementById("content").style.display = "block";
         }//preloader function
         window.onload = preloader;
@@ -103,7 +103,8 @@ eight="80" width="80" align="center" > </div>
       {{ form.radio_option }}
       {# {{ form.submit }} #}
       <div id="loading"></div>
-      <input type="submit" name="loading" value="Submit" onclick="loader_func();">
+      {# <input type="submit" name="loading" value="Submit" onclick="loader_func();"> #}
+      <input type="submit" name="loading" value="Submit" onclick='loader_func("loading");'>
     </form>
     
   </div>
