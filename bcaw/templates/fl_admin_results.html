@@ -32,13 +32,42 @@
             right: 350px;
             <!--position: absolute;-->
         }
+        div#content {
+            display: none;
+        }
+        div#loading {
+            top: 200 px;
+            margin: auto;
+            position: absolute;
+            z-index: 2000;
+            width: 222px;
+            height: 21px;
+            background: url(/static/loadingimage.gif) no-repeat ;
+            cursor: wait;
+        }
 
     </style>
+    <script type="text/javascript">
+        // <![CDATA[
+        function preloader(){
+            //window.alert("preloader")
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("content").style.display = "block";
+        }//preloader function
+
+        function loader_func(id){
+            //window.alert("loader_function")
+            document.getElementById(id).style.display = "inline";
+            document.getElementById("content").style.display = "block";
+        }//preloader function
+        window.onload = preloader;
+        // ]]>
+    </script>
 {% endblock %}
 
 {% block content %}
 
-<div id="wrap">
+<div id="content">
 
   <div id="header">
     <div style="width: 30%; display: table;">
@@ -72,7 +101,9 @@
 
           <form action="{{ url_for('admin') }}" method=post>
             {{ form.radio_option }}
-            {{ form.submit }}
+            {# {{ form.submit }} #}
+            <div id="loading"></div>
+            <input type="submit" name="loading" value="Submit" onclick='loader_func("loading");'>
           </form>
 
           {# <p style=' position:absolute; top:5px; right:800px; color:#eeeeee; font-wright:bold'> #}
