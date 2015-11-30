@@ -154,7 +154,7 @@ class QueryForm(Form):
         else:
             # It could be filename search with index or content search.
             if self.radio_option.data.lower() in "filename":
-                indexDir = app.config['FILE_INDEXDIR']
+                indexDir = app.config['FILENAME_INDEXDIR']
             else:
                 indexDir = app.config['INDEX_DIR']
                 # If no index files exist in the index directory, chances are
