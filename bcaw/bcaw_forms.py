@@ -140,8 +140,13 @@ class QueryForm(Form):
             # Method#1: Using DB Query for file-name search
             # This works just fine.
             q1 = bcaw_db.BcawDfxmlInfo.query.filter(bcaw_db.BcawDfxmlInfo.fo_filename.ilike(search_text_query))
+
+            # If db not readable, return.
+            if q1 == None:
+                print "DB Error: DB Not readable. Returning "
+                return None, self.radio_option.data.lower()
+
             logging.debug('D: bcaw_forms: Query: %s', q1.limit(5).all())
-            # print("D: bcaw_forms: Query: ", q1.limit(5).all())
     
             q2 = q1.all()
             if len(q2) == 0:
