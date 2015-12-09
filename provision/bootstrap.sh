@@ -256,7 +256,8 @@ ant-optional
 ivy 
 ivy-doc 
 npm 
-node"
+node
+rabbitmq-server"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -305,7 +306,8 @@ mock
 coverage 
 websocket-client 
 blaze 
-bokeh"
+bokeh
+celery"
 
     pip_pre_packages="bitstring"
 
