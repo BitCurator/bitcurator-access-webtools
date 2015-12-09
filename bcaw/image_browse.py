@@ -14,6 +14,7 @@
 
 from flask import Flask, render_template, url_for, Response, stream_with_context, request, flash, session, redirect
 from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm, buildForm
+from celery import Celery
 
 import pytsk3
 import os, sys, string, time, re
@@ -23,6 +24,8 @@ from datetime import date
 from bcaw_utils import bcaw
 import bcaw_utils
 import lucene
+#from bcaw import bcaw_celery_task
+import bcaw_celery_task
 
 from bcaw import app
 import bcaw_db
@@ -63,6 +66,7 @@ make_searchable()
 image_list = []
 file_list_root = []
 checked_list_dict = dict()
+partition_in = dict()
 
 '''
 NOTE: This function is a copy of bcawBroseImages, but with some changes (like
@@ -165,6 +169,19 @@ app.config.from_object('bcaw_default_settings')
 image_dir = app.config['IMAGEDIR']
 dirFilesToIndex = app.config['FILES_TO_INDEX_DIR']
 indexDir = app.config['INDEX_DIR']
+
+# CELERY stuff
+#FIXME: Need to move thise to config file: bcaw_default_settings.py ?
+## app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+## app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+app.config['CELERY_BROKER_URL'] = 'amqp://guest@localhost//'
+app.config['CELERY_RESULT_BACKEND'] = 'amqp://guest@localhost//'
+
+''' # celery
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
+'''
+
 num_images = 0
 image_db_list = []
 
@@ -184,7 +201,7 @@ def bcawBrowseImages(db_init=True):
     del image_db_list [:]
     global partition_in
 
-    partition_in = dict()
+    ######partition_in = dict()
 
     # Create the DB. FIXME: This needs to be called from runserver.py 
     # before calling run. That seems to have some issues. So calling from
@@ -1104,6 +1121,17 @@ def bcawIsImgInMatrix(img):
         ## print "image {} NOT found in the matrix ".format(img)
         return False
 
+
+''' #celery
+@celery.task
+def bcaw_index_asynchronously():
+    """ Background task to index the files """
+    print "IIIIn async_indexing func "
+    with app.app_context():
+        print "Calling bcawIndexAllFiles..."
+        bcawIndexAllFiles()
+'''
+
 def bcawIndexAllFiles():
     global image_list
     global image_db_list
@@ -1148,6 +1176,7 @@ def bcawIndexAllFiles():
 
                 ## print("Part Dir: ", part_dir)
                 #os.makedir(part_dir)
+
                 file_list_root, fs = dm.bcawGenFileList(image_path, image_index,int(p), '/')
                 ## print("D: Calling bcawDnldRepo with root ", file_list_root)
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
@@ -1266,7 +1295,14 @@ def admin():
 
 
         # First get the files starting from the root, for each image listed
+        """
         bcawIndexAllFiles()
+        """
+        print "CELERY: calling async function "
+        bcaw_celery_task.bcaw_index_asynchronously.delay()
+        #bcaw_index_asynchronously()
+        #flash("Index will be starting asynchronously")
+        print("CELERY: Index will be starting asynchronously")
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
