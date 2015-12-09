@@ -257,7 +257,6 @@ def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
             # if bld_imgdb == False and bld_dfxmldb == False:
             return(-1, "No DB Specified");
 
-    table_added = 0
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
             logging.debug('\nD: Generating table contents for image: %s', img)
@@ -276,10 +275,7 @@ def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
             continue
 
     ## print "[D]: Image_list: ", image_list
-    if table_added > 0:
-        return(0, "New tables added to the DB")
-    else:
-        return(0, "Table entries exist for all images")
+    return(0, return_msg)
 
 def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
     """ This routine builds/adds the DFXML table entry to the DB for the
