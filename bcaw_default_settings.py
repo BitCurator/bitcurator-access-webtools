@@ -14,3 +14,5 @@ FILESEARCH_DB = True
 
 # FILE_IDEXDIR is the directory where the index for filename search is stored.
 FILENAME_INDEXDIR = "/vagrant/filenames_to_index"
+CELERY_BROKER_URL = 'amqp://guest@localhost//'
+CELERY_RESULT_BACKEND = 'amqp://guest@localhost//'
