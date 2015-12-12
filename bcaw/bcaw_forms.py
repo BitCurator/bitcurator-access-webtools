@@ -13,7 +13,6 @@
 # Ref: http://code.tutsplus.com/tutorials/intro-to-flask-signing-in-and-out--net-29982
 #
 
-from bcaw import app
 from flask.ext.wtf import Form 
 from wtforms import TextField, TextAreaField, SubmitField, validators, ValidationError, PasswordField, RadioField
 from bcaw_userlogin_db import User, db_login
