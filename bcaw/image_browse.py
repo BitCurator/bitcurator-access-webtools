@@ -954,7 +954,6 @@ def bcawSetIndexFlag(image_index, img):
 
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
-    #if indexed == 0:
     if not indexed:
         indexed_string = "False"
     else:
@@ -1071,6 +1070,23 @@ def bcawSetFlagInMatrix(flag, value, image_name):
     return
 
     ## print "[D] bcawSetFlagInMatrix: Image Matrix After setting the falg: ", image_matrix
+
+def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
+    """ This routine updates the matrix with index flag from the DB for all the
+        images present.
+    """
+    for img_tbl_item in image_matrix:
+        # First, get the index flag for this image from the db:
+        img = img_tbl_item['img_name']
+        indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
+        if indexed == 0:
+            value = "False"
+        else:
+            value = "True"
+
+        # Now update the matrix:
+        img_tbl_item.update({bcaw_imginfo[4]:value})
+
 def bcawSetFlagInMatrixPerImage(flag, value, image):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
         in the image matrix, for the given image
@@ -1122,6 +1138,7 @@ def bcawIndexAllFiles():
     global image_db_list
     global partition_in
     global image_dir
+    ## print "[D] Celery: In async function: image_matrix: ", image_matrix
     ## print "[D] bcawIndexAllFiles: image_list: ", image_list
     ## print "[D] bcawIndexAllFiles: image_db_list: ", image_db_list
 
@@ -1138,7 +1155,7 @@ def bcawIndexAllFiles():
 
             ## Worker task-related code:
             ## The worker task's context will not have the following resources
-            ## even though the mail app has already created them. We have to
+            ## even though the main app has already created them. We have to
             ## create them on the worker task's context. So the following code
             ## is repeated here.
             dm = bcaw()
@@ -1285,7 +1302,11 @@ def admin():
             logging.debug('>> Filename Index built in directory: %s', index_dir)
             # print(">> Filename Index built in directory ", index_dir)
             db_option_msg = "Index built"
+
         # Now build the indexes for the content files fromn directory files_to-index
+        # In order to not hold the browser till the indexing is done, we use
+        # Celery package to offload the task to an asynchronous worker task,
+        # which is run in parallel with the app.
 
         '''
         # First get the checked images to build indexes of:
@@ -1293,16 +1314,12 @@ def admin():
         checked_index = 'build_index' in request.form
         '''
 
-
         # First get the files starting from the root, for each image listed
-        """
-        bcawIndexAllFiles()
-        """
-        print "CELERY: calling async function "
+        print "Celery: calling async function: "
         bcaw_celery_task.bcaw_index_asynchronously.delay()
         #bcaw_index_asynchronously()
         #flash("Index will be starting asynchronously")
-        print("CELERY: Index will be starting asynchronously")
+        logging.debug("Celery: Index will be starting asynchronously")
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
@@ -1325,6 +1342,12 @@ def admin():
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
         build_form = buildForm()
+
+        # Since the asynchronous worker task which does indexing has no access 
+        # to the matrix, we will extract the index flags from the DB here, and 
+        # update the matrix before displaying.
+        bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages()
+
         return render_template('fl_admin_imgmatrix.html',
                            db_option=str(db_option),
                            db_option_msg=str(db_option_msg),
