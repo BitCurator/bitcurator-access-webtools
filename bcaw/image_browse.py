@@ -14,6 +14,7 @@
 
 from flask import Flask, render_template, url_for, Response, stream_with_context, request, flash, session, redirect
 from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm, buildForm
+from celery import Celery
 
 import pytsk3
 import os, sys, string, time, re
@@ -23,6 +24,8 @@ from datetime import date
 from bcaw_utils import bcaw
 import bcaw_utils
 import lucene
+#from bcaw import bcaw_celery_task
+import bcaw_celery_task
 
 from bcaw import app
 import bcaw_db
@@ -63,6 +66,7 @@ make_searchable()
 image_list = []
 file_list_root = []
 checked_list_dict = dict()
+partition_in = dict()
 
 '''
 NOTE: This function is a copy of bcawBroseImages, but with some changes (like
@@ -165,11 +169,15 @@ app.config.from_object('bcaw_default_settings')
 image_dir = app.config['IMAGEDIR']
 dirFilesToIndex = app.config['FILES_TO_INDEX_DIR']
 indexDir = app.config['INDEX_DIR']
+
+# CELERY stuff
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
+
 num_images = 0
 image_db_list = []
 
 @app.route("/")
-
 def bcawBrowseImages(db_init=True):
     global image_dir
     image_index = 0
@@ -183,8 +191,6 @@ def bcawBrowseImages(db_init=True):
     global image_db_list
     del image_db_list [:]
     global partition_in
-
-    partition_in = dict()
 
     # Create the DB. FIXME: This needs to be called from runserver.py 
     # before calling run. That seems to have some issues. So calling from
@@ -285,6 +291,7 @@ def bcawDnldSingleFile(file_item, fs, filepath, index_dir):
         if os.path.exists(filepath_txt):
             subprocess.check_output(rmcmd_1, shell=True, stderr=subprocess.STDOUT)
 
+@celery.task
 def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_path):
     """This routine is used to download the indexable files of the Repository
     """
@@ -947,7 +954,6 @@ def bcawSetIndexFlag(image_index, img):
 
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
-    #if indexed == 0:
     if not indexed:
         indexed_string = "False"
     else:
@@ -963,6 +969,7 @@ def bcawSetIndexFlag(image_index, img):
         logging.debug('>> bcawSetIndexFlag: image_index not found %s', image_index)
         # print ">> bcawSetIndexFlag: image_index not found ", image_index
 
+@celery.task
 def bcawIsImageIndexed(img):
     """ A flag to tell if an image is indexed, is maintained in the global image
         matrix. This routine checks this flag in the matrix
@@ -1007,7 +1014,6 @@ def bcawClearIndexing():
         logging.debug('>> Warning: Deleting all index files in directory %s', indexDir)
         # print ">> Warning: Deleting all index files in directory ", indexDir
         subprocess.check_output(rmcmd, shell=True, stderr=subprocess.STDOUT)
-        ## XXXX FIXME Needs to uncomment after making sure cmd is correct
 
     # If the indexing flags are set in the db and in img matrix, clear them.
     for img in os.listdir(image_dir):
@@ -1064,6 +1070,23 @@ def bcawSetFlagInMatrix(flag, value, image_name):
     return
 
     ## print "[D] bcawSetFlagInMatrix: Image Matrix After setting the falg: ", image_matrix
+
+def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
+    """ This routine updates the matrix with index flag from the DB for all the
+        images present.
+    """
+    for img_tbl_item in image_matrix:
+        # First, get the index flag for this image from the db:
+        img = img_tbl_item['img_name']
+        indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
+        if indexed == 0:
+            value = "False"
+        else:
+            value = "True"
+
+        # Now update the matrix:
+        img_tbl_item.update({bcaw_imginfo[4]:value})
+
 def bcawSetFlagInMatrixPerImage(flag, value, image):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
         in the image matrix, for the given image
@@ -1104,11 +1127,18 @@ def bcawIsImgInMatrix(img):
         ## print "image {} NOT found in the matrix ".format(img)
         return False
 
+
+@celery.task
 def bcawIndexAllFiles():
+    """ This routine generates Lucene indexes for all the files contained in
+        the images in the disk_image directory. It is called by Celery worker
+        task, which runs the job asynchronously.
+    """
     global image_list
     global image_db_list
     global partition_in
     global image_dir
+    ## print "[D] Celery: In async function: image_matrix: ", image_matrix
     ## print "[D] bcawIndexAllFiles: image_list: ", image_list
     ## print "[D] bcawIndexAllFiles: image_db_list: ", image_db_list
 
@@ -1120,16 +1150,31 @@ def bcawIndexAllFiles():
 
     image_index = 0
     for img in os.listdir(image_dir):
-        logging.debug('>> Building Index for image: %s', img)
-        # print(">> Building Index for image: ", img)
         if img.endswith(".E01") or img.endswith(".AFF"):
+            logging.debug(">> Building Index for image: ", img)
+
+            ## Worker task-related code:
+            ## The worker task's context will not have the following resources
+            ## even though the main app has already created them. We have to
+            ## create them on the worker task's context. So the following code
+            ## is repeated here.
+            dm = bcaw()
+            image_path = image_dir+'/'+img
+            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
+            image_list.append(img)
+            partition_in[img] = dm.num_partitions
+
+            idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
+            image_db_list.append(idb)
+            ## END Worker-task related code
+
             # If index exists for this image, don't do it
             # FIXME: Query lucene to check the existance of indexing for this 
             # image and continue to the next image if indexing exiss for this img.
             # Code needs to be added.
             if bcawIsImageIndexedInDb(img) == True:
                 logging.debug('IndexFile: Image %s is already indexed ', img)
-                # print "IndexFiles: Image {} is already indexed ".format(img)
+                print "IndexFiles: Image {} is already indexed ".format(img)
                 continue
 
             # If user has chosen not to build index for this image, skip it.
@@ -1148,6 +1193,7 @@ def bcawIndexAllFiles():
 
                 ## print("Part Dir: ", part_dir)
                 #os.makedir(part_dir)
+
                 file_list_root, fs = dm.bcawGenFileList(image_path, image_index,int(p), '/')
                 ## print("D: Calling bcawDnldRepo with root ", file_list_root)
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
@@ -1256,7 +1302,11 @@ def admin():
             logging.debug('>> Filename Index built in directory: %s', index_dir)
             # print(">> Filename Index built in directory ", index_dir)
             db_option_msg = "Index built"
+
         # Now build the indexes for the content files fromn directory files_to-index
+        # In order to not hold the browser till the indexing is done, we use
+        # Celery package to offload the task to an asynchronous worker task,
+        # which is run in parallel with the app.
 
         '''
         # First get the checked images to build indexes of:
@@ -1264,13 +1314,16 @@ def admin():
         checked_index = 'build_index' in request.form
         '''
 
-
         # First get the files starting from the root, for each image listed
-        bcawIndexAllFiles()
+        print "Celery: calling async function: "
+        bcaw_celery_task.bcaw_index_asynchronously.delay()
+        #bcaw_index_asynchronously()
+        #flash("Index will be starting asynchronously")
+        logging.debug("Celery: Index will be starting asynchronously")
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
-        db_option_msg = "Index built"
+        db_option_msg = "Index being built"
 
         if os.path.exists(dirFilesToIndex) :
             logging.debug('>> Building Indexes for contents in %s', dirFilesToIndex)
@@ -1289,6 +1342,12 @@ def admin():
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
         build_form = buildForm()
+
+        # Since the asynchronous worker task which does indexing has no access 
+        # to the matrix, we will extract the index flags from the DB here, and 
+        # update the matrix before displaying.
+        bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages()
+
         return render_template('fl_admin_imgmatrix.html',
                            db_option=str(db_option),
                            db_option_msg=str(db_option_msg),
