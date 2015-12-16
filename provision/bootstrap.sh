@@ -257,7 +257,8 @@ ivy
 ivy-doc 
 npm 
 node
-rabbitmq-server"
+rabbitmq-server
+celeryd"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -487,6 +488,11 @@ install_source_packages() {
         # Clean up
         cd /tmp
         rm -rf pytsk
+
+  # Temporary: Create and perm-fix log file
+  echoinfo "bca-webtools: Preparing log file"
+        sudo touch /var/log/bcaw.log
+        sudo chmod 666 /var/log/bcaw.log
 
 }
 

@@ -15,17 +15,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Run the provisioning script	
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
 
-    # Run the other provisioning script	
+    # Run the server start script	
     config.vm.provision :shell, :path => "./provision/servstart.sh",
      run: "always"
 
+    # Run the Celery daemon start script	
+    config.vm.provision :shell, :path => "./provision/taskserv.sh",
+     run: "always"
 
     # Port forward HTTP (80) to host 2020
     config.vm.network :forwarded_port, :host => 8080, :guest => 5000
 
     config.vm.provider :virtualbox do |vb|
       vb.name = "bca-webtools-0.4.1"
-      vb.memory = 4096
-      vb.cpus = 2
+      vb.memory = 8192
+      vb.cpus = 4
     end
 end
