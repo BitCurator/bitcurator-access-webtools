@@ -844,6 +844,7 @@ def query():
                 num_results = 0
             else:
                 ## print "D2: search result list: ", search_result_list
+                search_result_list = [w.replace('/vagrant/files_to_index', '') for w in search_result_list]
                 num_results = len(search_result_list)
                 search_result_file_list = search_result_list
 
@@ -865,6 +866,7 @@ def query():
         # print (">> Rendering template with URL:  ")
         return render_template('fl_search_results.html',
                                 searched_phrase=searched_phrase,
+                                search_type=search_type,
                                 num_results=num_results,
                                 search_result_file_list=search_result_file_list,
                                 search_result_image_list=search_result_image_list,
@@ -1316,7 +1318,7 @@ def admin():
 
         # First get the files starting from the root, for each image listed
         print "Celery: calling async function: "
-        bcaw_celery_task.bcaw_index_asynchronously.delay()
+        task = bcaw_celery_task.bcaw_index_asynchronously.delay()
         #bcaw_index_asynchronously()
         #flash("Index will be starting asynchronously")
         logging.debug("Celery: Index will be starting asynchronously")
@@ -1439,6 +1441,7 @@ def admin():
     # Check if user has the permission to do admin services
     return render_template('fl_profile.html')   # FIXME: Placeholder
 '''    
+
 
 # FIXME: This is never called (since we run runserver.py)
 # Remove once confirmed to be deleted
