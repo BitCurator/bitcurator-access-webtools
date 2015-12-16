@@ -79,15 +79,11 @@ eight="80" width="80" align="center" > </div>
                 Found {{num_results}} search results for {{ searched_phrase }} 
             </p> 
           <table>
-            {% if search_type in "filename" %}
             <tr>
               <!-- <th align="left"></th> -->
               <th style="padding:0 15px 0 15px;" align="center">File Name</th>
               <th style="padding:0 15px 0 15px;" align="center">Image </th>
             </tr>
-            {% else %}
-              <th style="padding:0 15px 0 15px;" align="center">File Name</th>
-            {% endif %}
           {#<caption><i>Image List</i></caption>#}
           {% set item_num = 0 %}
           {% for item in search_result_file_list %}
