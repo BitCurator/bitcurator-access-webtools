@@ -316,7 +316,13 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             new_path = bcaw_utils.bcawGetPathFromDfxml(str(item['name']), dfxml_file)
             ## print("D: bcawDnldRepo: path from Dfxml file: ", new_path)
 
-            directory_path = app.config['FILES_TO_INDEX_DIR'] + "/" + new_path
+            # We will add image_index to the path so we can later extract the 
+            # image name to be displayed. We could have passed the image name 
+            # itself, instead of the index, but if the image name has special 
+            # characters, we might bump into unexpected errors while creating
+            # files/directories with an unknown string. So chose to use the image 
+            # index here and later extract the corresponding image name.
+            directory_path = app.config['FILES_TO_INDEX_DIR']+"/"+str(image_index) +"/"+new_path
             ## print ("D1: bcaDnldRepo: Trying to create directory ", directory_path)
 
             if not os.path.exists(directory_path):
@@ -359,7 +365,7 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 # If there is space in the file-name, replace it by %20
                 new_file_path = new_file_path.replace(" ", "%20")
 
-                file_path = app.config['FILES_TO_INDEX_DIR'] + "/" + str(new_file_path)
+                file_path = app.config['FILES_TO_INDEX_DIR'] + "/" + str(image_index) + "/" + str(new_file_path)
                 ## print("D: bcawDnldRepo: Calling bcawDnldSingleFile function for path: ", file_path)
 
                 ## print (">> Indexing Image:{}-{}, File: {}".format(img, partnum, file_path))
@@ -808,6 +814,7 @@ def bcaw_query(db, phrase):
 
 @app.route('/query', methods=['GET', 'POST'])
 def query():
+    global image_list
     form = QueryForm()
     if request.method == 'POST':
         search_result_file_list = []
@@ -844,7 +851,27 @@ def query():
                 num_results = 0
             else:
                 ## print "D2: search result list: ", search_result_list
-                search_result_list = [w.replace('/vagrant/files_to_index', '') for w in search_result_list]
+                # The search results list will have the unncessary leading text
+                # for each result. We will chop it off. But the last part of the
+                # string contains the image name, which is a usefule info for us
+                # do send to the template. Some string and list manipulations
+                # done here to extract the useful info and get rid of the unwanted
+                # stuff. NOTE: There could be a better and more efficient way of
+                # doing the same. We will address it later.
+                search_result_list = [w.replace('/vagrant/files_to_index/', '') for w in search_result_list]
+                index = 0
+                search_result_image_list = []
+                for j in search_result_list:
+                    j_list = j.split("/")
+                    j_index = int(j_list[0])
+                    j_image = image_list[j_index]
+                    search_result_image_list.append(j_image)
+
+                    # Now remove the leading index number from the fielname
+                    j_list.pop(0)
+                    search_result_list[index] = "/".join(j_list)
+                    index += 1
+
                 num_results = len(search_result_list)
                 search_result_file_list = search_result_list
 
@@ -1155,6 +1182,13 @@ def bcawIndexAllFiles():
         if img.endswith(".E01") or img.endswith(".AFF"):
             logging.debug(">> Building Index for image: ", img)
 
+            # Change the new files_to_index_directory into the one per image
+            files_to_index_dir_per_img = files_to_index_dir + "/" + str(image_index) 
+
+            cmd = "mkdir " + files_to_index_dir_per_img
+            if not os.path.exists(files_to_index_dir_per_img):
+                subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+
             ## Worker task-related code:
             ## The worker task's context will not have the following resources
             ## even though the main app has already created them. We have to
@@ -1319,8 +1353,6 @@ def admin():
         # First get the files starting from the root, for each image listed
         print "Celery: calling async function: "
         task = bcaw_celery_task.bcaw_index_asynchronously.delay()
-        #bcaw_index_asynchronously()
-        #flash("Index will be starting asynchronously")
         logging.debug("Celery: Index will be starting asynchronously")
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
