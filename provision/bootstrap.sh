@@ -286,28 +286,13 @@ install_ubuntu_14.04_pip_packages() {
 # Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf 
 # Scipy: scipy, numpy, pandas, redis, tornado, greenlet, pyzmq
 # Bokeh: beautifulsoup, colorama, boto, nose, mock, coverage, websocket-client, blaze, bokeh
+# Celery: celery
 #
 
 pip_packages="flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
-scipy 
-numpy 
-pandas 
-redis 
-tornado 
-greenlet 
-pyzmq 
-beautifulsoup 
-colorama 
-boto 
-nose 
-mock 
-coverage 
-websocket-client 
-blaze 
-bokeh
 celery"
 
     pip_pre_packages="bitstring"
