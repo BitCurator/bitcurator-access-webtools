@@ -509,7 +509,11 @@ def bcawDbGetIndexFlagForImage(img):
     idb = BcawImages.query.filter_by(image_name=img).first()
     logging.debug('[D]: GetIndexFlag: Value of the field indexed for the image is %s ', idb.indexed)
     # print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
-    return idb.indexed
+    #return idb.indexed
+    if idb.indexed == None or idb.indexed == 0:
+        return 0
+    else:
+        return 1
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
     try:
