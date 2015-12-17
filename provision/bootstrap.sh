@@ -255,8 +255,6 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-npm 
-node
 rabbitmq-server
 celeryd"
 
