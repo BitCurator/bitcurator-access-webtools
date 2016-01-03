@@ -218,7 +218,7 @@ install_ubuntu_14.04_deps() {
 # Text extraction: antiword, poppler-utils
 # Java: openjdk-7-*, ant-*, ivy-*
 # Bokeh: npm, node
-#
+# Celery: celeryd (don't use, deprecated)
 
 install_ubuntu_14.04_packages() {
     packages="dkms 
@@ -255,8 +255,7 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server
-celeryd"
+rabbitmq-server"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
