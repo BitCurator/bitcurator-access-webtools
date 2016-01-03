@@ -9,8 +9,11 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 
 # celery -A bcaw_celery_task.celery worker --loglevel=INFO &
 
-cd /vagrant
-sudo cp provision/celeryd /etc/default/celeryd
-sudo /etc/init.d/celeryd start
+# celeryd has been deprecated. Use celery worker command instead
+# cd /vagrant
+# sudo cp provision/celeryd /etc/default/celeryd
+# sudo /etc/init.d/celeryd start
 
+cd /vagrant
+su vagrant -c "celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO"
 
