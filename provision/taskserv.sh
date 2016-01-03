@@ -15,5 +15,4 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 # sudo /etc/init.d/celeryd start
 
 cd /vagrant
-su vagrant -c "celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO"
-
+su vagrant -c "celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO &"
