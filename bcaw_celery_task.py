@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# This file contains the main BitCurator Access Webtools application.
+# This file contains celery support code for the BitCurator Access Webtools application.
 #
 
 from flask import Flask, current_app
