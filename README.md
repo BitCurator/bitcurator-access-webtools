@@ -47,9 +47,17 @@ from within the bca-webtools directory. This step can take a long time the first
 
 to see the bca-webtools service running. 
 
-IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. Click on the "Admin" link at the bottom left of the window, and do the following:
+# Browsing and Searching
+
+IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. 
+
+Click on the "Admin" link at the bottom left of the window, and do the following:
+
   * Select "Build DFXML Table", and click "Submit". This is required for filename search to work.
+
   * Next, select "Generate Index", and click "Submit". The index generation process may take some time. It will run in the background; you can navgate away from the index page once you see the "Index being built" message. 
+
+# Terminating the bca-webtools service and virtual machine
 
 If you need to stop the service, you can type:
 
