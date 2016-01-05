@@ -1357,7 +1357,7 @@ def admin():
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
-        db_option_msg = "Index being built"
+        db_option_msg = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing."
 
         if os.path.exists(dirFilesToIndex) :
             logging.debug('>> Building Indexes for contents in %s', dirFilesToIndex)

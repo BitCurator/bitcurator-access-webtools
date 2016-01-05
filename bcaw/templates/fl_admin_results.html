@@ -99,6 +99,27 @@
 
   <div id="main">
 
+    <h3 align="left">bca-webtools - Administrative Functions</h3>
+
+    These functions provide administrative control of the contents of the database and search index.
+    <p>
+    "Build Image Table" populates the database with basic metadata from newly added E01 and AFF images.
+    <p>
+    "Build DFXML Table" generates DFXML files for all images that do not already have associated DFXML
+    files, and populates the database with this information.
+    <p>
+    "Build All Tables" builds all tables associated with the database.
+    <p>
+    Each of the "Drop" options drops the associated table from the database.
+    <p>
+    "Generate Index" generates an index of searchable content from common filetypes found in
+    available images using PyLucene.
+    <p>
+    "Clear Index" clears the existing index.
+    <p>
+    "Show Image Matrix" displays a table of all readable images, and shows the current status of
+    information from that image in the database.
+
           <form action="{{ url_for('admin') }}" method=post>
             {{ form.radio_option }}
             {# {{ form.submit }} #}
