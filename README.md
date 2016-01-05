@@ -1,11 +1,18 @@
 BitCurator Access Webtools: Disk Image Access for the Web
 ------------------------------------
-The bca-webtools project provides simple access to disk images over the web using open source 
-software including The Sleuth Kit, PyTSK, the Flask web framework, and postgres.
+The bca-webtools project allows users to browse a wide range of file systems contained within
+disk images using a web browser. It is intended to support access requirements in libraries,
+archives, and museums preserving born-digital materials extracted from source media as raw or
+forensically-packaged disk images. 
 
-Simply point bca-webtools at a local directory that contains raw (dd) or forensically-packaged disk 
-images, and it will create a web portal that allows you to browse the file systems, download 
-files, and examine disk image metadata.
+BCA-Webtools uses open source libraries and toolkits including The Sleuth Kit, PyTSK, and 
+the Flask web microservices framework. It uses PyLucene along with format-specific text-extraction
+tools to index the contents of files contained in disk images, allowing users to search for
+relevant content without individually inspecting files.
+
+BCA-Webtools is distributed with a simple build script that deploys it as a Vagrant virtual
+machine running the web service. It includes several sample images (in the "disk-images" directory)
+to get you started.
 
 Find out more at <http://access.bitcurator.net/>
 
