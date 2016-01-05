@@ -67,10 +67,10 @@ in the console on your host machine. The next time you issue the "vagrant up" co
 
 # Dependencies
 
-The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
-You'll also need several other libraries and tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
+The bca-webtools project is a Flask application that is deployed automatically into an appropriately configured Ubuntu 14.04LTS virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
+Several other libraries and tools are required, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
-On a Debian or Ubuntu system, some of these dependencies are simply apt packages. Others are a bit more involved, as the required versions are not packaged. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the "vagrant up" command.
+Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the "vagrant up" command.
 
 # bca-webtools Documentation
 
