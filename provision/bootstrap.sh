@@ -290,7 +290,9 @@ pip_packages="flask
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
-celery"
+celery
+nltk
+numpy"
 
     pip_pre_packages="bitstring"
 

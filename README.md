@@ -1,11 +1,18 @@
 BitCurator Access Webtools: Disk Image Access for the Web
 ------------------------------------
-The bca-webtools project provides simple access to disk images over the web using open source 
-software including The Sleuth Kit, PyTSK, the Flask web framework, and postgres.
+The bca-webtools project allows users to browse a wide range of file systems contained within
+disk images using a web browser. It is intended to support access requirements in libraries,
+archives, and museums preserving born-digital materials extracted from source media as raw or
+forensically-packaged disk images. 
 
-Simply point bca-webtools at a local directory that contains raw (dd) or forensically-packaged disk 
-images, and it will create a web portal that allows you to browse the file systems, download 
-files, and examine disk image metadata.
+BCA-Webtools uses open source libraries and toolkits including The Sleuth Kit, PyTSK, and 
+the Flask web microservices framework. It uses PyLucene along with format-specific text-extraction
+tools to index the contents of files contained in disk images, allowing users to search for
+relevant content without individually inspecting files.
+
+BCA-Webtools is distributed with a simple build script that deploys it as a Vagrant virtual
+machine running the web service. It includes several sample images (in the "disk-images" directory)
+to get you started.
 
 Find out more at <http://access.bitcurator.net/>
 
@@ -47,9 +54,17 @@ from within the bca-webtools directory. This step can take a long time the first
 
 to see the bca-webtools service running. 
 
-IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. Click on the "Admin" link at the bottom left of the window, and do the following:
+# Browsing and Searching
+
+IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. 
+
+Click on the "Admin" link at the bottom left of the window, and do the following:
+
   * Select "Build DFXML Table", and click "Submit". This is required for filename search to work.
+
   * Next, select "Generate Index", and click "Submit". The index generation process may take some time. It will run in the background; you can navgate away from the index page once you see the "Index being built" message. 
+
+# Terminating the bca-webtools service and virtual machine
 
 If you need to stop the service, you can type:
 
@@ -59,10 +74,10 @@ in the console on your host machine. The next time you issue the "vagrant up" co
 
 # Dependencies
 
-The bca-webtools project is a Flask application. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
-You'll also need several other libraries and tools, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
+The bca-webtools project is a Flask application that is deployed automatically into an appropriately configured Ubuntu 14.04LTS virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
+Several other libraries and tools are required, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
-On a Debian or Ubuntu system, some of these dependencies are simply apt packages. Others are a bit more involved, as the required versions are not packaged. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the "vagrant up" command.
+Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the "vagrant up" command.
 
 # bca-webtools Documentation
 
