@@ -1100,6 +1100,19 @@ def bcawSetFlagInMatrix(flag, value, image_name):
 
     ## print "[D] bcawSetFlagInMatrix: Image Matrix After setting the falg: ", image_matrix
 
+def bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages():
+    """ This routine updates the matrix with dfxml-table-exists flag from the DB
+        for all the images present.
+    """
+    for img_tbl_item in image_matrix:
+        img = img_tbl_item['img_name']
+        ret, ret_msg = bcaw_db.dbu_execute_dbcmd("bcaw_dfxmlinfo", \
+                           "find_dfxml_table_for_image", img)
+        if ret != -1:
+            # update the flag with True
+            print "D: Updating matrix for dfxml_table_exists with True for image", img
+            img_tbl_item.update({bcaw_imginfo[3]:True})
+
 def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
     """ This routine updates the matrix with index flag from the DB for all the
         images present.
@@ -1277,9 +1290,17 @@ def admin():
         logging.debug('>> Admin: Requested DFXML table build')
         # print ">> Admin: Requested DFXML table build "
         db_option = 3
+        task = bcaw_celery_task.bcawBuildDfxmlTableAsynchronously.delay()
+        logging.debug("Celery: DFXML table will be built asynchronously")
+        print("Celery: DFXML table will be built asynchronously")
+
+        '''
         retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = False, bld_dfxmldb = True)
         if retval == 0:
             db_option_msg = "Built DFXML Table"
+        '''
+        db_option_msg = "DFXML Table being built"
+
     elif (form.radio_option.data.lower() == 'drop_all_tables'):
         logging.debug('>> Admin: Requested Image and DFXML DB Drop')
         # print ">> Admin: Requested Image and DFXML DB Drop "
@@ -1352,7 +1373,7 @@ def admin():
 
         # First get the files starting from the root, for each image listed
         print "Celery: calling async function: "
-        task = bcaw_celery_task.bcaw_index_asynchronously.delay()
+        task = bcaw_celery_task.bcawIndexAsynchronously.delay()
         logging.debug("Celery: Index will be starting asynchronously")
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
@@ -1381,6 +1402,9 @@ def admin():
         # to the matrix, we will extract the index flags from the DB here, and 
         # update the matrix before displaying.
         bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages()
+
+        # for the same reason we will also extract the dfxml flag from the db.
+        bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages()
 
         return render_template('fl_admin_imgmatrix.html',
                            db_option=str(db_option),
