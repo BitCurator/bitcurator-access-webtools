@@ -20,6 +20,7 @@ from bcaw_userlogin_db import db_login
 import psycopg2
 import image_browse
 ###from runserver import db_login
+from celery import Celery
 
 
 app = Flask(__name__)
@@ -234,6 +235,11 @@ def dbBrowseImages():
     logging.debug('D: Image_list %s', image_list)
     # print 'D: Image_list: ', image_list
 
+# CELERY stuff
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
+
+@celery.task
 def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
     """ Depending on the arguments set, this functioon generates the table
         contents for the given table, for each image in the disk-images
@@ -506,14 +512,17 @@ def bcawDbGetIndexFlagForImage(img):
     """ This routine gets the flag which indicates whether index is generated or
         not for a particular image, from the image matrix.
     """
-    idb = BcawImages.query.filter_by(image_name=img).first()
-    logging.debug('[D]: GetIndexFlag: Value of the field indexed for the image is %s ', idb.indexed)
-    # print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
-    #return idb.indexed
-    if idb.indexed == None or idb.indexed == 0:
-        return 0
-    else:
-        return 1
+    if dbu_does_table_exist_for_img(img, "bcaw_images"):
+        idb = BcawImages.query.filter_by(image_name=img).first()
+        if idb:
+            logging.debug('[D]: GetIndexFlag: Value of the field indexed for the image is %s ', idb.indexed)
+            # print "[D]: GetIndexFlag: Value of the field indexed for the image {} is {} ".format(img, idb.indexed)
+            #return idb.indexed
+            if idb.indexed == None or idb.indexed == 0:
+                return 0
+            else:
+                return 1
+    return 0
 
 def bcawDfxmlDbSessionAdd(d_dbrec):
     try:
@@ -628,16 +637,29 @@ def dbu_execute_dbcmd(table_name, function, image_name):
     """ DB utility function to execute the command specified by 'function'
         for the given image.
     """
+    flag = True
     conn = dbu_get_conn()
     c = conn.cursor()
     if function in "delete_table":
         psql_cmd = "drop table " + table_name
         message_string = "Dropped table "+ table_name
+        flag = False
     elif function in "delete_entries_for_image":
         psql_cmd = "delete from "+table_name+" where image_name like '"+ image_name + "'"
         logging.debug('D: Psql cmd %s', psql_cmd)
         # print "D: Psql cmd: ", psql_cmd
         message_string = "Deleted rows from table "+ table_name
+        flag = False
+    elif function in "find_dfxml_table_for_image":
+        psql_cmd = "select '"+ image_name + "' FROM bcaw_dfxmlinfo"
+        # print "D: Psql cmd for find_dfxml_table_for_image: ", psql_cmd
+        message_string = "Found entries in DFXML table for image " + image_name
+        if dbu_does_table_exist_for_img(image_name, "bcaw_dfxmlinfo"):
+            # print "D: dbu_execute_dbcmd: image found in ret_list ", image_name
+            return(0, message_string)
+        else:
+            message_string = "No DFXML entries for image " + image_name
+            return(-1, message_string)
     else:
         logging.debug('D: psql function %s not supported ', function)
         # print "D: psql function {} not supported".format(function)
@@ -654,7 +676,7 @@ def dbu_execute_dbcmd(table_name, function, image_name):
 
         # update the image_matrix
         ## print "[D]: dbu_execute_cmd: Updating the matrix for img_db_exists " 
-        image_browse.bcawSetFlagInMatrixPerImage('dfxml_db_exists', False, image_name)
+        image_browse.bcawSetFlagInMatrixPerImage('dfxml_db_exists', flag, image_name)
 
         ## print "[D]:dbu_execute_cmd: returning message_str ", message_string
         return(0, message_string)
