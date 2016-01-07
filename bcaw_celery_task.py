@@ -28,7 +28,7 @@ celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
 @celery.task
-def bcaw_index_asynchronously():
+def bcawIndexAsynchronously():
     """ This is the Celery worker task which is run in parallel with the
         bcaw app. When user chooses to generate Lucene indexes for the disk
         images, the mail app (bcaw) calls this worker thread which in turn,
@@ -43,3 +43,11 @@ def bcaw_index_asynchronously():
         # print "Current app: ", current_app.name
         bcaw.image_browse.bcawIndexAllFiles()
 
+@celery.task
+def bcawBuildDfxmlTableAsynchronously():
+    """ Background task to build dfxml table """
+    with app.app_context():
+        # print "Calling dbBuildDb for DFXML..."
+        # print "Current app: ", current_app.name
+        bcaw.bcaw_db.dbBuildDb(bld_imgdb = False, bld_dfxmldb = True)
+    
