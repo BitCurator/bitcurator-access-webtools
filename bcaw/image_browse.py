@@ -1113,6 +1113,19 @@ def bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages():
             print "D: Updating matrix for dfxml_table_exists with True for image", img
             img_tbl_item.update({bcaw_imginfo[3]:True})
 
+def bcawUpdateMatrixWithImageFlagsFromDbForAllImages():
+    """ This routine updates the matrix with image-table-exists flag from the DB
+        for all the images present.
+    """
+    for img_tbl_item in image_matrix:
+        img = img_tbl_item['img_name']
+        ret, ret_msg = bcaw_db.dbu_execute_dbcmd("bcaw_images", \
+                           "find_image_table_for_image", img)
+        if ret != -1:
+            # update the flag with True
+            print "D: Updating matrix for image_table_exists with True for image", img
+            img_tbl_item.update({bcaw_imginfo[2]:True})
+
 def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
     """ This routine updates the matrix with index flag from the DB for all the
         images present.
@@ -1271,11 +1284,15 @@ def admin():
         logging.debug('>> Admin: Requested all tables build')
         # print ">> Admin: Requested all tables build "
         db_option = 1
-        db_option_msg = "Built All the Tables"
+        db_option_msg = "Building All the Tables"
 
         # Add Tables - either image table, or DFXML table or both - to the DB
         # based on the arguments.
-        retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
+        task = bcaw_celery_task.bcawBuildAllTablesAsynchronously.delay()
+        logging.debug("Celery: The tables will be built asynchronously")
+        print("Celery: The tables will be built asynchronously")
+
+        ##retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
     elif(form.radio_option.data.lower() == 'image_table'):
         logging.debug('>> Admin: Requested Image table build')
         # print ">> Admin: Requested Image table build "
@@ -1405,6 +1422,7 @@ def admin():
 
         # for the same reason we will also extract the dfxml flag from the db.
         bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages()
+        bcawUpdateMatrixWithImageFlagsFromDbForAllImages()
 
         return render_template('fl_admin_imgmatrix.html',
                            db_option=str(db_option),
