@@ -51,3 +51,10 @@ def bcawBuildDfxmlTableAsynchronously():
         # print "Current app: ", current_app.name
         bcaw.bcaw_db.dbBuildDb(bld_imgdb = False, bld_dfxmldb = True)
     
+@celery.task
+def bcawBuildAllTablesAsynchronously():
+    """ Background task to build image and dfxml table """
+    with app.app_context():
+        # print "Calling dbBuildDb for DFXML..."
+        # print "Current app: ", current_app.name
+        bcaw.bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
