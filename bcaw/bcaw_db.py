@@ -655,10 +655,20 @@ def dbu_execute_dbcmd(table_name, function, image_name):
         # print "D: Psql cmd for find_dfxml_table_for_image: ", psql_cmd
         message_string = "Found entries in DFXML table for image " + image_name
         if dbu_does_table_exist_for_img(image_name, "bcaw_dfxmlinfo"):
-            # print "D: dbu_execute_dbcmd: image found in ret_list ", image_name
+            # print "D: dbu_execute_dbcmd: image found in dfxml_table ", image_name
             return(0, message_string)
         else:
             message_string = "No DFXML entries for image " + image_name
+            return(-1, message_string)
+    elif function in "find_image_table_for_image":
+        psql_cmd = "select '"+ image_name + "' FROM bcaw_images"
+        # print "D: Psql cmd for find_dfxml_table_for_image: ", psql_cmd
+        message_string = "Found entries in Images table for image " + image_name
+        if dbu_does_table_exist_for_img(image_name, "bcaw_images"):
+            # print "D: dbu_execute_dbcmd: image found in image_table ", image_name
+            return(0, message_string)
+        else:
+            message_string = "No Image entry for image " + image_name
             return(-1, message_string)
     else:
         logging.debug('D: psql function %s not supported ', function)
