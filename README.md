@@ -70,7 +70,13 @@ If you need to stop the service, you can type:
 
   * vagrant halt
 
-in the console on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. If you need to delete the VM entirely, you can issue a "vagrant destroy" command after "vagrant halt".
+in the bca-webtools directory in the console or terminal on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. 
+
+If you need to delete the VM entirely, you can the the following command after halting the VM:
+
+  * vagrant destroy
+
+If you wish to build a new VM with updated sources, simply delete the bca-webtools directory after halting and destroying the previous VM, and clone or download the current sources from GitHub.
 
 # Dependencies
 
