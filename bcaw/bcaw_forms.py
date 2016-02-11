@@ -198,7 +198,7 @@ class QueryForm(Form):
             return search_list, "contents"
             
 class adminForm(Form):
-    radio_option = RadioField('Label', choices=[('Image_table', 'Build Image Table'), ('dfxml_table', 'Build DFXML Table'), ('all_tables', 'Build All Tables'), ('drop_img_table', 'Drop Image Table'), ('drop_dfxml_table', 'Drop DFXML Table'), ('drop_all_tables', 'Drop All Tables'), ('generate_index', 'Generate Index'), ('clear_index', 'Clear Index'), ('show_image_matrix','Show Image Matrix')])
+    radio_option = RadioField('Label', choices=[('Image_table', 'Build Image Table'), ('dfxml_table', 'Build DFXML Table'), ('all_tables', 'Build All Tables'), ('drop_img_table', 'Drop Image Table'), ('drop_dfxml_table', 'Drop DFXML Table'), ('drop_all_tables', 'Drop All Tables'), ('generate_index', 'Generate Index'), ('clear_index', 'Clear Index'), ('show_task_status', 'Show Task Status'), ('show_image_matrix','Show Image Matrix')])
     submit = SubmitField("Submit")
  
     def __init__(self, *args, **kwargs):
@@ -210,6 +210,7 @@ class adminForm(Form):
             # print(">> bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
 
+'''
 class buildForm(Form):
     radio_option = RadioField('Label', choices=[('build_db_table', 'Build DB Table'), ('rmove_db_table', 'Remove dB Table'), ('build_index', 'Build Index')], default='')
     submit = SubmitField("Submit")
@@ -222,8 +223,4 @@ class buildForm(Form):
             logging.debug('>> bcaw_forms: Validate failed. returning ')
             # print(">> bcaw_forms: Validate failed. returning ");
             return None, self.radio_option.data.lower()
-
-'''
-class buildIndexForm(Form):
-    radio_option = RadioField('Label', choices=[('build_db_table', 'Build DB Table'), ('rmove_db_table', 'Remove dB Table')], default='')
 '''
