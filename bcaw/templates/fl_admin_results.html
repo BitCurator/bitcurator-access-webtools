@@ -134,7 +134,7 @@
           <p style='font-size:12; color:Green'>
                 <!--Option {{ db_option }} chosen : {{ db_option_msg }}-->
                {% if is_option_msg_url  %}
-                  <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > <a href ="{{ db_option_msg }}">Task Status </a>
+                  <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > <a href ="{{ db_option_msg }}">{{ option_msg_with_url }} Task Status </a>
                {% else %}
                   <img src="{{ url_for('static', filename = "info_circle.png") }} " align="center" > {{ db_option_msg }} 
                {% endif %}
