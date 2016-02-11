@@ -51,7 +51,7 @@ def bcawBuildDfxmlTableAsynchronously():
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
-        bcaw.bcaw_db.dbBuildDb(bld_imgdb = False, bld_dfxmldb = True)
+        bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = False, bld_dfxmldb = True)
     
 @celery.task
 def bcawBuildAllTablesAsynchronously():
@@ -59,4 +59,4 @@ def bcawBuildAllTablesAsynchronously():
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
-        bcaw.bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
+        bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = True, bld_dfxmldb = True)
