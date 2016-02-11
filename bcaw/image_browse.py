@@ -137,8 +137,8 @@ bcaw_imginfo = ['img_index', 'img_name', 'img_db_exists', 'dfxml_db_exists', 'in
 # is invoked. This table is used by taskstatus. Originally the task_id was being passed
 # to the taskstatus route. But to avoid a url with dynamically generated task_id,
 # it was decided to store the task_id in a table and use it instead.
-task_id_table = {'Indexing':0, 'Build_dfxml_tables':0}
-task_response_table = {'Indexing':None, 'Build_dfxml_tables':None}
+task_id_table = {'Indexing':0, 'Build_dfxml_tables':0, 'Build_all_tables':0}
+task_response_table = {'Indexing':None, 'Build_dfxml_tables':None, 'Build_all_tables':None}
 
 def bcawPopulateImgInfoTable(image_index, img, imgdb_flag, dfxmldb_flag, index_flag):
     """ For the given image (img), this routine updates the corresponding
@@ -1302,6 +1302,7 @@ def admin():
   if request.method == 'POST':
     db_option = 3
     db_option_msg = None
+    option_msg_with_url = ""
 
     # option_message could be just a message or a url. We flag the latter case:
     is_option_msg_url = False
@@ -1319,6 +1320,13 @@ def admin():
         print("Celery: The tables will be built asynchronously")
 
         ##retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
+        # Task status
+        task_type = "Build_all_tables"
+        task_id_table['Build_all_tables'] = task.id
+        db_option = 2
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_all_tables')
+        is_option_msg_url = True
+        option_msg_with_url = "The Tables are being built. Click to see status: "
     elif(form.radio_option.data.lower() == 'image_table'):
         logging.debug('>> Admin: Requested Image table build')
         # print ">> Admin: Requested Image table build "
@@ -1327,12 +1335,12 @@ def admin():
         # NOTE: db_option is not really used at this time. Just keeping it in
         # case it could be of use in the future. Will be removed while cleaning up,
         # if not used.
-        db_option = 2
+        db_option = 3
         retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = False)
     elif (form.radio_option.data.lower() == 'dfxml_table'):
         logging.debug('>> Admin: Requested DFXML table build')
         # print ">> Admin: Requested DFXML table build "
-        db_option = 3
+        db_option = 4
         task = bcaw_celery_task.bcawBuildDfxmlTableAsynchronously.delay()
         logging.debug("Celery: DFXML table will be built asynchronously")
         print("Celery: DFXML table will be built asynchronously")
@@ -1344,10 +1352,18 @@ def admin():
         '''
         db_option_msg = "DFXML Table being built"
 
+        # Task status
+        task_type = "Build_dfxml_tables"
+        task_id_table['Build_dfxml_tables'] = task.id
+        #db_option = 7
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_dfxml_tables')
+        is_option_msg_url = True
+        option_msg_with_url = "DFXML Table being built. Click to see status: "
+
     elif (form.radio_option.data.lower() == 'drop_all_tables'):
         logging.debug('>> Admin: Requested Image and DFXML DB Drop')
         # print ">> Admin: Requested Image and DFXML DB Drop "
-        db_option = 4
+        db_option = 5
         ## print "[D]: Dropping img table and updating the matrix for img_db_exists "
         retval_img, message_img = bcaw_db.dbu_drop_table("bcaw_images")
 
@@ -1370,7 +1386,7 @@ def admin():
         logging.debug('>> Admin Requested Image DB Drop')
         # print ">> Admin: Requested Image DB Drop "
         ## print "[D] Dropping img table and updating the matrix for img_db_exists "
-        db_option = 5
+        db_option = 6
         retval, db_option_msg = bcaw_db.dbu_drop_table("bcaw_images")
 
         # update the image_matrix
@@ -1380,7 +1396,7 @@ def admin():
         logging.debug('>> Admin: Requested DFXML DB Drop')
         # print ">> Admin: Requested DFXML DB Drop "
         ## print "[D] Dropping dfxml table and updating the matrix for dfxml_db_exists "
-        db_option = 5
+        db_option = 7
         retval, db_option_msg = bcaw_db.dbu_drop_table("bcaw_dfxmlinfo")
 
         # update the image_matrix
@@ -1390,7 +1406,7 @@ def admin():
         # First biuld the index for th filenames. Then build the index
         # for the contents from the configured directory. The contents index
         # is built in 
-        db_option = 6
+        db_option = 8
         db_option_msg = "Option not yet supported"
         dirFileNamesToIndex = bcaw_generate_file_list()
 
@@ -1422,7 +1438,7 @@ def admin():
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
-        db_option_msg = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing."
+        option_msg_with_url = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing. Click to see status: "
 
         if os.path.exists(dirFilesToIndex) :
             logging.debug('>> Building Indexes for contents in %s', dirFilesToIndex)
@@ -1440,17 +1456,17 @@ def admin():
         #return jsonify({}), 202, {'Location': url_for('taskstatus', task_id=task.id)}
         task_type = "Indexing"
         task_id_table['Indexing'] = task.id
-        db_option = 7
+        db_option = 9
         db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Indexing')
         is_option_msg_url = True
         
     elif (form.radio_option.data.lower() == "clear_index"):
         bcawClearIndexing()
-        db_option = 7
+        db_option = 10
         db_option_msg = "Index Cleared "
 
     elif (form.radio_option.data.lower() == 'show_image_matrix'):
-        db_option = 8
+        db_option = 11
         db_option_msg = "Image Matrix "
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
@@ -1471,7 +1487,7 @@ def admin():
                            is_option_msg_url = is_option_msg_url,
                            form=form)
     elif (form.radio_option.data.lower() == 'show_task_status'):
-        db_option = 9
+        db_option = 12
         is_option_msg_url = True
         db_option_msg = "http://127.0.0.1:8080" + url_for('bcawCheckAllTaskStatus')
 
@@ -1543,6 +1559,7 @@ def admin():
                            db_option=str(db_option),
                            is_option_msg_url = is_option_msg_url,
                            db_option_msg=str(db_option_msg),
+                           option_msg_with_url=option_msg_with_url,
                            form=form)
  
   elif request.method == 'GET':
@@ -1621,17 +1638,15 @@ def taskstatus(task_type):
     """ The routine that runs when clicked on the status URL for the corresponding
         task ID.
     """
-    print "[D] taskstatus: task_type: {}, task_id_table: {}".format(task_type, task_id_table)
-    if task_type == "Indexing":
-        task_id = task_id_table['Indexing']
-        if task_id == 0:
-            # No task exists. Return appropriate response.
-            response = {
-                'state': 'NONE',
-                'status': 'NONE',
-                'result': 'NONE'
-            }
-            return render_template('fl_celery_status.html', \
+    ## print "[D] taskstatus: task_type: {}, task_id_table: {}".format(task_type, task_id_table)
+    task_id = task_id_table[task_type]
+    if task_id == 0:
+        # No task exists. Return appropriate response.
+        response = {
+            'state': 'None',
+            'status': 'None',
+        }
+        return render_template('fl_celery_status.html', \
                                    response=response, \
                                    task_type=task_type)
 
