@@ -240,7 +240,7 @@ celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
 @celery.task
-def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
+def dbBuildDb(task_id, bld_imgdb = False, bld_dfxmldb = False):
     """ Depending on the arguments set, this functioon generates the table
         contents for the given table, for each image in the disk-images
         directory.
@@ -276,6 +276,11 @@ def dbBuildDb(bld_imgdb = False, bld_dfxmldb = False):
                 continue
             else:
                 image_index += 1
+
+            # Send a status update as this is a celery task.
+            self.update_state(state='PROGRESS', \
+                              task_id=task_id, \
+                              meta={'current': image_index, 'status':message})
 
         else:
             continue
