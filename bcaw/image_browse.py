@@ -13,7 +13,7 @@
 #
 
 from flask import Flask, render_template, url_for, Response, stream_with_context, request, flash, session, redirect, jsonify
-from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm, buildForm
+from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm
 from celery import Celery
 
 import pytsk3
@@ -130,6 +130,15 @@ def bcawBrowse(db_init = True):
 # image_matrix is a global list of dictioaries, bcaw_imginfo, one per image.
 image_matrix = []
 bcaw_imginfo = ['img_index', 'img_name', 'img_db_exists', 'dfxml_db_exists', 'index_exists']
+
+# task_id_table os a dictionary containing the asynchronous task_id per async feature.
+# Currently there is on for Indexing task and the task that builds dfxml table in the
+# db. It can be expanded as needed. The value will be populated when the async task
+# is invoked. This table is used by taskstatus. Originally the task_id was being passed
+# to the taskstatus route. But to avoid a url with dynamically generated task_id,
+# it was decided to store the task_id in a table and use it instead.
+task_id_table = {'Indexing':0, 'Build_dfxml_tables':0}
+task_response_table = {'Indexing':None, 'Build_dfxml_tables':None}
 
 def bcawPopulateImgInfoTable(image_index, img, imgdb_flag, dfxmldb_flag, index_flag):
     """ For the given image (img), this routine updates the corresponding
@@ -1282,6 +1291,7 @@ def bcawIndexAllFiles(self, task_id):
             # Send and update_state. It can be chosen to send at particular intervals.
             # Here it is chosen to send update after indexing each image. This could
             # be changed.
+
             self.update_state(state='PROGRESS', \
                               task_id=task_id, \
                               meta={'current': image_index, 'status':message}) 
@@ -1428,8 +1438,10 @@ def admin():
         # sends the current status to the client in the form of a dictionary (jsonified
         # response).  We can build a user-friendly display usin that information.
         #return jsonify({}), 202, {'Location': url_for('taskstatus', task_id=task.id)}
+        task_type = "Indexing"
+        task_id_table['Indexing'] = task.id
         db_option = 7
-        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_id=task.id)
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Indexing')
         is_option_msg_url = True
         
     elif (form.radio_option.data.lower() == "clear_index"):
@@ -1442,7 +1454,6 @@ def admin():
         db_option_msg = "Image Matrix "
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
-        build_form = buildForm()
 
         # Since the asynchronous worker task which does indexing has no access 
         # to the matrix, we will extract the index flags from the DB here, and 
@@ -1457,9 +1468,12 @@ def admin():
                            db_option=str(db_option),
                            db_option_msg=str(db_option_msg),
                            image_matrix=image_matrix,
-                           build_form=build_form,
                            is_option_msg_url = is_option_msg_url,
                            form=form)
+    elif (form.radio_option.data.lower() == 'show_task_status'):
+        db_option = 9
+        is_option_msg_url = True
+        db_option_msg = "http://127.0.0.1:8080" + url_for('bcawCheckAllTaskStatus')
 
     # request.form will be in the form:
     # ImmutableMultiDict([('delete_table, <image>), ), )'delete_form', 'submit')])
@@ -1547,18 +1561,89 @@ def admin():
     return render_template('fl_profile.html')   # FIXME: Placeholder
 '''    
 
-@app.route('/status/<task_id>')
-def taskstatus(task_id):
+@app.route('/status/')
+def bcawCheckAllTaskStatus():
+    """ This routine is called when one clicks on "task status" url which
+        is generated either when a celery task is run or when one clicks on
+        "Show Task Status" in the admin menu.
+    """
+    for task_type in task_id_table:
+        task_id = task_id_table[task_type]
+        if task_id == 0:
+            # No task exists. Return appropriate response.
+            task_response_table[task_type] = {
+                'state': 'None',
+                'status': 'None',
+            }
+            continue
+        task =  bcaw_celery_task.bcawIndexAsynchronously.AsyncResult(task_id)
+        if task == None:
+            task_response_table[task_type] = {
+                'state': "No Task Running",
+                'status': 'None...'
+            }
+            continue
+        if task.state == 'PENDING':
+            task_response_table[task_type] = {
+                'state': task.state,
+                'status': 'Pending...'
+            }
+        elif task.state != 'FAILURE':
+            if task.state == 'SUCCESS':
+                # Job is completed. No need to probe task.
+                task_response_table[task_type] = {
+                    'state': 'SUCCESS',
+                    'status': 'TASK COMPLETED'
+                }
+            else:
+                task_response_table[task_type] = {
+                    'state': task.state,
+                    'status': task.info.get('status', '')
+                }
+                #FIXME: Figure out how to get this into the table
+                if 'result' in task.info:
+                    print "[D]: Result is in taskinfo: ", task.info['result']
+                    response['result'] = task.info['result']
+        else:
+            print ">> taskstatus: Something went wrong ", task.state
+            # something went wrong in the background job
+            task_response_table[task_type] = {
+                'state': 'FAILURE',
+                'status': str(task.info),  # this is the exception raised
+            }
+
+    return render_template('fl_celery_allstatus.html', \
+                           task_id_table=task_id_table,
+                           task_response_table=task_response_table)
+
+@app.route('/status/<task_type>')
+def taskstatus(task_type):
     """ The routine that runs when clicked on the status URL for the corresponding
         task ID.
     """
+    print "[D] taskstatus: task_type: {}, task_id_table: {}".format(task_type, task_id_table)
+    if task_type == "Indexing":
+        task_id = task_id_table['Indexing']
+        if task_id == 0:
+            # No task exists. Return appropriate response.
+            response = {
+                'state': 'NONE',
+                'status': 'NONE',
+                'result': 'NONE'
+            }
+            return render_template('fl_celery_status.html', \
+                                   response=response, \
+                                   task_type=task_type)
+
     task =  bcaw_celery_task.bcawIndexAsynchronously.AsyncResult(task_id)
     if task == None:
         response = {
             'state': "No Task Running",
             'status': 'None...'
         }
-        return jsonify(response)
+        return render_template('fl_celery_status.html', \
+                               response=response, \
+                               task_type=task_type)
 
     print "[D]: In taskstatus: task_state: ", task.state
     if task.state == 'PENDING':
@@ -1589,7 +1674,10 @@ def taskstatus(task_id):
             'status': str(task.info),  # this is the exception raised
         }
     print "[D] response: ", response
-    return jsonify(response)
+    ##return jsonify(response)
+    return render_template('fl_celery_status.html', \
+                           response=response, \
+                           task_type=task_type)
 
 
 
