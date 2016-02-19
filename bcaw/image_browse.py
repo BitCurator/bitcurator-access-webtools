@@ -12,8 +12,8 @@
 # This file contains the main BitCurator Access Webtools application.
 #
 
-from flask import Flask, render_template, url_for, Response, stream_with_context, request, flash, session, redirect
-from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm, buildForm
+from flask import Flask, render_template, url_for, Response, stream_with_context, request, flash, session, redirect, jsonify
+from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm
 from celery import Celery
 
 import pytsk3
@@ -130,6 +130,15 @@ def bcawBrowse(db_init = True):
 # image_matrix is a global list of dictioaries, bcaw_imginfo, one per image.
 image_matrix = []
 bcaw_imginfo = ['img_index', 'img_name', 'img_db_exists', 'dfxml_db_exists', 'index_exists']
+
+# task_id_table os a dictionary containing the asynchronous task_id per async feature.
+# Currently there is on for Indexing task and the task that builds dfxml table in the
+# db. It can be expanded as needed. The value will be populated when the async task
+# is invoked. This table is used by taskstatus. Originally the task_id was being passed
+# to the taskstatus route. But to avoid a url with dynamically generated task_id,
+# it was decided to store the task_id in a table and use it instead.
+task_id_table = {'Indexing':0, 'Build_dfxml_tables':0, 'Build_all_tables':0}
+task_response_table = {'Indexing':None, 'Build_dfxml_tables':None, 'Build_all_tables':None}
 
 def bcawPopulateImgInfoTable(image_index, img, imgdb_flag, dfxmldb_flag, index_flag):
     """ For the given image (img), this routine updates the corresponding
@@ -1183,11 +1192,15 @@ def bcawIsImgInMatrix(img):
         return False
 
 
-@celery.task
-def bcawIndexAllFiles():
+@celery.task(bind=True)
+def bcawIndexAllFiles(self, task_id):
     """ This routine generates Lucene indexes for all the files contained in
         the images in the disk_image directory. It is called by Celery worker
         task, which runs the job asynchronously.
+        Per blog miguelgrinberg.com/post/using-celery-with-flask, using "bind=True"
+        argument in the Celery decorator instructs Celery to send a self argument
+        to the function, which can then be used to record the status updates
+        We need task_id to send status updates from the task.
     """
     global image_list
     global image_db_list
@@ -1273,6 +1286,15 @@ def bcawIndexAllFiles():
             bcawSetIndexFlag(image_index, img)
 
             image_index += 1
+            message = "Indexing in Progress"
+
+            # Send and update_state. It can be chosen to send at particular intervals.
+            # Here it is chosen to send update after indexing each image. This could
+            # be changed.
+
+            self.update_state(state='PROGRESS', \
+                              task_id=task_id, \
+                              meta={'current': image_index, 'status':message}) 
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -1280,6 +1302,11 @@ def admin():
   if request.method == 'POST':
     db_option = 3
     db_option_msg = None
+    option_msg_with_url = ""
+
+    # option_message could be just a message or a url. We flag the latter case:
+    is_option_msg_url = False
+
     if (form.radio_option.data.lower() == 'all_tables'):
         logging.debug('>> Admin: Requested all tables build')
         # print ">> Admin: Requested all tables build "
@@ -1293,6 +1320,13 @@ def admin():
         print("Celery: The tables will be built asynchronously")
 
         ##retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
+        # Task status
+        task_type = "Build_all_tables"
+        task_id_table['Build_all_tables'] = task.id
+        db_option = 2
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_all_tables')
+        is_option_msg_url = True
+        option_msg_with_url = "The Tables are being built. Click to see status: "
     elif(form.radio_option.data.lower() == 'image_table'):
         logging.debug('>> Admin: Requested Image table build')
         # print ">> Admin: Requested Image table build "
@@ -1301,12 +1335,12 @@ def admin():
         # NOTE: db_option is not really used at this time. Just keeping it in
         # case it could be of use in the future. Will be removed while cleaning up,
         # if not used.
-        db_option = 2
+        db_option = 3
         retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = False)
     elif (form.radio_option.data.lower() == 'dfxml_table'):
         logging.debug('>> Admin: Requested DFXML table build')
         # print ">> Admin: Requested DFXML table build "
-        db_option = 3
+        db_option = 4
         task = bcaw_celery_task.bcawBuildDfxmlTableAsynchronously.delay()
         logging.debug("Celery: DFXML table will be built asynchronously")
         print("Celery: DFXML table will be built asynchronously")
@@ -1318,10 +1352,18 @@ def admin():
         '''
         db_option_msg = "DFXML Table being built"
 
+        # Task status
+        task_type = "Build_dfxml_tables"
+        task_id_table['Build_dfxml_tables'] = task.id
+        #db_option = 7
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_dfxml_tables')
+        is_option_msg_url = True
+        option_msg_with_url = "DFXML Table being built. Click to see status: "
+
     elif (form.radio_option.data.lower() == 'drop_all_tables'):
         logging.debug('>> Admin: Requested Image and DFXML DB Drop')
         # print ">> Admin: Requested Image and DFXML DB Drop "
-        db_option = 4
+        db_option = 5
         ## print "[D]: Dropping img table and updating the matrix for img_db_exists "
         retval_img, message_img = bcaw_db.dbu_drop_table("bcaw_images")
 
@@ -1344,7 +1386,7 @@ def admin():
         logging.debug('>> Admin Requested Image DB Drop')
         # print ">> Admin: Requested Image DB Drop "
         ## print "[D] Dropping img table and updating the matrix for img_db_exists "
-        db_option = 5
+        db_option = 6
         retval, db_option_msg = bcaw_db.dbu_drop_table("bcaw_images")
 
         # update the image_matrix
@@ -1354,7 +1396,7 @@ def admin():
         logging.debug('>> Admin: Requested DFXML DB Drop')
         # print ">> Admin: Requested DFXML DB Drop "
         ## print "[D] Dropping dfxml table and updating the matrix for dfxml_db_exists "
-        db_option = 5
+        db_option = 7
         retval, db_option_msg = bcaw_db.dbu_drop_table("bcaw_dfxmlinfo")
 
         # update the image_matrix
@@ -1364,7 +1406,7 @@ def admin():
         # First biuld the index for th filenames. Then build the index
         # for the contents from the configured directory. The contents index
         # is built in 
-        db_option = 6
+        db_option = 8
         db_option_msg = "Option not yet supported"
         dirFileNamesToIndex = bcaw_generate_file_list()
 
@@ -1390,12 +1432,13 @@ def admin():
 
         # First get the files starting from the root, for each image listed
         print "Celery: calling async function: "
-        task = bcaw_celery_task.bcawIndexAsynchronously.delay()
-        logging.debug("Celery: Index will be starting asynchronously")
+        ##task = bcaw_celery_task.bcawIndexAsynchronously.delay()
+        task = bcaw_celery_task.bcawIndexAsynchronously.apply_async()
+        logging.debug("Celery: Index will be starting asynchronously: task: ", task)
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
-        db_option_msg = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing."
+        option_msg_with_url = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing. Click to see status: "
 
         if os.path.exists(dirFilesToIndex) :
             logging.debug('>> Building Indexes for contents in %s', dirFilesToIndex)
@@ -1403,17 +1446,30 @@ def admin():
             bcaw_index.IndexFiles(dirFilesToIndex, indexDir)
             logging.debug('>> Built indexes for contents in %s', indexDir)
             # print ">> Built indexes for contents in ", indexDir
+
+        # NOTE: Miguel's blog uses the following, which didn't make sense here.
+        # Keeping the code in case it makes sense at a later time.
+        # We embed the url for status in db_option_msg, which forms the link in the
+        # results html output. Clicling on it invokes the routine taskstatus, which
+        # sends the current status to the client in the form of a dictionary (jsonified
+        # response).  We can build a user-friendly display usin that information.
+        #return jsonify({}), 202, {'Location': url_for('taskstatus', task_id=task.id)}
+        task_type = "Indexing"
+        task_id_table['Indexing'] = task.id
+        db_option = 9
+        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Indexing')
+        is_option_msg_url = True
+        
     elif (form.radio_option.data.lower() == "clear_index"):
         bcawClearIndexing()
-        db_option = 7
+        db_option = 10
         db_option_msg = "Index Cleared "
 
     elif (form.radio_option.data.lower() == 'show_image_matrix'):
-        db_option = 8
+        db_option = 11
         db_option_msg = "Image Matrix "
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
-        build_form = buildForm()
 
         # Since the asynchronous worker task which does indexing has no access 
         # to the matrix, we will extract the index flags from the DB here, and 
@@ -1428,8 +1484,12 @@ def admin():
                            db_option=str(db_option),
                            db_option_msg=str(db_option_msg),
                            image_matrix=image_matrix,
-                           build_form=build_form,
+                           is_option_msg_url = is_option_msg_url,
                            form=form)
+    elif (form.radio_option.data.lower() == 'show_task_status'):
+        db_option = 12
+        is_option_msg_url = True
+        db_option_msg = "http://127.0.0.1:8080" + url_for('bcawCheckAllTaskStatus')
 
     # request.form will be in the form:
     # ImmutableMultiDict([('delete_table, <image>), ), )'delete_form', 'submit')])
@@ -1497,7 +1557,9 @@ def admin():
 
     return render_template('fl_admin_results.html',
                            db_option=str(db_option),
+                           is_option_msg_url = is_option_msg_url,
                            db_option_msg=str(db_option_msg),
+                           option_msg_with_url=option_msg_with_url,
                            form=form)
  
   elif request.method == 'GET':
@@ -1515,6 +1577,124 @@ def admin():
     # Check if user has the permission to do admin services
     return render_template('fl_profile.html')   # FIXME: Placeholder
 '''    
+
+@app.route('/status/')
+def bcawCheckAllTaskStatus():
+    """ This routine is called when one clicks on "task status" url which
+        is generated either when a celery task is run or when one clicks on
+        "Show Task Status" in the admin menu.
+    """
+    for task_type in task_id_table:
+        task_id = task_id_table[task_type]
+        if task_id == 0:
+            # No task exists. Return appropriate response.
+            task_response_table[task_type] = {
+                'state': 'None',
+                'status': 'None',
+            }
+            continue
+        task =  bcaw_celery_task.bcawIndexAsynchronously.AsyncResult(task_id)
+        if task == None:
+            task_response_table[task_type] = {
+                'state': "No Task Running",
+                'status': 'None...'
+            }
+            continue
+        if task.state == 'PENDING':
+            task_response_table[task_type] = {
+                'state': task.state,
+                'status': 'Pending...'
+            }
+        elif task.state != 'FAILURE':
+            if task.state == 'SUCCESS':
+                # Job is completed. No need to probe task.
+                task_response_table[task_type] = {
+                    'state': 'SUCCESS',
+                    'status': 'TASK COMPLETED'
+                }
+            else:
+                task_response_table[task_type] = {
+                    'state': task.state,
+                    'status': task.info.get('status', '')
+                }
+                #FIXME: Figure out how to get this into the table
+                if 'result' in task.info:
+                    print "[D]: Result is in taskinfo: ", task.info['result']
+                    response['result'] = task.info['result']
+        else:
+            print ">> taskstatus: Something went wrong ", task.state
+            # something went wrong in the background job
+            task_response_table[task_type] = {
+                'state': 'FAILURE',
+                'status': str(task.info),  # this is the exception raised
+            }
+
+    return render_template('fl_celery_allstatus.html', \
+                           task_id_table=task_id_table,
+                           task_response_table=task_response_table)
+
+@app.route('/status/<task_type>')
+def taskstatus(task_type):
+    """ The routine that runs when clicked on the status URL for the corresponding
+        task ID.
+    """
+    ## print "[D] taskstatus: task_type: {}, task_id_table: {}".format(task_type, task_id_table)
+    task_id = task_id_table[task_type]
+    if task_id == 0:
+        # No task exists. Return appropriate response.
+        response = {
+            'state': 'None',
+            'status': 'None',
+        }
+        return render_template('fl_celery_status.html', \
+                                   response=response, \
+                                   task_type=task_type)
+
+    task =  bcaw_celery_task.bcawIndexAsynchronously.AsyncResult(task_id)
+    if task == None:
+        response = {
+            'state': "No Task Running",
+            'status': 'None...'
+        }
+        return render_template('fl_celery_status.html', \
+                               response=response, \
+                               task_type=task_type)
+
+    print "[D]: In taskstatus: task_state: ", task.state
+    if task.state == 'PENDING':
+        response = {
+            'state': task.state,
+            'status': 'Pending...'
+        }
+    elif task.state != 'FAILURE':
+        if task.state == 'SUCCESS':
+            # Job is completed. No need to probe task.
+            response = {
+                'state': 'SUCCESS',
+                'status': 'TASK COMPLETED'
+            }
+        else:
+            response = {
+                'state': task.state,
+                'status': task.info.get('status', '')
+            }
+            if 'result' in task.info:
+                print "[D]: Result is in taskinfo: ", task.info['result']
+                response['result'] = task.info['result']
+    else:
+        print ">> taskstatus: Something went wrong ", task.state
+        # something went wrong in the background job
+        response = {
+            'state': 'FAILURE',
+            'status': str(task.info),  # this is the exception raised
+        }
+    print "[D] response: ", response
+    ##return jsonify(response)
+    return render_template('fl_celery_status.html', \
+                           response=response, \
+                           task_type=task_type)
+
+
 
 
 # FIXME: This is never called (since we run runserver.py)

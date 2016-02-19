@@ -27,8 +27,9 @@ app.config['CELERY_RESULT_BACKEND'] = 'amqp://guest@localhost//'
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
-@celery.task
-def bcawIndexAsynchronously():
+@celery.task(bind=True)
+#def bcawIndexAsynchronously(bind=True):
+def bcawIndexAsynchronously(self):
     """ This is the Celery worker task which is run in parallel with the
         bcaw app. When user chooses to generate Lucene indexes for the disk
         images, the mail app (bcaw) calls this worker thread which in turn,
@@ -38,10 +39,11 @@ def bcawIndexAsynchronously():
     """
 
     """ Background task to index the files """
+    # print "[D]: Task_id: ", self.request.id
     with app.app_context():
         # print "Calling bcawIndexAllFiles..."
         # print "Current app: ", current_app.name
-        bcaw.image_browse.bcawIndexAllFiles()
+        bcaw.image_browse.bcawIndexAllFiles(self.request.id)
 
 @celery.task
 def bcawBuildDfxmlTableAsynchronously():
@@ -49,7 +51,7 @@ def bcawBuildDfxmlTableAsynchronously():
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
-        bcaw.bcaw_db.dbBuildDb(bld_imgdb = False, bld_dfxmldb = True)
+        bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = False, bld_dfxmldb = True)
     
 @celery.task
 def bcawBuildAllTablesAsynchronously():
@@ -57,4 +59,4 @@ def bcawBuildAllTablesAsynchronously():
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
-        bcaw.bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = True)
+        bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = True, bld_dfxmldb = True)

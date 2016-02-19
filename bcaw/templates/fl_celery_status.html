@@ -1,0 +1,65 @@
+{% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #222; }
+        <style type="text/css">
+        h1.categories
+        {
+            color:red;
+            text-align:center;
+        }
+        h1 {
+            color:black;
+            text-align:center;
+        }
+        body {
+            color:#222;
+            background-color: white;
+            margin-left: 5%;
+            margin-right: 5%;
+            border: 0px dotted gray;;
+            font-family: Roboto, sans-serif;
+            line-height: 1.6
+            font-size:14px;
+            <!--font-family: Verdana, Geneva, sans-serif;-->
+            <!--background-color: #d2b48c;-->
+        }
+        p.note {
+            font: italic bold 12px/30px Georgia, serif;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+<div id="wrap">
+
+  <div id="header">
+    <div style="width: 30%; display: table;">
+      <div style="display: table-row">
+        <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" h
+eight="80" width="80" align="center" > </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+      </div>
+    </div>    
+
+  </div>
+
+  <div id="nav">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+    </ul>
+  </div>
+
+  <body>
+    <h1>Task Status </h1>
+    <ul>Task Status of {{ task_type }} is : {{ response.state }}</ul>
+    {# <p style='font-size:9'> #}
+    <p class="note">
+        (Note: Refresh the page to get latest status)
+    </p>
+
+  </body>
+{% endblock %}
