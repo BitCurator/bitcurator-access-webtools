@@ -239,8 +239,8 @@ def dbBrowseImages():
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
-@celery.task
-def dbBuildDb(task_id, bld_imgdb = False, bld_dfxmldb = False):
+@celery.task(bind=True)
+def dbBuildDb(self, task_id, bld_imgdb = False, bld_dfxmldb = False):
     """ Depending on the arguments set, this functioon generates the table
         contents for the given table, for each image in the disk-images
         directory.
@@ -276,6 +276,8 @@ def dbBuildDb(task_id, bld_imgdb = False, bld_dfxmldb = False):
                 continue
             else:
                 image_index += 1
+
+            message = "Table Build in Progress"
 
             # Send a status update as this is a celery task.
             self.update_state(state='PROGRESS', \
