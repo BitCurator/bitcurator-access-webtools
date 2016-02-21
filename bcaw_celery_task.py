@@ -45,16 +45,16 @@ def bcawIndexAsynchronously(self):
         # print "Current app: ", current_app.name
         bcaw.image_browse.bcawIndexAllFiles(self.request.id)
 
-@celery.task
-def bcawBuildDfxmlTableAsynchronously():
+@celery.task(bind=True)
+def bcawBuildDfxmlTableAsynchronously(self):
     """ Background task to build dfxml table """
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
         bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = False, bld_dfxmldb = True)
     
-@celery.task
-def bcawBuildAllTablesAsynchronously():
+@celery.task(bind=True)
+def bcawBuildAllTablesAsynchronously(self):
     """ Background task to build image and dfxml table """
     with app.app_context():
         # print "Calling dbBuildDb for DFXML..."

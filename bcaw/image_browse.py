@@ -1302,6 +1302,7 @@ def admin():
   if request.method == 'POST':
     db_option = 3
     db_option_msg = None
+    option_msg = ""
     option_msg_with_url = ""
 
     # option_message could be just a message or a url. We flag the latter case:
@@ -1438,7 +1439,11 @@ def admin():
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.
+        '''
         option_msg_with_url = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing. Click to see status: "
+        '''
+        option_msg = "The search index is being generated. This may take some time; you may navigate back to the main page and continue browsing. "
+        option_msg_with_url = "Click here to see "
 
         if os.path.exists(dirFilesToIndex) :
             logging.debug('>> Building Indexes for contents in %s', dirFilesToIndex)
@@ -1559,6 +1564,7 @@ def admin():
                            db_option=str(db_option),
                            is_option_msg_url = is_option_msg_url,
                            db_option_msg=str(db_option_msg),
+                           option_msg=option_msg,
                            option_msg_with_url=option_msg_with_url,
                            form=form)
  
