@@ -424,9 +424,9 @@ install_source_packages() {
   echoinfo "bca-webtools: Building and installing libqcow..."
         CDIR=$(pwd)
         cd /tmp
-        wget https://github.com/libyal/libqcow/releases/download/20160108/libqcow-alpha-20160108.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar zxvf libqcow-alpha-20160108.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd libqcow-20160108
+        wget https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar zxvf libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd libqcow-20160123
         ./configure --enable-python >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
