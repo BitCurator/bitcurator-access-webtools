@@ -400,10 +400,22 @@ install_source_packages() {
   echoinfo "bca-webtools: Building and installing libewf..."
         CDIR=$(pwd)
         cd /tmp
-        git clone https://github.com/libyal/libewf >> $LOG_BASE/bca-install.log 2>&1
-        cd libewf
-        ./synclibs.sh >> $LOG_BASE/bca-install.log 2>&1
-        ./autogen.sh >> $LOG_BASE/bca-install.log 2>&1
+
+        #git clone https://github.com/libyal/libewf >> $LOG_BASE/bca-install.log 2>&1
+        #cd libewf
+        #./synclibs.sh >> $LOG_BASE/bca-install.log 2>&1
+        #./autogen.sh >> $LOG_BASE/bca-install.log 2>&1
+        #./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
+        #make >> $LOG_BASE/bca-install.log 2>&1
+        #sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        #sudo ldconfig >> $LOG_BASE/bca-install.log 2>&1
+        ## Clean up
+        #cd /tmp
+        #rm -rf libewf
+
+        sudo wget https://github.com/libyal/libewf/releases/download/20150126/libewf-experimental-20150126.tar.gz
+        tar -zxvf libewf-experimental-20150126.tar.gz
+        cd libewf-20150126
         ./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
@@ -411,14 +423,8 @@ install_source_packages() {
         # Clean up
         cd /tmp
         rm -rf libewf
-        #sudo wget https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz
-        #tar -xzvf libewf-20140608.tar.gz
-        #cd libewf-20140608
-        #bootstrap
-        #./configure --enable-v1-api
-        #make
-        #sudo make install
-        #sudo ldconfig
+        
+
 
   # Install libqcow (needed for pytsk)
   echoinfo "bca-webtools: Building and installing libqcow..."
