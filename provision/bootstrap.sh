@@ -413,9 +413,9 @@ install_source_packages() {
         #cd /tmp
         #rm -rf libewf
 
-        sudo wget https://github.com/libyal/libewf/releases/download/20150126/libewf-experimental-20150126.tar.gz
-        tar -zxvf libewf-experimental-20150126.tar.gz
-        cd libewf-20150126
+        sudo wget https://github.com/libyal/libewf/releases/download/20160318/libewf-experimental-20160318.tar.gz
+        tar -zxvf libewf-experimental-20160318.tar.gz
+        cd libewf-20160318
         ./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
