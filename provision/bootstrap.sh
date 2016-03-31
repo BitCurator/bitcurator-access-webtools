@@ -413,17 +413,35 @@ install_source_packages() {
         #cd /tmp
         #rm -rf libewf
 
-        sudo wget https://github.com/libyal/libewf/releases/download/20160318/libewf-experimental-20160318.tar.gz
-        tar -zxvf libewf-experimental-20160318.tar.gz
-        cd libewf-20160318
-        ./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
-        make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install >> $LOG_BASE/bca-install.log 2>&1
-        sudo ldconfig >> $LOG_BASE/bca-install.log 2>&1
-        # Clean up
+        #sudo wget https://github.com/libyal/libewf/releases/download/20160318/libewf-experimental-20160318.tar.gz
+        #tar -zxvf libewf-experimental-20160318.tar.gz
+        #cd libewf-20160318
+        #./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
+        #make >> $LOG_BASE/bca-install.log 2>&1
+        #sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        #sudo ldconfig >> $LOG_BASE/bca-install.log 2>&1
+        ## Clean up
+        #cd /tmp
+        #rm -rf libewf
+       
+  # Install libewf from current sources
+  echoinfo "BitCurator environment: Building and installing libewf"
+        CDIR=$(pwd)
+        git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
+        # Hackery: build a recent version, but not so recent that we break Sleuthkit 4.2.0, which won't
+        # build with the current experimental source. This means pulling a specific commit from 2015.
+        cd /tmp/libewf
+        git checkout 1fb9693145907f59ef3401b58d7ec43a7b14ca15 .
+        ./synclibs.sh >> $HOME/bitcurator-install.log 2>&1
+        ./autogen.sh >> $HOME/bitcurator-install.log 2>&1
+        ./configure --enable-python --enable-v1-api >> $HOME/bitcurator-install.log 2>&1
+        # ./configure --enable-python --enable-python2 --enable-python3 >> $HOME/bitcurator-install.log 2>&1
+        make -s >> $HOME/bitcurator-install.log 2>&1
+        make install >> $HOME/bitcurator-install.log 2>&1
+        ldconfig >> $HOME/bitcurator-install.log 2>&1
+        # Now clean up
         cd /tmp
-        rm -rf libewf
-        
+        rm -rf libewf   
 
 
   # Install libqcow (needed for pytsk)
@@ -472,14 +490,14 @@ install_source_packages() {
         CDIR=$(pwd)
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget https://github.com/py4n6/pytsk/releases/download/20160318/pytsk3-20160318.tar.gz
-        tar zxvf pytsk3-20160318.tar.gz
-        cd pytsk3-20160318
+        wget https://github.com/py4n6/pytsk/releases/download/20160325/pytsk3-20160325.tar.gz
+        tar zxvf pytsk3-20160325.tar.gz
+        cd pytsk3-20160325
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
-        rm -rf pytsk3-20160318
+        rm -rf pytsk3-20160325
 
   # Temporary: Create and perm-fix log file
   echoinfo "bca-webtools: Preparing log file"
