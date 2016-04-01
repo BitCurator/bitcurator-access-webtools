@@ -427,6 +427,7 @@ install_source_packages() {
   # Install libewf from current sources
   echoinfo "BitCurator environment: Building and installing libewf"
         CDIR=$(pwd)
+        cd /tmp
         git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
         # Hackery: build a recent version, but not so recent that we break Sleuthkit 4.2.0, which won't
         # build with the current experimental source. This means pulling a specific commit from 2015.
@@ -490,14 +491,14 @@ install_source_packages() {
         CDIR=$(pwd)
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget https://github.com/py4n6/pytsk/releases/download/20160325/pytsk3-20160325.tar.gz
-        tar zxvf pytsk3-20160325.tar.gz
-        cd pytsk3-20160325
+        wget https://github.com/py4n6/pytsk/releases/download/20150406/pytsk3-20150406.tar.gz
+        tar zxvf pytsk3-20150406.tar.gz
+        cd pytsk3-20150406
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
-        rm -rf pytsk3-20160325
+        rm -rf pytsk3-20150406
 
   # Temporary: Create and perm-fix log file
   echoinfo "bca-webtools: Preparing log file"
