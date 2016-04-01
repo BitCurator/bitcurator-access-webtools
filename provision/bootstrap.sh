@@ -491,14 +491,14 @@ install_source_packages() {
         CDIR=$(pwd)
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget https://github.com/py4n6/pytsk/releases/download/20150406/pytsk3-20150406.tar.gz
-        tar zxvf pytsk3-20150406.tar.gz
-        cd pytsk3-20150406
+        wget https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tar.gz
+        tar zxvf pytsk-20150406.tar.gz
+        cd pytsk
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
-        rm -rf pytsk3-20150406
+        rm -rf pytsk
 
   # Temporary: Create and perm-fix log file
   echoinfo "bca-webtools: Preparing log file"
