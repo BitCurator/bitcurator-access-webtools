@@ -207,12 +207,13 @@ def bcawBrowseImages(db_init=True):
     if db_init == True:
         session1 = bcaw_db.bcawdb()
 
+    dm = bcaw()
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
             ## print img
             ### global image_list
 
-            dm = bcaw()
+            #dm = bcaw()
             image_path = image_dir+'/'+img
             dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             image_list.append(img)
