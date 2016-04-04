@@ -191,7 +191,7 @@ class bcaw:
             # print("CMD: ", ewfinfo_xmlfile, cmd)
             subprocess.check_output(cmd, shell=True)
             return ewfinfo_xmlfile
-        elif image.endswith(".AFF") or image.endswith(".aff"):
+        elif image_name.endswith(".AFF") or image_name.endswith(".aff"):
             # FIXME: does affinfo create xml output?
             cmd = "affinfo "+image_name
             subprocess.check_output(cmd, shell=True)
