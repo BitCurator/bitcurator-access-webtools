@@ -401,55 +401,41 @@ install_source_packages() {
         CDIR=$(pwd)
         cd /tmp
 
-        #git clone https://github.com/libyal/libewf >> $LOG_BASE/bca-install.log 2>&1
-        #cd libewf
-        #./synclibs.sh >> $LOG_BASE/bca-install.log 2>&1
-        #./autogen.sh >> $LOG_BASE/bca-install.log 2>&1
-        #./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
-        #make >> $LOG_BASE/bca-install.log 2>&1
-        #sudo make install >> $LOG_BASE/bca-install.log 2>&1
-        #sudo ldconfig >> $LOG_BASE/bca-install.log 2>&1
-        ## Clean up
-        #cd /tmp
-        #rm -rf libewf
-
-        #sudo wget https://github.com/libyal/libewf/releases/download/20160318/libewf-experimental-20160318.tar.gz
-        #tar -zxvf libewf-experimental-20160318.tar.gz
-        #cd libewf-20160318
-        #./configure --enable-v1-api --enable-python >> $LOG_BASE/bca-install.log 2>&1
-        #make >> $LOG_BASE/bca-install.log 2>&1
-        #sudo make install >> $LOG_BASE/bca-install.log 2>&1
-        #sudo ldconfig >> $LOG_BASE/bca-install.log 2>&1
-        ## Clean up
-        #cd /tmp
-        #rm -rf libewf
-       
   # Install libewf from current sources
   echoinfo "BitCurator environment: Building and installing libewf"
         CDIR=$(pwd)
         cd /tmp
-        git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
+#        git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
         # Hackery: build a recent version, but not so recent that we break Sleuthkit 4.2.0, which won't
         # build with the current experimental source. This means pulling a specific commit from 2015.
-        cd /tmp/libewf
-        git checkout 1fb9693145907f59ef3401b58d7ec43a7b14ca15 .
-        ./synclibs.sh >> $HOME/bitcurator-install.log 2>&1
-        ./autogen.sh >> $HOME/bitcurator-install.log 2>&1
-        ./configure --enable-python --enable-v1-api >> $HOME/bitcurator-install.log 2>&1
+#        cd /tmp/libewf
+#        git checkout 1fb9693145907f59ef3401b58d7ec43a7b14ca15 .
+#        ./synclibs.sh >> $HOME/bitcurator-install.log 2>&1
+#        ./autogen.sh >> $HOME/bitcurator-install.log 2>&1
+#        ./configure --enable-python --enable-v1-api >> $HOME/bitcurator-install.log 2>&1
         # ./configure --enable-python --enable-python2 --enable-python3 >> $HOME/bitcurator-install.log 2>&1
-        make -s >> $HOME/bitcurator-install.log 2>&1
-        make install >> $HOME/bitcurator-install.log 2>&1
-        ldconfig >> $HOME/bitcurator-install.log 2>&1
+#        make -s >> $HOME/bitcurator-install.log 2>&1
+#        make install >> $HOME/bitcurator-install.log 2>&1
+#        ldconfig >> $HOME/bitcurator-install.log 2>&1
+ 
+        wget -q https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar zxvf libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd libewf-20140608
+        ./configure --enable-python --enable-v1-api >> $LOG_BASE/bca-install.log 2>&1
+        make -s >> $LOG_BASE/bca-install.log 2>&1
+        make install >> $LOG_BASE/bca-install.log 2>&1
+        ldconfig >> $LOG_BASE/bca-install.log 2>&1
+
         # Now clean up
         cd /tmp
-        rm -rf libewf   
+        rm -rf libewf-20140608
 
 
   # Install libqcow (needed for pytsk)
   echoinfo "bca-webtools: Building and installing libqcow..."
         CDIR=$(pwd)
         cd /tmp
-        wget https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        wget -q https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd libqcow-20160123
         ./configure --enable-python >> $LOG_BASE/bca-install.log 2>&1
