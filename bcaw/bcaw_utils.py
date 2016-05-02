@@ -55,6 +55,7 @@ class bcaw:
         volume = pytsk3.Volume_Info(img)
         self.partDictList.append([])
 
+        self.num_partitions = 0
         for part in volume:
             # The slot_num field of volume object has a value of -1
             # for non-partition entries - like Unallocated partition
@@ -127,6 +128,14 @@ class bcaw:
     def bcawListFiles(self, fs, path, image_index, partition_num):
         file_list = []
         directory = fs.open_dir(path=path)
+        ''' NEW
+        try:
+           directory = fs.open_dir(path=path)
+        except:
+           print "Error in opening file path {} ".format(path)
+           return None
+        '''
+
         i=0
         for f in directory:
             is_dir = False
@@ -333,3 +342,41 @@ def bcawGetParentDir(filepath):
     temp_list = file_name_list[0:(len(temp_list)-1)]
     parent_dir = '/'.join(temp_list)
     return parent_dir
+
+# list of image types supported
+bcaw_supported_imgtype_list = ['.E01', '.e01', '.aff', '.AFF', '.raw', '.dd']
+
+# list of image types supporting system metadata
+bcaw_sysmeta_supported_list = ['.E01', '.e01', '.aff', '.AFF']
+
+# list of raw image types
+bcaw_raw_image_list = ['.raw', '.dd']
+
+def bcaw_is_imgtype_supported(image):
+    imgname, img_extension = os.path.splitext(image)
+    if img_extension in bcaw_supported_imgtype_list:
+        ## print "D: Image {} is supported".format(image)
+        logging.debug("D: Image %s is supported" ,image)
+        return True
+    else:
+        # print "> Image type {} not supported".format(img_extension)
+        logging.debug("> Image type %s not supported", img_extension)
+        return False
+
+def bcaw_is_sysmeta_supported(image):
+    imgname, img_extension = os.path.splitext(image)
+    if img_extension in bcaw_sysmeta_supported_list:
+        ## print "D: Image {} has system metadata info".format(image)
+        logging.debug("D: Image %s has system metadata info", image)
+        return True
+    else:
+        ## print "> Image type {} doesnot have system metadata".format(img_extension)
+        logging.debug("> Image type %s doesnot have system metadata", img_extension)
+        return False
+
+def is_image_raw(image):
+    imgname, img_extension = os.path.splitext(image)
+    if img_extension in bcaw_raw_image_list:
+        return True
+    return False
+
