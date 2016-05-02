@@ -27,7 +27,7 @@ app = Flask(__name__)
 
 import os
 import logging
-import bcaw_utils
+from bcaw_utils import *
 import xml.etree.ElementTree as ET
 
 # Set up logging location for anyone importing these utils
@@ -67,6 +67,22 @@ def bcawGetXmlInfo(xmlfile):
         populate the bcaw_image table in the db.
     """
     result = ""
+    if xmlfile == None:
+        # It could be a raw image which hsa no metadata. Still we need to 
+        # create the image table for indexing purpose. Create a table with
+        # dummy info.
+        dbrec = dict()
+        dbrec['acq_date'] = "NA"
+        dbrec['sys_date'] = "NA"
+        dbrec['os'] = "NA"
+        dbrec['file_format'] = "RAW"
+        dbrec['media_type'] = "NA"
+        dbrec['is_physical'] = "NA"
+        dbrec['bps'] = 0
+        dbrec['media_size'] = "NA"
+        dbrec['md5'] = "NA"
+        return dbrec
+
     try:
         tree = ET.parse( xmlfile )
     except IOError, e:
@@ -176,7 +192,8 @@ def dbBrowseImages():
     del image_list[:]
 
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        ##if img.endswith(".E01") or img.endswith(".AFF"):
+        if image_browse.bcaw_is_imgtype_supported(img):
             # print "\n Image: ", img
             ## global image_list
             image_list.append(img)
@@ -191,17 +208,14 @@ def dbBrowseImages():
 
             # FIXME: Partition info will be added to the metadata info
             # Till then the following three lines are not necessary.
-            dm = bcaw_utils.bcaw()
+            dm = bcaw()
             image_path = image_dir+'/'+img
             dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
             xmlfile = dm.dbGetImageInfoXml(image_path)
             if (xmlfile == None):
                 logging.debug('No XML file generated for image info. Returning')
-                # print("No XML file generated for image info. Returning")
-                # FIXME: This was a return stmt, but it should move on to 
-                # the next image. So replaced it with continue. Need to test
-                # some relevant scenarios to confirm this is what we want.
-                continue
+                # We will just log the message that there is no xmlfile for
+                # this image and proceed, as it might be a raw image.
             logging.debug('XML file %s generated', xmlfile)
             logging.debug('for image %s', img)
             # print("XML File {} generated for image {}".format(xmlfile, img))
@@ -247,6 +261,7 @@ def dbBuildDb(self, task_id, bld_imgdb = False, bld_dfxmldb = False):
     """
     global image_dir
     image_index = 0
+    return_msg = None
 
     # Since image_list is declared globally, empty it before populating
     ###global image_list
@@ -264,7 +279,8 @@ def dbBuildDb(self, task_id, bld_imgdb = False, bld_dfxmldb = False):
             return(-1, "No DB Specified");
 
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        #if img.endswith(".E01") or img.endswith(".AFF"):
+        if image_browse.bcaw_is_imgtype_supported(img):
             logging.debug('\nD: Generating table contents for image: %s', img)
             # print "\nD: Generating table contents for Image: ", img
             ###global image_list
@@ -279,12 +295,15 @@ def dbBuildDb(self, task_id, bld_imgdb = False, bld_dfxmldb = False):
 
             message = "Table Build in Progress"
 
-            # Send a status update as this is a celery task.
-            self.update_state(state='PROGRESS', \
+            if task_id != None:
+                # Send a status update as this is a celery task.
+                self.update_state(state='PROGRESS', \
                               task_id=task_id, \
                               meta={'current': image_index, 'status':message})
 
         else:
+            ##print ">> Image type for {} not supported for building tables".format(img)
+            logging.debug(">> Image type for %s not supported for building tables", img)
             continue
 
     ## print "[D]: Image_list: ", image_list
@@ -308,26 +327,23 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
             # if bld_imgdb == False and bld_dfxmldb == False:
             return(-1, "No DB Specified")
 
-    if not img.endswith(".E01") or img.endswith(".AFF"):
+    #if not img.endswith(".E01") or img.endswith(".AFF"):
+    if not image_browse.bcaw_is_imgtype_supported(img):
         logging.debug('>> Not building Table: Wrong image type: %s', img)
-        # print ">> Not building Table: Wrong image type: ", img
         return(-1, "Wrong Image Type")
 
     # No need to create table if it already exists
     if dbu_does_table_exist_for_img(img, table_name):
         logging.debug('>> Table already exists for image %s', img)
-        # print ">> Table already exists for image " , img
         return(-2, "Table entry exists for the image")
     else:
         logging.debug('>> Table for image %s does not exist', img)
-        # print ">> Table for image {} does not exist: ".format(img)
         db_login.create_all()
         table_added += 1
 
     if bld_imgdb:
         # update the image_matrix
         logging.debug('D: dbBuildTableForImage: Updating the matrix for img_db_exists')
-        # print "D: dbBuildTableForImage: Updating the matrix for img_db_exists "
 
         # By setting image to None, it sets the flags for all images. We don't 
         # do individual flag setting for imgdb.
@@ -340,21 +356,21 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
     # FIXME: Partition info will be added to the metadata info
     # Till then the following three lines are not necessary.
     image_index = image_browse.bcawGetImageIndex(str(img), False)
-    dm = bcaw_utils.bcaw()
+    dm = bcaw()
     image_path = image_dir+'/'+img
     dm.num_partitions = dm.bcawGetNumPartsForImage(image_path, image_index)
     xmlfile = dm.dbGetImageInfoXml(image_path)
     if (xmlfile == None):
         logging.debug('No XML file generated for image info. Returning')
-        # print("No XML file generated for image info. Returning")
-        return (-1, "No Image XML File generated")
+        # Commented out returning from here since there might be cases (raw images)
+        # which don't have an image table, but can have a dfxml table
+        ## return (-1, "No Image XML File generated")
     logging.debug('XML File %s generated for image', xmlfile)
     # print("XML File {} generated for image {}".format(xmlfile, img))
 
     dfxmlfile = dm.dbGetInfoFromDfxml(image_path)
     if (dfxmlfile == None):
         logging.debug('>> No DFXML file generated for image info. Returning')
-        # print(">> No DFXML file generated for image info. Returning")
         return (-1, "No DFXML generated")
 
     logging.debug('>> DFXML File %s generated for image', dfxmlfile)
