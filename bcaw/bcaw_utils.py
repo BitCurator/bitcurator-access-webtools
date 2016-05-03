@@ -127,14 +127,11 @@ class bcaw:
 
     def bcawListFiles(self, fs, path, image_index, partition_num):
         file_list = []
-        directory = fs.open_dir(path=path)
-        ''' NEW
         try:
            directory = fs.open_dir(path=path)
         except:
            print "Error in opening file path {} ".format(path)
            return None
-        '''
 
         i=0
         for f in directory:
