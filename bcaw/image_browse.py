@@ -306,31 +306,27 @@ def bcawDnldSingleFile(file_item, fs, filepath, index_dir):
 def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_path):
     """This routine is used to download the indexable files of the Repository
     """
-    ## print("D: bcawDnldRepo: Root={} len={} ".format(root_path, len(root_dir_list)))
+    ## print("Index-debug2: COMM bcawDnldRepo: Root={} len={} ".format(root_path, len(root_dir_list)))
 
-    ''' Need to test
-    if root_dir_list == None:
-        print ">> bcawDnldRepo: ERROR: root_dir_list is None. Returning"
-        return
-    '''
     num_elements = len(root_dir_list)
     dm = bcaw()
-    #root_path = '/'
-    #new_path = root_path
     if root_path == '/':
         new_path = ""
     else:
         new_path = root_path
+
+    ## print "Index-debug2: bcawDnldRepo: iterating within root_Dir_list:{}, \
+    ##                     new_path:{} ".format(root_dir_list, new_path)
     for item in root_dir_list:
         if item['isdir'] == True:
             logging.debug("bcawDnldRepo: D1:It is a Directory", item['name'])
             if item['name'] == '.' or item['name'] == '..':
                 continue
-            ''' need to test
+
             if new_path == None:
-               print "D1: root_path is None"
+               ## print "Index-debug1: root_path is None. Name: ", item['name']
                continue
-            '''
+
             new_path = new_path + '/'+ str(item['name'])
 
             dfxml_file = image_path + "_dfxml.xml"
@@ -339,7 +335,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             ## print("D: bcawDnldRepo: path from Dfxml file: ", new_path)
             logging.debug("D: bcawDnldRepo: path from Dfxml file: ", new_path)
             if new_path == None:
-               print "Path for file {} is not found in DFXML".format(dfxml_file)
+               ## print "Index-debug1: Path for file {} is not found in \
+               ##                    DFXML".format(dfxml_file)
                continue
 
             # We will add image_index to the path so we can later extract the 
@@ -364,11 +361,19 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
 
             # Generate the file-list under this directory
             new_filelist_root, fs = dm.bcawGenFileList(image_path, image_index, partnum, new_path)
+
+            # if file_list is None, continue
+            if new_filelist_root == None:
+                ## print "Index-debug1: GetFileList returned Null filelist_root \
+                ##          for Image Path {}, partnum {}, new_path: \
+                ##          {}".format(image_path, partnum, new_path)  
+                continue
+
             # Call the function recursively
-            ## print("bcawDnldRepo: D2: Calling func recursively with item-name: {}, new_path:{}, item: {}".format(item['name'], new_path, item))
+            logging.debug("bcawDnldRepo: D2: Calling func recursively with item-name: {}, new_path:{}, item: {}".format(item['name'], new_path, item))
             bcawDnldRepo(img, new_filelist_root, fs, image_index, partnum, image_path, new_path)
         else:
-            ## print("D2: bcawDnldRepo: It is a File", item['name'])
+            ## print("Index-debug2: bcawDnldRepo: It is a File", item['name'])
             filename = item['name'] # FIXME: Test more to make sure files with space work.
 
             #if item['name_slug'] != "None" and item['inode'] == int(inode) :
@@ -382,7 +387,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             # If it is indexable file, download it and generate index.
             if (filename.endswith('.txt') or filename.endswith('.pdf') or filename.endswith('.xml') or filename.endswith('.doc')):
 
-                ## print "D2: bcawDnldRepo: Indexing file {} in dir {}".format(filename, dirFilesToIndex)
+                ## print "Index-debug2: bcawDnldRepo: Indexing file {} in dir \
+                ##                 {}".format(filename, dirFilesToIndex)
                 dfxml_file = image_path + "_dfxml.xml"
                 ## print("D2: bcawDnldRepo: Calling bcawGetPathFromDfxml: dfxml_file: ", dfxml_file)
                 # We will use the 'real' file name while looking for it in dfxml file
@@ -394,7 +400,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 file_path = app.config['FILES_TO_INDEX_DIR'] + "/" + str(image_index) + "/" + str(new_file_path)
                 ## print("D: bcawDnldRepo: Calling bcawDnldSingleFile function for path: ", file_path)
 
-                ## print (">> Indexing Image:{}-{}, File: {}".format(img, partnum, file_path))
+                print (">> Index-debug1: Indexing Image:{}-{}, File: {}".format(img,\
+                                  partnum, file_path))
                 bcawDnldSingleFile(item, fs, file_path, indexDir)
 
 def bcawGetImageIndex(image, is_path):
@@ -1305,7 +1312,8 @@ def bcawIndexAllFiles(self, task_id):
                     print "Error: File_list_root is None for image_path {} amd part {}".format(image_path, p)
                     continue
 
-                ## print("D: Calling bcawDnldRepo with root ", file_list_root)
+                ## print("Index-debug2: Calling bcawDnldRepo for \
+                ##       PARTITION {} with root {} ".format(file_list_root,p))
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
 
             # If successfully indexed, set the flag to "indexed" in the image table
