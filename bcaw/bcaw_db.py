@@ -68,7 +68,7 @@ def bcawGetXmlInfo(xmlfile):
     """
     result = ""
     if xmlfile == None:
-        # It could be a raw image which hsa no metadata. Still we need to 
+        # It could be a raw image which has no metadata. Still we need to 
         # create the image table for indexing purpose. Create a table with
         # dummy info.
         dbrec = dict()
