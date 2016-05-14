@@ -424,7 +424,7 @@ def bcawGetImageIndex(image, is_path):
 #
 @app.route('/image/<image_name>')
 def image(image_name):
-    # print("D: Partitions: Rendering Template with partitions for img: ", image_name)
+    ## print("D: Partitions: Rendering Template with partitions: {} for img: {} ".format(num_partitions, image_name))
     num_partitions = bcaw.num_partitions_ofimg[str(image_name)]
     part_desc = []
     image_index =  bcawGetImageIndex(image_name, is_path=False)
