@@ -477,8 +477,8 @@ install_source_packages() {
         CDIR=$(pwd)
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
-        tar zxvf pytsk-20150406.tgz
+        wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
+        tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
