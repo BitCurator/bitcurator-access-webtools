@@ -39,7 +39,17 @@ class bcaw:
 
     def bcawGetNumPartsForImage(self, image_path, image_index):
         img = pytsk3.Img_Info(image_path)
-        volume = pytsk3.Volume_Info(img)
+
+        # pytsk3.Volume_Info works only with file systems which have partition
+        # defined. For file systems like FAT12, with no partition info, we need
+        # to handle in an exception.
+        try:
+            volume = pytsk3.Volume_Info(img)
+        except:
+            ## print "bcawGetNumPartsForImage: Volume Info failed. Could be FAT12 "
+            self.num_partitions = 1
+            return (self.num_partitions)
+
         for part in volume:
             if part.slot_num >= 0:
                 try:
@@ -52,7 +62,42 @@ class bcaw:
 
     def bcawGetPartInfoForImage(self, image_path, image_index):
         img = pytsk3.Img_Info(image_path)
-        volume = pytsk3.Volume_Info(img)
+        is_partition_info = False
+
+        # pytsk3.Volume_Info works only with file systems which have partition
+        # defined. For file systems like FAT12, with no partition info, we need
+        # to handle in an exception.
+        try:
+            volume = pytsk3.Volume_Info(img)
+            is_partition_info = True
+        except:
+            ## print "bcawGetPartitionInfoForImage: Volume Info failed. Could be FAT12 "
+            self.num_partitions = 1
+            is_partition_info = False
+            fs = pytsk3.FS_Info(img, offset=0)
+
+            ## print "D: File System Type Detected ", fs.info.ftype
+            if fs.info.ftype == pytsk3.TSK_FS_TYPE_FAT12:
+                fs_desc = "FAT12 file system"
+            else:
+                fs_desc = "Unknown file system"
+
+            self.partDictList.append([])
+            # First level files and directories off the root
+            # returns file_list for the root directory
+            file_list_root = self.bcawListFiles(fs, "/", image_index, 0)
+            image_name = os.path.basename(image_path)
+            self.num_partitions_ofimg[image_name] = self.num_partitions
+
+            # Populate the partDictList for the image.
+            self.partDictList[image_index].append({self.part_array[0]:image_path, \
+                                     self.part_array[1]:0, \
+                                     self.part_array[2]:0, \
+                                     self.part_array[3]:0, \
+                                     self.part_array[4]:fs_desc })
+            return self.num_partitions
+
+        # For images with partition_info, we continue here.
         self.partDictList.append([])
 
         self.num_partitions = 0
@@ -341,13 +386,13 @@ def bcawGetParentDir(filepath):
     return parent_dir
 
 # list of image types supported
-bcaw_supported_imgtype_list = ['.E01', '.e01', '.aff', '.AFF', '.raw', '.dd']
+bcaw_supported_imgtype_list = ['.E01', '.e01', '.aff', '.AFF', '.raw', '.dd', '.iso']
 
 # list of image types supporting system metadata
 bcaw_sysmeta_supported_list = ['.E01', '.e01', '.aff', '.AFF']
 
 # list of raw image types
-bcaw_raw_image_list = ['.raw', '.dd']
+bcaw_raw_image_list = ['.raw', '.dd', '.iso']
 
 def bcaw_is_imgtype_supported(image):
     imgname, img_extension = os.path.splitext(image)
