@@ -52,15 +52,15 @@ from within the bca-webtools directory. This step can take a long time the first
 
   * 127.0.0.1:8080
 
-to see the bca-webtools service running. 
+to see the bca-webtools service running. The first time you bring the service up, you must follow the steps in the next section to enable all browsing and search features. 
 
 # Browsing and Searching
 
-IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to using the "Search" bar on the right hand side of the window. 
+IMPORTANT! In the current release, a searchable index of the filenames and file system contents must be generated prior to browsing the file system and using the "Search" bar on the right hand side of the window. 
 
 Click on the "Admin" link at the bottom left of the window, and do the following:
 
-  * Select "Build DFXML Table", and click "Submit". This is required for filename search to work.
+  * Select "Build DFXML Table", and click "Submit". This is required for browsing and filename search to work.
 
   * Next, select "Generate Index", and click "Submit". The index generation process may take some time. It will run in the background; you can navgate away from the index page once you see the "Index being built" message. 
 
@@ -91,7 +91,7 @@ More documentation coming soon. bca-webtools is currently in alpha; updates will
 
 # License(s)
 
-bca-webtools project documentation, and other non-software products of the BitCurator Access team are subject to the the Creative Commons Attribution 3.0 Unported license (CC BY 3.0).
+bca-webtools project documentation, and other non-software products of the BitCurator Access team are subject to the the Creative Commons Attribution 4.0 Unported license (CC BY 4.0).
 
 Unless otherwise indicated, software objects in this repository are distributed under the terms of the GNU General Public License, Version 3. See the text file "LICENSE" for further details about the terms of this license.
 
