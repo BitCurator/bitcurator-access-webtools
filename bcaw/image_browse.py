@@ -22,7 +22,7 @@ import logging
 from mimetypes import MimeTypes
 from datetime import date
 from bcaw_utils import bcaw
-import bcaw_utils
+from bcaw_utils import *
 import lucene
 #from bcaw import bcaw_celery_task
 import bcaw_celery_task
@@ -93,12 +93,12 @@ def bcawBrowse(db_init = True):
     if db_init == True:
         session1 = bcaw_db.bcawdb()
 
+    dm = bcaw()
     for img in os.listdir(image_dir):
         if img.endswith(".E01") or img.endswith(".AFF"):
             ## print img
             global image_list
 
-            dm = bcaw()
             image_path = image_dir+'/'+img
             dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             image_list.append(img, dm.num_partitions)
@@ -209,12 +209,13 @@ def bcawBrowseImages(db_init=True):
 
     dm = bcaw()
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        #if img.endswith(".E01") or img.endswith(".AFF"):
+        if bcaw_is_imgtype_supported(img):
             ## print img
             ### global image_list
 
-            #dm = bcaw()
             image_path = image_dir+'/'+img
+
             dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             image_list.append(img)
             partition_in[img] = dm.num_partitions
@@ -305,26 +306,38 @@ def bcawDnldSingleFile(file_item, fs, filepath, index_dir):
 def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_path):
     """This routine is used to download the indexable files of the Repository
     """
-    ## print("D: bcawDnldRepo: Root={} len={} ".format(root_path, len(root_dir_list)))
+    ## print("Index-debug2: COMM bcawDnldRepo: Root={} len={} ".format(root_path, len(root_dir_list)))
+
     num_elements = len(root_dir_list)
     dm = bcaw()
-    #root_path = '/'
-    #new_path = root_path
     if root_path == '/':
         new_path = ""
     else:
         new_path = root_path
+
+    ## print "Index-debug2: bcawDnldRepo: iterating within root_Dir_list:{}, \
+    ##                     new_path:{} ".format(root_dir_list, new_path)
     for item in root_dir_list:
         if item['isdir'] == True:
-            ## print("D1: It is a Directory", item['name'])
+            logging.debug("bcawDnldRepo: D1:It is a Directory", item['name'])
             if item['name'] == '.' or item['name'] == '..':
                 continue
+
+            if new_path == None:
+               ## print "Index-debug1: root_path is None. Name: ", item['name']
+               continue
+
             new_path = new_path + '/'+ str(item['name'])
 
             dfxml_file = image_path + "_dfxml.xml"
 
-            new_path = bcaw_utils.bcawGetPathFromDfxml(str(item['name']), dfxml_file)
+            new_path = bcawGetPathFromDfxml(str(item['name']), dfxml_file)
             ## print("D: bcawDnldRepo: path from Dfxml file: ", new_path)
+            logging.debug("D: bcawDnldRepo: path from Dfxml file: ", new_path)
+            if new_path == None:
+               ## print "Index-debug1: Path for file {} is not found in \
+               ##                    DFXML".format(dfxml_file)
+               continue
 
             # We will add image_index to the path so we can later extract the 
             # image name to be displayed. We could have passed the image name 
@@ -348,11 +361,19 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
 
             # Generate the file-list under this directory
             new_filelist_root, fs = dm.bcawGenFileList(image_path, image_index, partnum, new_path)
+
+            # if file_list is None, continue
+            if new_filelist_root == None:
+                ## print "Index-debug1: GetFileList returned Null filelist_root \
+                ##          for Image Path {}, partnum {}, new_path: \
+                ##          {}".format(image_path, partnum, new_path)  
+                continue
+
             # Call the function recursively
-            ## print("bcawDnldRepo: Calling func recursively with item-name: {}, new_path:{}, item: {}".format(item['name'], new_path, item))
+            logging.debug("bcawDnldRepo: D2: Calling func recursively with item-name: {}, new_path:{}, item: {}".format(item['name'], new_path, item))
             bcawDnldRepo(img, new_filelist_root, fs, image_index, partnum, image_path, new_path)
         else:
-            ## print("D2: bcawDnldRepo: It is a File", item['name'])
+            ## print("Index-debug2: bcawDnldRepo: It is a File", item['name'])
             filename = item['name'] # FIXME: Test more to make sure files with space work.
 
             #if item['name_slug'] != "None" and item['inode'] == int(inode) :
@@ -366,11 +387,12 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             # If it is indexable file, download it and generate index.
             if (filename.endswith('.txt') or filename.endswith('.pdf') or filename.endswith('.xml') or filename.endswith('.doc')):
 
-                ## print "D2: bcawDnldRepo: Indexing file {} in dir {}".format(filename, dirFilesToIndex)
+                ## print "Index-debug2: bcawDnldRepo: Indexing file {} in dir \
+                ##                 {}".format(filename, dirFilesToIndex)
                 dfxml_file = image_path + "_dfxml.xml"
                 ## print("D2: bcawDnldRepo: Calling bcawGetPathFromDfxml: dfxml_file: ", dfxml_file)
                 # We will use the 'real' file name while looking for it in dfxml file
-                new_file_path = bcaw_utils.bcawGetPathFromDfxml(item['name'], dfxml_file)
+                new_file_path = bcawGetPathFromDfxml(item['name'], dfxml_file)
 
                 # If there is space in the file-name, replace it by %20
                 new_file_path = new_file_path.replace(" ", "%20")
@@ -378,7 +400,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 file_path = app.config['FILES_TO_INDEX_DIR'] + "/" + str(image_index) + "/" + str(new_file_path)
                 ## print("D: bcawDnldRepo: Calling bcawDnldSingleFile function for path: ", file_path)
 
-                ## print (">> Indexing Image:{}-{}, File: {}".format(img, partnum, file_path))
+                print (">> Index-debug1: Indexing Image:{}-{}, File: {}".format(img,\
+                                  partnum, file_path))
                 bcawDnldSingleFile(item, fs, file_path, indexDir)
 
 def bcawGetImageIndex(image, is_path):
@@ -401,10 +424,15 @@ def bcawGetImageIndex(image, is_path):
 #
 @app.route('/image/<image_name>')
 def image(image_name):
-    # print("D: Partitions: Rendering Template with partitions for img: ", image_name)
+    ## print("D: Partitions: Rendering Template with partitions: {} for img: {} ".format(num_partitions, image_name))
     num_partitions = bcaw.num_partitions_ofimg[str(image_name)]
     part_desc = []
     image_index =  bcawGetImageIndex(image_name, is_path=False)
+
+    # Find the file-system type first. For fat12, fat16, raw images, there is no
+    # partition info. We need to skip the step for such cases.
+    #FIXME: This is taken care of elsewhere in the code. Check.
+
     for i in range(0, num_partitions):
         ## print("D: part_disk[i={}]={}".format(i, bcaw.partDictList[image_index][i]))
         part_desc.append(bcaw.partDictList[image_index][i]['desc'])
@@ -430,9 +458,11 @@ def image_psql(image_name):
                            image_name = image_name,
                            image=image_db[int(image_index)])
     '''
+    meta = bcaw_is_sysmeta_supported(image_name)
     return render_template("db_image_template.html", 
                            image_name = image_name,
-                           image=image_db_list[image_index])
+                           image=image_db_list[image_index],
+                           meta=meta)
 
 #
 # Template rendering for Directory Listing per partition
@@ -703,7 +733,8 @@ def home():
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        #if img.endswith(".E01") or img.endswith(".AFF"):
+        if bcaw_is_imgtype_supported(img):
             ## print img
             ### global image_list
             image_list.append(img)
@@ -991,6 +1022,7 @@ def bcawSetIndexFlag(image_index, img):
         corresponding to the given image_index.
     """
 
+    logging.debug("Setting Idexed Flag %d ", image_index)
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
     if not indexed:
@@ -1002,11 +1034,14 @@ def bcawSetIndexFlag(image_index, img):
         if img_tbl_item['img_index'] == image_index:
             #img_tbl_item.update({bcaw_imginfo[4]:1})
             img_tbl_item.update({bcaw_imginfo[4]:indexed_string})
-            ## print "[D] Image Matrix After setting Index flag: ", image_matrix
             break
+    '''
     else:
         logging.debug('>> bcawSetIndexFlag: image_index not found %s', image_index)
-        # print ">> bcawSetIndexFlag: image_index not found ", image_index
+        print ">> bcawSetIndexFlag: image_index not found ", image_index
+        # It is possible that image table is deleted or not built at all, for
+        # this message. Try building it here.
+    '''
 
 @celery.task
 def bcawIsImageIndexed(img):
@@ -1056,7 +1091,8 @@ def bcawClearIndexing():
 
     # If the indexing flags are set in the db and in img matrix, clear them.
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        #if img.endswith(".E01") or img.endswith(".AFF"):
+        if bcaw_is_imgtype_supported(img):
             # Clear the flag in the matrix first
             bcawSetFlagInMatrix('img_index', False, img)
 
@@ -1120,7 +1156,7 @@ def bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages():
                            "find_dfxml_table_for_image", img)
         if ret != -1:
             # update the flag with True
-            print "D: Updating matrix for dfxml_table_exists with True for image", img
+            logging.debug("D: Updating matrix for dfxml_table_exists with True for image %s", img)
             img_tbl_item.update({bcaw_imginfo[3]:True})
 
 def bcawUpdateMatrixWithImageFlagsFromDbForAllImages():
@@ -1133,7 +1169,7 @@ def bcawUpdateMatrixWithImageFlagsFromDbForAllImages():
                            "find_image_table_for_image", img)
         if ret != -1:
             # update the flag with True
-            print "D: Updating matrix for image_table_exists with True for image", img
+            logging.debug("D: Updating matrix for image_table_exists with True for image%s", img)
             img_tbl_item.update({bcaw_imginfo[2]:True})
 
 def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
@@ -1219,7 +1255,8 @@ def bcawIndexAllFiles(self, task_id):
 
     image_index = 0
     for img in os.listdir(image_dir):
-        if img.endswith(".E01") or img.endswith(".AFF"):
+        #if img.endswith(".E01") or img.endswith(".AFF"):
+        if bcaw_is_imgtype_supported(img):
             logging.debug(">> Building Index for image: ", img)
 
             # Change the new files_to_index_directory into the one per image
@@ -1271,7 +1308,12 @@ def bcawIndexAllFiles(self, task_id):
                 #os.makedir(part_dir)
 
                 file_list_root, fs = dm.bcawGenFileList(image_path, image_index,int(p), '/')
-                ## print("D: Calling bcawDnldRepo with root ", file_list_root)
+                if file_list_root == None:
+                    print "Error: File_list_root is None for image_path {} amd part {}".format(image_path, p)
+                    continue
+
+                ## print("Index-debug2: Calling bcawDnldRepo for \
+                ##       PARTITION {} with root {} ".format(file_list_root,p))
                 bcawDnldRepo(img, file_list_root, fs, image_index, p, image_path, '/')
 
             # If successfully indexed, set the flag to "indexed" in the image table
@@ -1338,7 +1380,7 @@ def admin():
         # case it could be of use in the future. Will be removed while cleaning up,
         # if not used.
         db_option = 3
-        retval, db_option_msg = bcaw_db.dbBuildDb(bld_imgdb = True, bld_dfxmldb = False)
+        retval, db_option_msg = bcaw_db.dbBuildDb(task_id=None, bld_imgdb = True, bld_dfxmldb = False)
     elif (form.radio_option.data.lower() == 'dfxml_table'):
         logging.debug('>> Admin: Requested DFXML table build')
         # print ">> Admin: Requested DFXML table build "
@@ -1409,7 +1451,25 @@ def admin():
         # for the contents from the configured directory. The contents index
         # is built in 
         db_option = 8
-        db_option_msg = "Option not yet supported"
+
+        # Indexing needs the image_table to be present in the bca_db for every image.
+        # If not present, don't start indexing.
+        for img_tbl_item in image_matrix:
+            img = img_tbl_item['img_name']
+            ret, ret_msg = bcaw_db.dbu_execute_dbcmd("bcaw_images", \
+                           "find_image_table_for_image", img)
+            if ret < 0:
+                print ">> Image Table doesn't exist for all images. Build them before running indexing"
+                db_option_msg = "Build Image Tables first. Index NOT built"
+                return render_template('fl_admin_results.html',
+                           db_option=str(db_option),
+                           is_option_msg_url = False,
+                           db_option_msg=str(db_option_msg),
+                           option_msg=option_msg,
+                           option_msg_with_url=option_msg_with_url,
+                           form=form)
+
+        print "Image table exists for ALL images. Proceeding with indexing"
         dirFileNamesToIndex = bcaw_generate_file_list()
 
         # Index the filenames first
@@ -1436,7 +1496,7 @@ def admin():
         print "Celery: calling async function: "
         ##task = bcaw_celery_task.bcawIndexAsynchronously.delay()
         task = bcaw_celery_task.bcawIndexAsynchronously.apply_async()
-        logging.debug("Celery: Index will be starting asynchronously: task: ", task)
+        logging.debug("Celery: Index will be starting asynchronously: task:%s ", task)
 
         # FIXME: Get the return code from bcawIndexAllFiles to set db_option_msg.
         # Till now, we will assume success.

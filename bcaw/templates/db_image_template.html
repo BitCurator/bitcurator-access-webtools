@@ -60,7 +60,11 @@ eight="80" width="80" align="center" > </div>
   <div id="main">
 
     <p class="important">
-      File system metadata for disk image: {{image.image_name }}
+      {% if meta == True %}
+          File system metadata for disk image: {{image_name }}
+      {% else %}
+          No System metadata available for this image type: {{ image_name }}
+      {% endif %}
 
       <BR>&nbsp;<BR> 
         <table>
