@@ -71,7 +71,7 @@ class bcaw:
             volume = pytsk3.Volume_Info(img)
             is_partition_info = True
         except:
-            ## print "bcawGetPartitionInfoForImage: Volume Info failed. Could be FAT12 "
+            ## print "bcawGetPartionInfoForImage: Volume Info failed. Could be FAT12 "
             self.num_partitions = 1
             is_partition_info = False
             fs = pytsk3.FS_Info(img, offset=0)
@@ -79,6 +79,8 @@ class bcaw:
             ## print "D: File System Type Detected ", fs.info.ftype
             if fs.info.ftype == pytsk3.TSK_FS_TYPE_FAT12:
                 fs_desc = "FAT12 file system"
+            elif fs.info.ftype == pytsk3.TSK_FS_TYPE_ISO9660_DETECT:
+                fs_desc = "ISO file system"
             else:
                 fs_desc = "Unknown file system"
 
