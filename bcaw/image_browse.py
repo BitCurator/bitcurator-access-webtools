@@ -302,6 +302,17 @@ def bcawDnldSingleFile(file_item, fs, filepath, index_dir):
         if os.path.exists(filepath_txt):
             subprocess.check_output(rmcmd_1, shell=True, stderr=subprocess.STDOUT)
 
+def isFileIndexable(filename):
+    if (filename.endswith('.txt') or filename.endswith('.TXT') or  \
+        filename.endswith('.pdf') or filename.endswith('.PDF') or \
+        filename.endswith('.xml') or filename.endswith('.XML') or \
+        filename.endswith('.doc') or filename.endswith('.DOC') or \
+        filename.endswith('.htm') or filename.endswith('.HTM;1') or \
+        filename.endswith('.html') or filename.endswith('.HTML') ):
+        return True
+    else:
+        return False
+
 @celery.task
 def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_path):
     """This routine is used to download the indexable files of the Repository
@@ -385,10 +396,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 filename = item['name_slug']
 
             # If it is indexable file, download it and generate index.
-            if (filename.endswith('.txt') or filename.endswith('.pdf') or filename.endswith('.xml') or filename.endswith('.doc')):
+            if isFileIndexable(filename):
 
-                ## print "Index-debug2: bcawDnldRepo: Indexing file {} in dir \
-                ##                 {}".format(filename, dirFilesToIndex)
                 dfxml_file = image_path + "_dfxml.xml"
                 ## print("D2: bcawDnldRepo: Calling bcawGetPathFromDfxml: dfxml_file: ", dfxml_file)
                 # We will use the 'real' file name while looking for it in dfxml file
