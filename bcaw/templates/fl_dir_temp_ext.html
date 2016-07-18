@@ -85,13 +85,6 @@ eight="80" width="80" align="center" > </div>
             {% else %}
                 {% set column1 = 'r' %}
             {% endif %}
-            {#{% set fileinfo_html = partition_num ~'/'~new_dir~'/'~item.name %}#}
-            {#{% set fileinfo_html = partition_num ~ '/' ~ new_dir~'/'~item.name %} #}
-            {#{% set fileinfo_html = '/' ~ new_dir~'/'~item.name %} #}
-              {#<td> <a href={{ filepath_string ~ '%' ~ item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
-              {#<td> <a href={{ url~'-'~item.name }}>Browse</a> <a href=imgdnld.html>Download</a> </td> #}
-            {#{% set temp = url | replace('/','%') %}#}
-            {#{% set filepath_string = temp | replace('%', '/', 4) %}#}
             {% if ' ' in item.name %}
               {% set itemname = item.name.replace(' ', "_") %}
             {% else %}
@@ -99,10 +92,13 @@ eight="80" width="80" align="center" > </div>
             {% endif %}
 
             {% set filepath_string = url %}
+
+            {% set filepath_html = filepath ~'/'~itemname %}
+
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
-              <td> <a href={{ filepath_string~'/'~itemname~'-'~item.inode }}>{{ itemname}}</a>  </td>
+              <td> <a href={{ url_for('file_clicked', image_name=image_name, image_partition=partition_num,  filepath=filepath_html, inode=item.inode) }}>{{ itemname }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
