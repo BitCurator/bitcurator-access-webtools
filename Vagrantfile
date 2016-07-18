@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Use the precised64 box, change this for 32 bit, or other distro
-    config.vm.box = "ubuntu/trusty64"
+    config.vm.box = "ubuntu/xenial64"
 
     # Set the box host-name
     config.vm.hostname = "bca-webtools-0.4.12"

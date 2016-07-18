@@ -208,6 +208,31 @@ install_ubuntu_14.04_deps() {
     return 0
 }
 
+install_ubuntu_16.04_deps() {
+
+    echoinfo "Updating your APT Repositories ... "
+    apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Installing Python Software Properies ... "
+    __apt_get_install_noinput software-properties-common >> $LOG_BASE/bca-install.log 2>&1  || return 1
+
+    echoinfo "Enabling Universal Repository ... "
+    __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    # TESTING ONLY - DO NOT UNCOMMENT
+    # echoinfo "Adding Oracle Java Repository"
+    # add-apt-repository -y ppa:webupd8team/java >> $LOG_BASE/bca-install.log 2>&1 || return 1
+    # Need oracle-java8-installer to replace openjdk in package list below (future)
+
+    echoinfo "Updating Repository Package List ..."
+    apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Upgrading all packages to latest version ..."
+    __apt_get_upgrade_noinput >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    return 0
+}
+
 #
 # Packages below will be installed. Dependencies listed here:
 # Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
@@ -276,7 +301,128 @@ rabbitmq-server"
     return 0
 }
 
+#
+# Packages below will be installed. Dependencies listed here:
+# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
+# Access Git repositories: git
+# libewf specific depends: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
+# pyewf specific depends: python, python-dev, python-pip
+# Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
+# Text extraction: antiword, poppler-utils
+# Java: openjdk-7-*, ant-*, ivy-*
+# Bokeh: npm, node
+# Celery: celeryd (don't use, deprecated)
+
+install_ubuntu_16.04_packages() {
+    packages="dkms 
+subversion 
+libatlas-base-dev 
+gcc 
+gfortran 
+g++ 
+build-essential 
+libtool 
+automake 
+autopoint 
+git 
+bison 
+flex 
+python 
+python-dev 
+python-pip 
+zlib1g-dev 
+postgresql 
+pgadmin3 
+postgresql-server-dev-9.3 
+libtalloc2 
+libtalloc-dev 
+antiword 
+poppler-utils 
+odt2txt
+redis-server 
+openjdk-7-jdk 
+openjdk-7-jre-headless 
+openjdk-7-jre-lib 
+ant 
+ant-doc 
+ant-optional 
+ivy 
+ivy-doc 
+rabbitmq-server"
+
+    if [ "$@" = "dev" ]; then
+        packages="$packages"
+    elif [ "$@" = "stable" ]; then
+        packages="$packages"
+    fi
+
+    for PACKAGE in $packages; do
+        __apt_get_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1
+        ERROR=$?
+        if [ $ERROR -ne 0 ]; then
+            echoerror "Install Failure: $PACKAGE (Error Code: $ERROR)"
+        else
+            echoinfo "Installed Package: $PACKAGE"
+        fi
+    done
+
+    return 0
+}
+
 install_ubuntu_14.04_pip_packages() {
+
+#
+# Packages below will be installed. Dependencies listed here:
+# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf 
+# Scipy: scipy, numpy, pandas, redis, tornado, greenlet, pyzmq
+# Bokeh: beautifulsoup, colorama, boto, nose, mock, coverage, websocket-client, blaze, bokeh
+# Celery: celery
+#
+
+pip_packages="flask 
+psycopg2 
+Flask-SQLAlchemy 
+flask-wtf 
+celery
+nltk
+numpy"
+
+    pip_pre_packages="bitstring"
+
+    if [ "$@" = "dev" ]; then
+        pip_packages="$pip_packages"
+    elif [ "$@" = "stable" ]; then
+        pip_packages="$pip_packages"
+    fi
+
+    ERROR=0
+    for PACKAGE in $pip_pre_packages; do
+        CURRENT_ERROR=0
+        echoinfo "Installed Python (pre) Package: $PACKAGE"
+        __pip_pre_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
+        if [ $CURRENT_ERROR -eq 1 ]; then
+            echoerror "Python Package Install Failure: $PACKAGE"
+        fi
+    done
+
+    for PACKAGE in $pip_packages; do
+        CURRENT_ERROR=0
+        echoinfo "Installed Python Package: $PACKAGE"
+        __pip_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
+        if [ $CURRENT_ERROR -eq 1 ]; then
+            echoerror "Python Package Install Failure: $PACKAGE"
+        fi
+    done
+
+    if [ $ERROR -ne 0 ]; then
+        echoerror
+        return 1
+    fi
+
+    return 0
+}
+
+install_ubuntu_16.04_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
@@ -521,8 +667,8 @@ fi
 #    exit 2
 #fi
 
-if [ $VER != "14.04" ]; then
-    echo "bca-webtools is only installable on Ubuntu 14.04 at this time."
+if [ $VER != "14.04" ] && [ $VER != "16.04"]; then
+    echo "bca-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
     exit 3
 fi
 
