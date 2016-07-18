@@ -342,7 +342,6 @@ odt2txt
 redis-server 
 openjdk-8-jdk 
 openjdk-8-jre-headless 
-openjdk-8-jre-lib 
 ant 
 ant-doc 
 ant-optional 
