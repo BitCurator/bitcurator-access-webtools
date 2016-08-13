@@ -508,26 +508,18 @@ def stream_template(template_name, **context):
 @app.route('/image/<image_name>/<image_partition>', defaults={'filepath': ''})
 @app.route('/image/<image_name>/<image_partition>/<path:filepath>')
 
-def file_clicked(image_name, image_partition, filepath):
+def file_clicked(image_name, image_partition, filepath, inode=None):
     logging.debug('File_clicked: Rendering Template for subdirectory or contents of a file ')
     logging.debug('D: image_name: %s', image_name)
     logging.debug('D: image_partition: %s', image_partition)
     logging.debug('D: filepath: %s', filepath)
+    logging.debug('D: inode: %s', inode)
     # print("\nFile_clicked: Rendering Template for subdirectory or contents of a file: ",
-    #      image_name, image_partition, filepath)
+    #      image_name, image_partition, filepath, inode)
 
     # Strip the digits after the last "-" from filepath to get inode
-    new_filepath, separater, inode = filepath.rpartition("-") 
-
-    logging.debug('D: Inode Split of file-name: ')
-    logging.debug('new_filepath: %s', new_filepath)
-    logging.debug('sep: %s', separater)
-    logging.debug('inode: %s', inode)
-    # print("D: Inode Split of file-name: new_filepath={}, sep:{}, inode:{} ".format\
-    #        (new_filepath, separater, inode)) 
-
-    if separater == "-":
-        filepath = new_filepath
+    inode = request.args.get('inode')
+    logging.debug('D: Inode: %s ', inode)
 
     # print("D: Files: Rendering Template for subdirectory or contents of a file: ",
           ## image_name, image_partition, path)
@@ -538,10 +530,8 @@ def file_clicked(image_name, image_partition, filepath):
     file_name_list = filepath.split('/')
     file_name = file_name_list[len(file_name_list)-1]
 
-    # print "D: File_path after manipulation = ", path
-
     # To verify that the file_name exsits, we need the directory where
-    # the file sits. That is if tje file name is $Extend/$RmData, we have
+    # the file sits. That is if the file name is $Extend/$RmData, we have
     # to look for the file $RmData under the directory $Extend. So we
     # will call the TSK API fs.open_dir with the parent directory
     # ($Extend in this example)
@@ -561,7 +551,8 @@ def file_clicked(image_name, image_partition, filepath):
         logging.debug('D: item-name = %s', item['name'])
         logging.debug('D: slug-name = %s', item['name_slug'])
         logging.debug('D: file-name = %s', file_name)
-        logging.debug('D: item-inode = %s', item['inode'])
+
+        #logging.debug('D: item-inode = %s', item['inode'])
         # print("D: item-name={} slug_name={} file_name={} item_inode={} ".format\
         #     (item['name'], item['name_slug'], file_name, item['inode']))
 
@@ -605,6 +596,7 @@ def file_clicked(image_name, image_partition, filepath):
         # FIXME: Should we abort it here?
 
     if item['isdir'] == True:
+        logging.debug("D: File_clicked: It is a Directory: %s ", item['name'])
         # We will send the file_list under this directory to the template.
         # So calling once again the TSK API ipen_dir, with the current
         # directory, this time.
@@ -613,7 +605,7 @@ def file_clicked(image_name, image_partition, filepath):
                                         int(image_partition), filepath)
         # Generate the URL to communicate to the template:
         with app.test_request_context():
-            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, filepath=filepath )
+            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, filepath=filepath, inode=inode )
 
         '''
         ############ Work under progress
@@ -636,8 +628,7 @@ def file_clicked(image_name, image_partition, filepath):
             # get config_list
         '''
 
-        logging.debug('>> Rendering template with URL: ', url)
-        # print (">> Rendering template with URL: ", url)
+        logging.debug('>> File_Clicked: Rendering template with URL:%s, filepath:%s, inode:%s', url, filepath, inode)
         return render_template('fl_dir_temp_ext.html',
                    image_name=str(image_name),
                    partition_num=image_partition,
@@ -645,7 +636,8 @@ def file_clicked(image_name, image_partition, filepath):
                    file_list=file_list,
                    ##email = email,
                    ##checked_list=checked_list_dict[email],
-                   url=url)
+                   url=url,
+                   inode=inode)
 
     else:
         logging.debug('>> Downloading File: %s', real_file_name)
