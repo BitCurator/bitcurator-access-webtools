@@ -733,6 +733,7 @@ def home():
     # Create the DB. FIXME: This needs to be called from runserver.py 
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
+    dm = bcaw()
     for img in os.listdir(image_dir):
         #if img.endswith(".E01") or img.endswith(".AFF"):
         if bcaw_is_imgtype_supported(img):
@@ -740,7 +741,6 @@ def home():
             ### global image_list
             image_list.append(img)
 
-            dm = bcaw()
             image_path = image_dir+'/'+img
             dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
