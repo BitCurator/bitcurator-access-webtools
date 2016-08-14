@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014
+# Copyright (C) 2014 - 2016
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -22,7 +22,6 @@ import image_browse
 ###from runserver import db_login
 from celery import Celery
 
-
 app = Flask(__name__)
 
 import os
@@ -33,7 +32,6 @@ import xml.etree.ElementTree as ET
 # Set up logging location for anyone importing these utils
 logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
-##########
 '''
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
@@ -42,13 +40,9 @@ from sqlalchemy_utils.types import TSVectorType
 
 from sqlalchemy_searchable import search
 
-
 Base = declarative_base()
-
 make_searchable()
 '''
-
-##########
 
 # FIXME: The following two lines for configuration are supposed to be
 # in __init__.py. But somehow they are not getting picked up here. So

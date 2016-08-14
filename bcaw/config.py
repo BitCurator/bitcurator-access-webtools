@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014
+# Copyright (C) 2014 - 2016
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public

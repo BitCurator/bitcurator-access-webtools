@@ -20,12 +20,10 @@ import bcaw.image_browse
 
 # Config file:
 
-# Adding the following line will allow the econfigurations  to be
+# Adding the following line will allow the configurations to be
 # defined in the specified file - bcaw_default_settings.py. Doing so
 # will add the corresponding elements to the dectionary app.config
 # and populate them with the given values.
-# app.config['element_name']
-
 app.config.from_object('bcaw_default_settings')
 
 # NOTE: The following line should be uncommented when the env variable
