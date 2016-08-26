@@ -260,8 +260,9 @@ git
 bison 
 flex 
 python 
-python-dev 
 python-pip 
+python-dev 
+nginx
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -328,8 +329,9 @@ git
 bison 
 flex 
 python 
-python-dev 
 python-pip 
+python-dev 
+nginx
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -378,13 +380,15 @@ install_ubuntu_14.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="flask 
+pip_packages="uwsgi 
+flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
-celery
-nltk
-numpy"
+celery 
+nltk 
+numpy 
+virtualenv"
 
     pip_pre_packages="bitstring"
 
@@ -431,13 +435,15 @@ install_ubuntu_16.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="flask 
+pip_packages="uwsgi 
+flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery
 nltk
-numpy"
+numpy
+virtualenv"
 
     pip_pre_packages="bitstring"
 
