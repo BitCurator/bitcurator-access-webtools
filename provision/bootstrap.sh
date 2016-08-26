@@ -269,6 +269,8 @@ pgadmin3
 postgresql-server-dev-9.3 
 libtalloc2 
 libtalloc-dev 
+libpcre3
+libpcre3-dev
 antiword 
 poppler-utils 
 odt2txt
@@ -338,6 +340,8 @@ pgadmin3
 postgresql-server-dev-9.5 
 libtalloc2 
 libtalloc-dev 
+libpcre3
+libpcre3-dev
 antiword 
 poppler-utils 
 odt2txt
