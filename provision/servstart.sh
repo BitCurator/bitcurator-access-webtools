@@ -18,7 +18,7 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 
 # Start the Flask server / app
 cd /vagrant
-python runserver.py &
-
+#python runserver.py &
+python runbcaw.py &
 
 
