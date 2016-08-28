@@ -1,0 +1,17 @@
+server {
+    listen 80;
+
+    server_name $hostname;
+
+    access_log  /var/log/nginx/access.log;
+    error_log  /var/log/nginx/error.log;
+
+    location / {
+        try_files $uri @bcaw;
+    }
+
+    location @bcaw {
+        include uwsgi_params;
+        uwsgi_pass unix:/var/www/run/bcaw.sock;
+   }
+}

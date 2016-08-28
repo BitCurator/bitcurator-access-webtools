@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # config.vm.box = "bento/ubuntu-16.04"
 
     # Set the box host-name
-    config.vm.hostname = "bca-webtools-0.4.12"
+    config.vm.hostname = "bca-webtools-0.5.0"
 
     # Run the provisioning script	
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
@@ -26,10 +26,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      run: "always"
 
     # Port forward HTTP (80) to host 2020
-    config.vm.network :forwarded_port, :host => 8080, :guest => 5000
+    config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.4.12"
+      vb.name = "bca-webtools-0.5.0"
       vb.memory = 4096
       vb.cpus = 2
     end
