@@ -654,7 +654,7 @@ configure_environment() {
 
    mkdir /var/www
    mkdir /var/www/bcaw
-   cp -r /vagrant/runbcaw.py /var/www/bcaw
+   cp -r /vagrant/* /var/www/bcaw
    #cp /vagrant/runbcaw.py /var/www/bcaw
 
    virtualenv /var/www/bcaw/venv
