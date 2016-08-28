@@ -652,7 +652,8 @@ configure_environment() {
 
    mkdir /var/www
    mkdir /var/www/bcaw
-   cp /vagrant/runbcaw.py /var/www/bcaw
+   cp -r /vagrant/runbcaw.py /var/www/bcaw
+   #cp /vagrant/runbcaw.py /var/www/bcaw
 
    virtualenv /var/www/bcaw/venv
    source /var/www/bcaw/venv/bin/activate
@@ -798,6 +799,7 @@ echoinfo "The current user is: $SUDO_USER"
     install_ubuntu_${VER}_packages $ITYPE
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
+    configure_environment
 
 #fi
 
