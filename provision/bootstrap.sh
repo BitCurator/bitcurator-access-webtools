@@ -261,8 +261,9 @@ bison
 flex 
 python 
 python-pip 
-python-dev
-nginx
+python-dev 
+python-virtualenv 
+nginx 
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -283,7 +284,9 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server"
+rabbitmq-server 
+uwsgi 
+uwsgi-plugin-python"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -333,7 +336,8 @@ flex
 python 
 python-pip 
 python-dev 
-nginx
+python-virtualenv 
+nginx 
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -353,7 +357,9 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server"
+rabbitmq-server 
+uwsgi 
+uwsgi-plugin-python"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -384,15 +390,13 @@ install_ubuntu_14.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="uwsgi 
-flask 
+pip_packages="flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery 
 nltk 
-numpy 
-virtualenv"
+numpy"
 
     pip_pre_packages="bitstring"
 
@@ -439,15 +443,13 @@ install_ubuntu_16.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="uwsgi 
-flask 
+pip_packages="flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery
 nltk
-numpy
-virtualenv"
+numpy"
 
     pip_pre_packages="bitstring"
 
