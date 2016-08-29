@@ -17,10 +17,8 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 # bokeh-server --backend=redis
 
 # Start the Flask server / app
-#cd /vagrant
-#python runserver.py &
+cd /vagrant
+python runserver.py &
 
-cd /var/www/bcaw
-python runbcaw.py &
 
 

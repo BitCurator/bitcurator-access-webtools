@@ -1300,8 +1300,7 @@ def bcawIndexAllFiles(self, task_id):
 
             logging.debug('bcawIndexAllFiles: parts %s', partition_in[img])
             # print("bcawIndexAllFiles: parts: ", partition_in[img])
-            #temp_root_dir = "/vagrant"
-            temp_root_dir = "/var/www/bcaw"
+            temp_root_dir = "/vagrant"
             for p in range(0, partition_in[img]):
                 # make the directory for this img and partition
                 part_dir = str(temp_root_dir) + '/img'+str(image_index)+"_"+ str(p)

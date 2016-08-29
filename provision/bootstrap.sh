@@ -262,8 +262,7 @@ flex
 python 
 python-pip 
 python-dev 
-python-virtualenv 
-nginx 
+nginx
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -284,9 +283,7 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server 
-uwsgi 
-uwsgi-plugin-python"
+rabbitmq-server"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -336,8 +333,7 @@ flex
 python 
 python-pip 
 python-dev 
-python-virtualenv 
-nginx 
+nginx
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -357,9 +353,7 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server 
-uwsgi 
-uwsgi-plugin-python"
+rabbitmq-server"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -390,13 +384,15 @@ install_ubuntu_14.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="flask 
+pip_packages="uwsgi 
+flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery 
 nltk 
-numpy"
+numpy 
+virtualenv"
 
     pip_pre_packages="bitstring"
 
@@ -443,13 +439,15 @@ install_ubuntu_16.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="flask 
+pip_packages="uwsgi 
+flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery
 nltk
-numpy"
+numpy
+virtualenv"
 
     pip_pre_packages="bitstring"
 
@@ -650,49 +648,6 @@ install_source_packages() {
 
 }
 
-setup_virtualenv() {
-
-   mkdir /var/www
-   mkdir /var/www/bcaw
-   cp -r /vagrant/* /var/www/bcaw
-   #cp /vagrant/runbcaw.py /var/www/bcaw
-
-   virtualenv /var/www/bcaw/venv
-   source /var/www/bcaw/venv/bin/activate
-   #pip install flask
-
-}
-
-configure_environment() {
-
-   # UWSGI Setup
-   #apt-get -y install uwsgi uwsgi-plugin-python
-
-   mkdir /var/www/run
-   chown www-data:www-data /var/www/run
-
-   touch /var/log/uwsgi/emperor.log
-   chown www-data:www-data /var/log/uwsgi/emperor.log
-
-   touch /var/log/uwsgi/app/bcaw.log
-   chown www-data:www-data /var/log/uwsgi/app/bcaw.log
-
-   cp /vagrant/uwsgi.conf /etc/init
-   cp /vagrant/uwsgi_config.ini /etc/uwsgi/apps-available/
-   ln -s /etc/uwsgi/apps-available/uwsgi_config.ini /etc/uwsgi/apps-enabled
-
-   # NGINX Setup
-   apt-get -y install nginx
-   rm /etc/nginx/sites-enabled/default
-   cp /vagrant/nginx_config /etc/nginx/sites-available/
-   ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
-
-   # Start UWSGI and NGINX
-   service nginx restart
-   service uwsgi restart
-
-}
-
 complete_message() {
     echo
     echo "Installation Complete!"
@@ -801,12 +756,10 @@ echoinfo "The current user is: $SUDO_USER"
 #if [ "$INSTALL" -eq 1 ] && [ "$CONFIGURE_ONLY" -eq 0 ]; then
 
     export DEBIAN_FRONTEND=noninteractive
-    setup_virtualenv
     install_ubuntu_${VER}_deps $ITYPE
     install_ubuntu_${VER}_packages $ITYPE
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
-    configure_environment
 
 #fi
 
