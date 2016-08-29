@@ -641,10 +641,12 @@ install_source_packages() {
         wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
         tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
-        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        /var/www/bcaw/venv/bin/python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Modified for use in virtualenv
-        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        /var/www/bcaw/venv/bin/python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
         rm -rf pytsk
