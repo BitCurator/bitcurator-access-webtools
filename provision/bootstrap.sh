@@ -650,7 +650,7 @@ install_source_packages() {
 
 }
 
-configure_environment() {
+setup_virtualenv() {
 
    mkdir /var/www
    mkdir /var/www/bcaw
@@ -660,6 +660,10 @@ configure_environment() {
    virtualenv /var/www/bcaw/venv
    source /var/www/bcaw/venv/bin/activate
    #pip install flask
+
+}
+
+configure_environment() {
 
    # UWSGI Setup
    #apt-get -y install uwsgi uwsgi-plugin-python
@@ -797,6 +801,7 @@ echoinfo "The current user is: $SUDO_USER"
 #if [ "$INSTALL" -eq 1 ] && [ "$CONFIGURE_ONLY" -eq 0 ]; then
 
     export DEBIAN_FRONTEND=noninteractive
+    setup_virtualenv
     install_ubuntu_${VER}_deps $ITYPE
     install_ubuntu_${VER}_packages $ITYPE
     install_ubuntu_${VER}_pip_packages $ITYPE
