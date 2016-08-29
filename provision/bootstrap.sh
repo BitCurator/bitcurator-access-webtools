@@ -801,9 +801,9 @@ echoinfo "The current user is: $SUDO_USER"
 #if [ "$INSTALL" -eq 1 ] && [ "$CONFIGURE_ONLY" -eq 0 ]; then
 
     export DEBIAN_FRONTEND=noninteractive
-    setup_virtualenv
     install_ubuntu_${VER}_deps $ITYPE
     install_ubuntu_${VER}_packages $ITYPE
+    setup_virtualenv
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
     configure_environment
