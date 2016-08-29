@@ -262,7 +262,8 @@ flex
 python 
 python-pip 
 python-dev 
-nginx
+python-virtualenv 
+nginx 
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -283,7 +284,9 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server"
+rabbitmq-server 
+uwsgi 
+uwsgi-plugin-python"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -333,7 +336,8 @@ flex
 python 
 python-pip 
 python-dev 
-nginx
+python-virtualenv 
+nginx 
 zlib1g-dev 
 postgresql 
 pgadmin3 
@@ -353,7 +357,9 @@ ant-doc
 ant-optional 
 ivy 
 ivy-doc 
-rabbitmq-server"
+rabbitmq-server 
+uwsgi 
+uwsgi-plugin-python"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -384,15 +390,13 @@ install_ubuntu_14.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="uwsgi 
-flask 
+pip_packages="flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery 
 nltk 
-numpy 
-virtualenv"
+numpy"
 
     pip_pre_packages="bitstring"
 
@@ -439,15 +443,13 @@ install_ubuntu_16.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="uwsgi 
-flask 
+pip_packages="flask 
 psycopg2 
 Flask-SQLAlchemy 
 flask-wtf 
 celery
 nltk
-numpy
-virtualenv"
+numpy"
 
     pip_pre_packages="bitstring"
 
@@ -504,9 +506,13 @@ install_source_packages() {
         # First we look for the requred string in the makefile and copy the 5 lines
         # strting from the 4th line after the pattern match, into a temp file (temp),
         # after removing the leading hash (to uncomment the lines).
+  
+        # Then we fix some paths for the virtualenv.
+
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
         grep -A 8 "Ubuntu 11.10 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+        sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i -e '/Ubuntu 11.10 64-bit/r temp' Makefile
         make >> $LOG_BASE/bca-install.log 2>&1 
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
@@ -635,8 +641,12 @@ install_source_packages() {
         wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
         tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
-        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        /var/www/bcaw/venv/bin/python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        # Modified for use in virtualenv
+        /var/www/bcaw/venv/bin/python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
         rm -rf pytsk
@@ -645,6 +655,50 @@ install_source_packages() {
   echoinfo "bca-webtools: Preparing log file"
         sudo touch /var/log/bcaw.log
         sudo chmod 666 /var/log/bcaw.log
+
+}
+
+setup_virtualenv() {
+
+   mkdir /var/www
+   mkdir /var/www/bcaw
+   cp -r /vagrant/* /var/www/bcaw
+   #cp /vagrant/runbcaw.py /var/www/bcaw
+   chown -R www-data:www-data /var/www/bcaw
+
+   virtualenv /var/www/bcaw/venv
+   source /var/www/bcaw/venv/bin/activate
+   #pip install flask
+
+}
+
+configure_environment() {
+
+   # UWSGI Setup
+   #apt-get -y install uwsgi uwsgi-plugin-python
+
+   mkdir /var/www/run
+   chown www-data:www-data /var/www/run
+
+   touch /var/log/uwsgi/emperor.log
+   chown www-data:www-data /var/log/uwsgi/emperor.log
+
+   touch /var/log/uwsgi/app/bcaw.log
+   chown www-data:www-data /var/log/uwsgi/app/bcaw.log
+
+   cp /vagrant/uwsgi.conf /etc/init
+   cp /vagrant/uwsgi_config.ini /etc/uwsgi/apps-available/
+   ln -s /etc/uwsgi/apps-available/uwsgi_config.ini /etc/uwsgi/apps-enabled
+
+   # NGINX Setup
+   apt-get -y install nginx
+   rm /etc/nginx/sites-enabled/default
+   cp /vagrant/nginx_config /etc/nginx/sites-available/
+   ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
+
+   # Start UWSGI and NGINX
+   service nginx restart
+   service uwsgi restart
 
 }
 
@@ -758,6 +812,7 @@ echoinfo "The current user is: $SUDO_USER"
     export DEBIAN_FRONTEND=noninteractive
     install_ubuntu_${VER}_deps $ITYPE
     install_ubuntu_${VER}_packages $ITYPE
+    setup_virtualenv
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
 

@@ -254,7 +254,7 @@ class bcaw:
 
     def fixup_dfxmlfile_temp(self, dfxmlfile):
         ## print("D: Fix up the dfxml file: ")
-        with open(dfxmlfile) as fin, open("tempfile", "w") as fout:
+        with open(dfxmlfile) as fin, open("/tmp/tempfile", "w") as fout:
             for line in fin:
                 if not "xmlns" in line:
                     if "dc:type" in line:
@@ -264,7 +264,7 @@ class bcaw:
         fin.close()
         fout.close()
 
-        cmd = "mv tempfile " + dfxmlfile
+        cmd = "mv /tmp/tempfile " + dfxmlfile
         subprocess.check_output(cmd, shell=True)
         logging.debug('>> : Updated dfxmlfile ')
         # print(">> : Updated dfxmlfile ")
