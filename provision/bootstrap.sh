@@ -506,9 +506,13 @@ install_source_packages() {
         # First we look for the requred string in the makefile and copy the 5 lines
         # strting from the 4th line after the pattern match, into a temp file (temp),
         # after removing the leading hash (to uncomment the lines).
+  
+        # Then we fix some paths for the virtualenv.
+
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
         grep -A 8 "Ubuntu 11.10 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+        sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i -e '/Ubuntu 11.10 64-bit/r temp' Makefile
         make >> $LOG_BASE/bca-install.log 2>&1 
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
@@ -638,7 +642,9 @@ install_source_packages() {
         tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        # Modified for use in virtualenv
+        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         cd /tmp
         rm -rf pytsk
