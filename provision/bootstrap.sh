@@ -18,7 +18,7 @@
 #    vagrant destroy
 #    vagrant up
 #
-# See the README for further detais.
+# See the README for further details.
 #
 #===============================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
@@ -235,7 +235,7 @@ install_ubuntu_16.04_deps() {
 
 #
 # Packages below will be installed. Dependencies listed here:
-# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
+# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automake
 # Access Git repositories: git
 # libewf specific depends: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
 # pyewf specific depends: python, python-dev, python-pip
@@ -503,8 +503,8 @@ install_source_packages() {
         popd >> $LOG_BASE/bca-install.log 2>&1
 
         # Edit the Makefile to uncomment the config info for Linux.
-        # First we look for the requred string in the makefile and copy the 5 lines
-        # strting from the 4th line after the pattern match, into a temp file (temp),
+        # First we look for the required string in the makefile and copy the 5 lines
+        # starting from the 4th line after the pattern match, into a temp file (temp),
         # after removing the leading hash (to uncomment the lines).
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
