@@ -664,6 +664,7 @@ setup_virtualenv() {
    mkdir /var/www/bcaw
    cp -r /vagrant/* /var/www/bcaw
    #cp /vagrant/runbcaw.py /var/www/bcaw
+   chown -R www-data:www-data /var/www/bcaw
 
    virtualenv /var/www/bcaw/venv
    source /var/www/bcaw/venv/bin/activate
