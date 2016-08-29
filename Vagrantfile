@@ -26,7 +26,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      run: "always"
 
     # Port forward HTTP (80) to host 2020
-    config.vm.network :forwarded_port, :host => 8080, :guest => 5000
+    config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
       vb.name = "bca-webtools-0.6.0"
