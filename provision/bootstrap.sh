@@ -815,6 +815,7 @@ echoinfo "The current user is: $SUDO_USER"
     setup_virtualenv
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
+    configure_environment
 
 #fi
 
