@@ -900,7 +900,9 @@ def query():
                 # done here to extract the useful info and get rid of the unwanted
                 # stuff. NOTE: There could be a better and more efficient way of
                 # doing the same. We will address it later.
-                search_result_list = [w.replace('/vagrant/files_to_index/', '') for w in search_result_list]
+                #search_result_list = [w.replace('/vagrant/files_to_index/', '') for w in search_result_list]
+                # Fixed for virtualenv install
+                search_result_list = [w.replace('/var/www/bcaw/files_to_index/', '') for w in search_result_list]
                 index = 0
                 search_result_image_list = []
                 for j in search_result_list:
