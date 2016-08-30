@@ -700,6 +700,9 @@ configure_environment() {
    service nginx restart
    service uwsgi restart
 
+   # Give vagrant user access to www-data
+   usermod -a -G www-data vagrant
+
 }
 
 complete_message() {
