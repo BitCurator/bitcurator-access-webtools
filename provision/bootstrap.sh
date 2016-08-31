@@ -665,6 +665,8 @@ setup_virtualenv() {
    cp -r /vagrant/* /var/www/bcaw
    #cp /vagrant/runbcaw.py /var/www/bcaw
    chown -R www-data:www-data /var/www/bcaw
+   chmod 775 /var/www/bcaw
+   chmod 775 /var/www/bcaw/disk-images
 
    virtualenv /var/www/bcaw/venv
    source /var/www/bcaw/venv/bin/activate
@@ -679,12 +681,15 @@ configure_environment() {
 
    mkdir /var/www/run
    chown www-data:www-data /var/www/run
+   chmod 775 /var/www/run
 
    touch /var/log/uwsgi/emperor.log
    chown www-data:www-data /var/log/uwsgi/emperor.log
+   chmod 664 /var/log/uwsgi/emperor.log
 
    touch /var/log/uwsgi/app/bcaw.log
    chown www-data:www-data /var/log/uwsgi/app/bcaw.log
+   chmod 664 /var/log/uwsgi/app/bcaw.log
 
    cp /vagrant/uwsgi.conf /etc/init
    cp /vagrant/uwsgi_config.ini /etc/uwsgi/apps-available/
