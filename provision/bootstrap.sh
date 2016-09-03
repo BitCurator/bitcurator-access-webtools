@@ -667,6 +667,7 @@ setup_virtualenv() {
    chown -R www-data:www-data /var/www/bcaw
    chmod 777 /var/www/bcaw
    chmod 777 /var/www/bcaw/disk-images
+   chmod 666 /var/www/bcaw/disk-images/*
 
    virtualenv /var/www/bcaw/venv
    source /var/www/bcaw/venv/bin/activate
