@@ -45,7 +45,8 @@ class IndexFiles(object):
     def __init__(self, root, store_dir):
 
         if not os.path.exists(store_dir):
-            os.mkdir(store_dir)
+            os.mkdir(store_dir, 0777)
+
 
         # NOTE: Hardcoded the analyzer instead of passing it
         lucene.initVM()
@@ -57,6 +58,17 @@ class IndexFiles(object):
         store = SimpleFSDirectory(File(store_dir))
         analyzer = LimitTokenCountAnalyzer(analyzer, 1048576)
         config = IndexWriterConfig(Version.LUCENE_CURRENT, analyzer)
+
+        # Set the permissions to 777 for the index directory and the write.lock file
+        chmod_indexdir_cmd = "chmod 0777 " + store_dir
+        writelock_file = store_dir + "/" + "write.lock"
+        chmod_writelock_cmd = "chmod 0777 " + writelock_file
+
+        if os.path.exists(store_dir):
+            cicmd=os.popen("sudo -S %s"%(chmod_indexdir_cmd), 'w').write('vagrant')
+
+        if os.path.exists(writelock_file):
+            cwcmd=os.popen("sudo -S %s"%(chmod_writelock_cmd), 'w').write('vagrant')
 
         # setting CREATE will rewrite over the existing indexes.
         ###config.setOpenMode(IndexWriterConfig.OpenMode.CREATE)
