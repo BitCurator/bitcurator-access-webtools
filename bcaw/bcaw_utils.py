@@ -241,8 +241,8 @@ class bcaw:
             cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
             logging.debug('CMD xmlfile: %s', ewfinfo_xmlfile)
             logging.debug('CMD: %s', cmd)
-            # print("CMD: ", ewfinfo_xmlfile, cmd)
-            subprocess.check_output(cmd, shell=True)
+            if not os.path.exists(ewfinfo_xmlfile):
+                c=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return ewfinfo_xmlfile
         elif image_name.endswith(".AFF") or image_name.endswith(".aff"):
             # FIXME: does affinfo create xml output?
