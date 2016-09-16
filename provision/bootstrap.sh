@@ -579,7 +579,8 @@ install_source_packages() {
 #        make install >> $HOME/bitcurator-install.log 2>&1
 #        ldconfig >> $HOME/bitcurator-install.log 2>&1
  
-        wget -q https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        #wget -q https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cp /vagrant/externals/libewf-20140608.tar.gz .
         tar zxvf libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd libewf-20140608
         ./configure --enable-python --enable-v1-api >> $LOG_BASE/bca-install.log 2>&1
