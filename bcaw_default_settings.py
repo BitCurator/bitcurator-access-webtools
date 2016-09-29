@@ -16,6 +16,7 @@ IMAGEDIR = '/var/www/bcaw/disk-images'
 DELETED_FILES = True
 INDEX_DIR = "/var/www/bcaw/lucene_index"
 FILES_TO_INDEX_DIR = "/var/www/bcaw/files_to_index"
+SERVER_HOST_NAME = "127.0.0.1"
 
 #IMAGEDIR = '/vagrant/disk-images'
 #DELETED_FILES = True
