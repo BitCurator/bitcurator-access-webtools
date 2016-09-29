@@ -1351,6 +1351,7 @@ def admin():
     db_option_msg = None
     option_msg = ""
     option_msg_with_url = ""
+    server_host_name = app.config['SERVER_HOST_NAME']
 
     # option_message could be just a message or a url. We flag the latter case:
     is_option_msg_url = False
@@ -1372,7 +1373,7 @@ def admin():
         task_type = "Build_all_tables"
         task_id_table['Build_all_tables'] = task.id
         db_option = 2
-        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_all_tables')
+        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Build_all_tables')
         is_option_msg_url = True
         option_msg_with_url = "The Tables are being built. Click to see status: "
     elif(form.radio_option.data.lower() == 'image_table'):
@@ -1404,7 +1405,7 @@ def admin():
         task_type = "Build_dfxml_tables"
         task_id_table['Build_dfxml_tables'] = task.id
         #db_option = 7
-        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Build_dfxml_tables')
+        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Build_dfxml_tables')
         is_option_msg_url = True
         option_msg_with_url = "DFXML Table being built. Click to see status: "
 
@@ -1527,7 +1528,7 @@ def admin():
         task_type = "Indexing"
         task_id_table['Indexing'] = task.id
         db_option = 9
-        db_option_msg = "http://127.0.0.1:8080" + url_for('taskstatus', task_type='Indexing')
+        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Indexing')
         is_option_msg_url = True
         
     elif (form.radio_option.data.lower() == "clear_index"):
@@ -1559,7 +1560,7 @@ def admin():
     elif (form.radio_option.data.lower() == 'show_task_status'):
         db_option = 12
         is_option_msg_url = True
-        db_option_msg = "http://127.0.0.1:8080" + url_for('bcawCheckAllTaskStatus')
+        db_option_msg = "http://" + server_host_name + ":8080" + url_for('bcawCheckAllTaskStatus')
 
     # request.form will be in the form:
     # ImmutableMultiDict([('delete_table, <image>), ), )'delete_form', 'submit')])
