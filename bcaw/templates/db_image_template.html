@@ -4,29 +4,6 @@
     {{ super() }}
     <style type="text/css">
         .important { color: #704040; }
-        <style type="text/css">
-        h1.categories
-        {
-            color:red;
-            text-align:center;
-        }
-        h1 {
-            color:black;
-            text-align:center;
-        }
-        body {
-            color:#222;
-            background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 0px dotted gray;;
-            font-family: Roboto, sans-serif;
-            line-height: 1.6
-            font-size:14px;
-            <!--font-family: Verdana, Geneva, sans-serif;-->
-            <!--background-color: #d2b48c;-->
-        }
-
     </style>
 {% endblock %}
 <!-- .important { color: #336699; } -->
@@ -42,7 +19,7 @@
 eight="80" width="80" align="center" > </div>
         <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
       </div>
-    </div>    
+    </div>
 
       {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
@@ -66,7 +43,7 @@ eight="80" width="80" align="center" > </div>
           No System metadata available for this image type: {{ image_name }}
       {% endif %}
 
-      <BR>&nbsp;<BR> 
+      <BR>&nbsp;<BR>
         <table>
            <tr> <td>Acquisition Date:        </td>  <td><b>{{ image.acq_date }}</b>   </td> </tr>
            <tr> <td>Acquisition System Date: </td>  <td><b>{{ image.sys_date }}</b>   </td> </tr>

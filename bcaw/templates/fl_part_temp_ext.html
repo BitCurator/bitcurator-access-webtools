@@ -4,29 +4,6 @@
     {{ super() }}
     <style type="text/css">
         .important { color: #222; }
-        <style type="text/css">
-        h1.categories
-        {
-            color:red;
-            text-align:center;
-        }
-        h1 {
-            color:black;
-            text-align:center;
-        }
-        body {
-            color:#222;
-            background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 0px dotted gray;;
-            font-family: Roboto, sans-serif;
-            line-height: 1.6
-            font-size:14px;
-            <!--font-family: Verdana, Geneva, sans-serif;-->
-            <!--background-color: #d2b48c;-->
-        }
-
     </style>
 {% endblock %}
 {% block content %}
@@ -40,7 +17,7 @@
 eight="80" width="80" align="center" > </div>
         <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
       </div>
-    </div>    
+    </div>
 
       {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
@@ -72,7 +49,7 @@ eight="80" width="80" align="center" > </div>
               <th align="left">Last Modified</th>
               <th align="left">Deleted?</th>
           </tr>
-          {% for item in file_list %} 
+          {% for item in file_list %}
             {% if item.isdir %}
                 {% set column1 = 'd' %}
             {% else %}
@@ -86,7 +63,7 @@ eight="80" width="80" align="center" > </div>
             {% endif %}
 
 
-            {% set fileinfo_html = partition_num ~'/'~ itemname %} 
+            {% set fileinfo_html = partition_num ~'/'~ itemname %}
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>

@@ -4,28 +4,6 @@
     {{ super() }}
     <style type="text/css">
         .important { color: #336699; }
-        <style type="text/css">
-        h1.categories
-        {
-            color:red;
-            text-align:center;
-        }
-        h1 {
-            color:black;
-            text-align:center;
-        }
-        body {
-            color:#222;
-            background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 0px dotted gray;;
-            font-family: Roboto, sans-serif;
-            line-height: 1.6
-            font-size:14px;
-            <!--background-color: #d2b48c;-->
-        }
-
     </style>
 {% endblock %}
 {% block content %}
@@ -38,7 +16,7 @@
         <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="80" width="80" align="center" > </div>
         <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
       </div>
-    </div>    
+    </div>
 
       {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
@@ -64,25 +42,25 @@
   </div>
 
   <div id="main">
- 
+
     <h3>Sign up</h3>
- 
+
     {% for message in form.firstname.errors %}
       <div class="flash">{{ message }}</div>
     {% endfor %}
-   
+
     {% for message in form.lastname.errors %}
       <div class="flash">{{ message }}</div>
     {% endfor %}
-   
+
     {% for message in form.email.errors %}
       <div class="flash">{{ message }}</div>
     {% endfor %}
-   
+
     {% for message in form.password.errors %}
       <div class="flash">{{ message }}</div>
     {% endfor %}
-   
+
     <form action="{{ url_for('signup') }}" method=post>
       {{ form.hidden_tag() }}
 
@@ -107,10 +85,10 @@
           <td>{{ form.password }}</td>
         </tr>
       </table>
- 
+
       {{ form.submit }}
     </form>
-    
+
   </div>
 
   <div id="sidebar">
@@ -124,5 +102,5 @@
 
 </div>
 
- 
+
 {% endblock %}

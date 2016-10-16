@@ -4,46 +4,8 @@
     {{ super() }}
     <style type="text/css">
         .important { color: #336699; }
-        <style type="text/css">
-        h1.categories
-        {
-            color:red;
-            text-align:center;
-        }
-        h1 {
-            color:black;
-            text-align:center;
-        }
-        body {
-            color:#222;
-            background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 0px dotted gray;;
-            font-family: Roboto, sans-serif;
-            line-height: 1.6
-            font-size:14px;
-            <!--font-family: Verdana, Geneva, sans-serif;-->
-            <!--background-color: #d2b48c;-->
-        }
-        form {
-            list-style-type: none;
-            top: 15px;
-            right: 350px;
-            <!--position: absolute;-->
-        }
         div#content {
             display: none;
-        }
-        div#loading {
-            <!-- top: 200 px; -->
-            <!-- margin: auto; -->
-            <!-- position: absolute; -->
-            z-index: 2000;
-            width: 222px;
-            height: 21px;
-            background: url(/static/loadingimage.gif) no-repeat ;
-            cursor: wait;
         }
     </style>
     <script type="text/javascript">
@@ -77,9 +39,9 @@
       <div style="display: table-row">
         <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" h
 eight="80" width="80" align="center" > </div>
-        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCRRRRA Webtools</div> </div>
       </div>
-    </div>    
+    </div>
 
       {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
@@ -125,7 +87,7 @@ eight="80" width="80" align="center" > </div>
       {# <input type="submit" name="loading" value="Submit" onclick="loader_func();"> #}
       <input type="submit" name="loading" value="Submit" onclick='loader_func("loading");'>
     </form>
-    
+
   </div>
 
   <div id="sidebar">
@@ -140,5 +102,3 @@ eight="80" width="80" align="center" > </div>
 </div>
 
 {% endblock %}
- 
-

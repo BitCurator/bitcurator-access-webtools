@@ -4,35 +4,6 @@
     {{ super() }}
     <style type="text/css">
         .important { color: #222; }
-        <style type="text/css">
-        h1.categories
-        {
-            color:red;
-            text-align:center;
-        }
-        h1 {
-            color:black;
-            text-align:center;
-        }
-        body {
-            color:#222;
-            background-color: white;
-            margin-left: 5%;
-            margin-right: 5%;
-            border: 0px dotted gray;;
-            font-family: Roboto, sans-serif;
-            line-height: 1.6
-            font-size:14px;
-            <!--font-family: Verdana, Geneva, sans-serif;-->
-            <!--background-color: #d2b48c;-->
-        }
-        form {
-            list-style-type: none;
-            top: 15px;
-            right: 350px;
-            <!--position: absolute;-->
-        }
-
     </style>
 {% endblock %}
 {% block content %}
@@ -46,7 +17,7 @@
 eight="80" width="80" align="center" > </div>
         <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
       </div>
-    </div>    
+    </div>
 
       {# <!--<h3 align="left">BCA Webtools</h3>-->
       <!--<div id="btext">BCA Webtools</div>-->
@@ -72,12 +43,12 @@ eight="80" width="80" align="center" > </div>
 
     <p class="important">
       The bca-webtools application provides access to forensically-packaged and raw disk images. Supported file systems include FAT16, FAT32, NTFS, HFS+, and EXT2/3/4. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
-      <BR>&nbsp;<BR> 
+      <BR>&nbsp;<BR>
 
           <!--<table style="width:300px"> -->
             <p style='font-size:12; color:Green'>
-                Found {{num_results}} search results for {{ searched_phrase }} 
-            </p> 
+                Found {{num_results}} search results for {{ searched_phrase }}
+            </p>
           <table>
             <tr>
               <!-- <th align="left"></th> -->
@@ -105,7 +76,7 @@ eight="80" width="80" align="center" > </div>
 
     <p>Select an option below to search available disk images by filename or file contents. (Currently indexing all filenames, contents of .doc, .odt, .pdf, and .txt)
 
-    <p> 
+    <p>
       <form action="{{ url_for('query') }}" method=post>
         {{ form.hidden_tag() }}
         <!--{{ form.search_text.label }}-->
