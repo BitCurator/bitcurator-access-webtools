@@ -714,9 +714,9 @@ configure_webstack() {
 
    # Start UWSGI and NGINX
    echoinfo "bca-webtools: Restarting nginx.....";
-   # service nginx restart
-   echoinfo "bca-webtools: Restarting usgi.....";
-   # service uwsgi restart
+   service nginx restart
+   echoinfo "bca-webtools: starting usgi.....";
+   service uwsgi start
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
