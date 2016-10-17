@@ -90,7 +90,7 @@ eight="80" width="80" align="center" > </div>
             <p style="font-size:9">
             <tr>
               <td>{{ column1 }}</td>
-              <td> <a href={{ url_for('file_clicked', image_name=image_name, image_partition=partition_num,  filepath=itemname, inode=item.inode) }}>{{ itemname }}</a>  </td>
+              <td> <a href={{ url_for('file_clicked', image_name=image_name, image_partition=partition_num,  filepath=itemname) }}>{{ itemname }}</a>  </td>
               <td>{{ item.size }}</td>
               <td>{{ item.mtime }}</td>
               <td>{{ item.deleted }}</td>
