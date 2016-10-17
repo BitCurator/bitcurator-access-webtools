@@ -70,15 +70,15 @@ partition_in = dict()
 
 '''
 NOTE: This function is a copy of bcawBroseImages, but with some changes (like
-not initializing DB). Due to some issue with calling this routine from home(), 
+not initializing DB). Due to some issue with calling this routine from home(),
 and other route routines, the same code is inlined in those routines for now.
-It needs to be changed by calling this routine instead.  
+It needs to be changed by calling this routine instead.
 
 def bcawBrowse(db_init = True):
     global image_dir
     image_index = 0
 
-    # Two lists are maintained: image_list: List of image names, 
+    # Two lists are maintained: image_list: List of image names,
     # image_db_list: List of the db_elements of all images. Each element is
     # a db-structure.
     # Since lists are declared globally, empty them before populating
@@ -87,7 +87,7 @@ def bcawBrowse(db_init = True):
     global image_db_list
     del image_db_list [:]
 
-    # Create the DB. FIXME: This needs to be called from runserver.py 
+    # Create the DB. FIXME: This needs to be called from runserver.py
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
     if db_init == True:
@@ -105,7 +105,7 @@ def bcawBrowse(db_init = True):
 
             idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
             image_db_list.append(idb)
-            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5)) 
+            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5))
             image_index +=1
         else:
             continue
@@ -191,7 +191,7 @@ def bcawBrowseImages(db_init=True):
     global image_dir
     image_index = 0
 
-    # Two lists are maintained: image_list: List of image names, 
+    # Two lists are maintained: image_list: List of image names,
     # image_db_list: List of the db_elements of all images. Each element is
     # a db-structure.
     # Since image_list is declared globally, empty it before populating
@@ -201,7 +201,7 @@ def bcawBrowseImages(db_init=True):
     del image_db_list [:]
     global partition_in
 
-    # Create the DB. FIXME: This needs to be called from runserver.py 
+    # Create the DB. FIXME: This needs to be called from runserver.py
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
     if db_init == True:
@@ -222,8 +222,8 @@ def bcawBrowseImages(db_init=True):
 
             idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
             image_db_list.append(idb)
- 
-            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5)) 
+
+            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5))
 
             # Populate the image info table with this image name and index
             if bcawIsImgInMatrix(img):
@@ -350,11 +350,11 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                ##                    DFXML".format(dfxml_file)
                continue
 
-            # We will add image_index to the path so we can later extract the 
-            # image name to be displayed. We could have passed the image name 
-            # itself, instead of the index, but if the image name has special 
+            # We will add image_index to the path so we can later extract the
+            # image name to be displayed. We could have passed the image name
+            # itself, instead of the index, but if the image name has special
             # characters, we might bump into unexpected errors while creating
-            # files/directories with an unknown string. So chose to use the image 
+            # files/directories with an unknown string. So chose to use the image
             # index here and later extract the corresponding image name.
             directory_path = app.config['FILES_TO_INDEX_DIR']+"/"+str(image_index) +"/"+new_path
             ## print ("D1: bcaDnldRepo: Trying to create directory ", directory_path)
@@ -377,7 +377,7 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             if new_filelist_root == None:
                 ## print "Index-debug1: GetFileList returned Null filelist_root \
                 ##          for Image Path {}, partnum {}, new_path: \
-                ##          {}".format(image_path, partnum, new_path)  
+                ##          {}".format(image_path, partnum, new_path)
                 continue
 
             # Call the function recursively
@@ -463,12 +463,12 @@ def image_psql(image_name):
     image_index =  bcawGetImageIndex(image_name, is_path=False)
 
     '''
-    return render_template("db_image_template.html", 
+    return render_template("db_image_template.html",
                            image_name = image_name,
                            image=image_db[int(image_index)])
     '''
     meta = bcaw_is_sysmeta_supported(image_name)
-    return render_template("db_image_template.html", 
+    return render_template("db_image_template.html",
                            image_name = image_name,
                            image=image_db_list[image_index],
                            meta=meta)
@@ -476,7 +476,7 @@ def image_psql(image_name):
 #
 # Template rendering for Directory Listing per partition
 #
-@app.route('/image/<image_name>/<image_partition>')
+@app.route('/image/<image_name>/<image_partition>/')
 def root_directory_list(image_name, image_partition):
     logging.debug('D: Files: Rendering Template with files for partition: %s', image_partition)
     # print("D: Files: Rendering Template with files for partition: ",
@@ -505,8 +505,8 @@ def stream_template(template_name, **context):
 #
 # Template rendering when a File is clicked
 #
-@app.route('/image/<image_name>/<image_partition>', defaults={'filepath': ''})
-@app.route('/image/<image_name>/<image_partition>/<path:filepath>')
+@app.route('/image/<image_name>/<image_partition>/', defaults={'filepath': ''})
+@app.route('/image/<image_name>/<image_partition>/<path:filepath>/')
 
 def file_clicked(image_name, image_partition, filepath, inode=None):
     logging.debug('File_clicked: Rendering Template for subdirectory or contents of a file ')
@@ -523,7 +523,7 @@ def file_clicked(image_name, image_partition, filepath, inode=None):
 
     # print("D: Files: Rendering Template for subdirectory or contents of a file: ",
           ## image_name, image_partition, path)
-    
+
     image_index = bcawGetImageIndex(str(image_name), False)
     image_path = image_dir+'/'+image_name
 
@@ -644,7 +644,7 @@ def file_clicked(image_name, image_partition, filepath, inode=None):
         # print(">> Downloading File: ", real_file_name)
         # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
-    
+
         # Read data and store it in a string
         offset = 0
         size = f.info.meta.size
@@ -659,9 +659,9 @@ def file_clicked(image_name, image_partition, filepath, inode=None):
                 break
 
             offset += len(data)
-            total_data = total_data+data 
+            total_data = total_data+data
             # print "Length OF TOTAL DATA: ", len(total_data)
-           
+
 
         ###file_new = "'" + real_file_name + "'"
         mime = MimeTypes()
@@ -730,7 +730,7 @@ def home():
     global image_db_list
     del image_db_list [:]
 
-    # Create the DB. FIXME: This needs to be called from runserver.py 
+    # Create the DB. FIXME: This needs to be called from runserver.py
     # before calling run. That seems to have some issues. So calling from
     # here for now. Need to fix it.
     dm = bcaw()
@@ -745,7 +745,7 @@ def home():
             dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
             image_db_list.append(idb)
-            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5)) 
+            ## print("D: IDB: image_index:{}, image_name:{}, acq_date:{}, md5: {}".format(image_index, idb.image_name, idb.acq_date, idb.md5))
             image_index +=1
         else:
             continue
@@ -777,9 +777,9 @@ def contact():
 def profile():
   if 'email' not in session:
     return redirect(url_for('signin'))
- 
+
   user = User.query.filter_by(email = session['email']).first()
- 
+
   if user is None:
     return redirect(url_for('signin'))
   else:
@@ -792,15 +792,15 @@ def config():
     return redirect(url_for('config'))
 
   user = User.query.filter_by(email = session['email']).first()
- 
+
   if user is None:
     return redirect(url_for('signin'))
   else:
     config
-    return render_template('fl_config.html', 
+    return render_template('fl_config.html',
                    config_list=config_list,
                    num_config_items=str(len(config_list)))
-    
+
 @app.route('/fl_process_confinfo.html',  methods=['POST','GET'])
 def fl_process_confinfo():
     checked_list = request.form.getlist('config_item')
@@ -942,13 +942,13 @@ def query():
                                 search_result_file_list=search_result_file_list,
                                 search_result_image_list=search_result_image_list,
                                 user=user, signup_out = signup_out, form=form)
-                                                    
-            
+
+
     elif request.method == 'GET':
         return render_template('fl_query.html', form=form)
-        
 
-    ##query = bcaw_query(BcawDfxmlInfo, phrase) 
+
+    ##query = bcaw_query(BcawDfxmlInfo, phrase)
     #engine = create_engine('postgresql://vagrant:vagrant@localhost/bca_db')
 
     '''
@@ -996,7 +996,7 @@ def bcaw_generate_file_list():
     # print "D: bcaw_generatefile_list: Creating : ", outfile, outfile_dir
 
     if not os.path.exists(outfile_dir):
-        subprocess.check_output("mkdir " + outfile_dir, shell=True) 
+        subprocess.check_output("mkdir " + outfile_dir, shell=True)
     subprocess.check_output("touch " + outfile, shell=True)
     for dfxml_file in os.listdir(image_dir):
         if dfxml_file.endswith("_dfxml.xml"):
@@ -1063,7 +1063,7 @@ def bcawIsImageIndexedInDb(img):
     """ A flag to tell if an image is indexed, is maintained in the image table of
         the bcaw_db database. This flag should be in sync with the one in the image
         matrix. The reason it is replicated in the db is that it needs to be persistent
-        between application's running and retunning. 
+        between application's running and retunning.
     """
     #indexed =  int(bcaw_db.bcawDbGetIndexFlagForImage(img))
     indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
@@ -1263,7 +1263,7 @@ def bcawIndexAllFiles(self, task_id):
             logging.debug(">> Building Index for image: ", img)
 
             # Change the new files_to_index_directory into the one per image
-            files_to_index_dir_per_img = files_to_index_dir + "/" + str(image_index) 
+            files_to_index_dir_per_img = files_to_index_dir + "/" + str(image_index)
 
             cmd = "mkdir " + files_to_index_dir_per_img
             if not os.path.exists(files_to_index_dir_per_img):
@@ -1285,7 +1285,7 @@ def bcawIndexAllFiles(self, task_id):
             ## END Worker-task related code
 
             # If index exists for this image, don't do it
-            # FIXME: Query lucene to check the existance of indexing for this 
+            # FIXME: Query lucene to check the existance of indexing for this
             # image and continue to the next image if indexing exiss for this img.
             # Code needs to be added.
             if bcawIsImageIndexedInDb(img) == True:
@@ -1341,7 +1341,7 @@ def bcawIndexAllFiles(self, task_id):
 
             self.update_state(state='PROGRESS', \
                               task_id=task_id, \
-                              meta={'current': image_index, 'status':message}) 
+                              meta={'current': image_index, 'status':message})
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -1373,7 +1373,7 @@ def admin():
         task_type = "Build_all_tables"
         task_id_table['Build_all_tables'] = task.id
         db_option = 2
-        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Build_all_tables')
+        db_option_msg = url_for('taskstatus', task_type='Build_all_tables')
         is_option_msg_url = True
         option_msg_with_url = "The Tables are being built. Click to see status: "
     elif(form.radio_option.data.lower() == 'image_table'):
@@ -1405,7 +1405,7 @@ def admin():
         task_type = "Build_dfxml_tables"
         task_id_table['Build_dfxml_tables'] = task.id
         #db_option = 7
-        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Build_dfxml_tables')
+        db_option_msg = url_for('taskstatus', task_type='Build_dfxml_tables')
         is_option_msg_url = True
         option_msg_with_url = "DFXML Table being built. Click to see status: "
 
@@ -1454,7 +1454,7 @@ def admin():
     elif (form.radio_option.data.lower() == 'generate_index'):
         # First biuld the index for th filenames. Then build the index
         # for the contents from the configured directory. The contents index
-        # is built in 
+        # is built in
         db_option = 8
 
         # Indexing needs the image_table to be present in the bca_db for every image.
@@ -1528,9 +1528,9 @@ def admin():
         task_type = "Indexing"
         task_id_table['Indexing'] = task.id
         db_option = 9
-        db_option_msg = "http://" + server_host_name + ":8080" + url_for('taskstatus', task_type='Indexing')
+        db_option_msg = url_for('taskstatus', task_type='Indexing')
         is_option_msg_url = True
-        
+
     elif (form.radio_option.data.lower() == "clear_index"):
         bcawClearIndexing()
         db_option = 10
@@ -1542,8 +1542,8 @@ def admin():
         # Send the image list to the template
         ## print "[D] Displaying Image Matrix: ", image_matrix
 
-        # Since the asynchronous worker task which does indexing has no access 
-        # to the matrix, we will extract the index flags from the DB here, and 
+        # Since the asynchronous worker task which does indexing has no access
+        # to the matrix, we will extract the index flags from the DB here, and
         # update the matrix before displaying.
         bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages()
 
@@ -1560,13 +1560,13 @@ def admin():
     elif (form.radio_option.data.lower() == 'show_task_status'):
         db_option = 12
         is_option_msg_url = True
-        db_option_msg = "http://" + server_host_name + ":8080" + url_for('bcawCheckAllTaskStatus')
+        db_option_msg = url_for('bcawCheckAllTaskStatus')
 
     # request.form will be in the form:
     # ImmutableMultiDict([('delete_table, <image>), ), )'delete_form', 'submit')])
     # We need the image name from this dict. So we use the first element of the
     # list to get the image name so we know which image DB the table is being added
-    # to or deleted from. 
+    # to or deleted from.
     bld_list = request.form.getlist('build_table')
     delete_list = request.form.getlist('delete_table')
 
@@ -1600,7 +1600,7 @@ def admin():
                 db_option_msg = "Table bcaw_dfxmlinfo already exists for image " + image_name
             else:
                 logging.debug('>> Building DFXML table for image %s', image_name)
-                # print ">> Building DFXML table for image ", image_name 
+                # print ">> Building DFXML table for image ", image_name
                 retval, db_option_msg = bcaw_db.dbBuildTableForImage(image_name, bld_imgdb = False, bld_dfxmldb = True)
                 if retval == 0:
                     db_option_msg = "Built DFXML Table"
@@ -1633,22 +1633,22 @@ def admin():
                            option_msg=option_msg,
                            option_msg_with_url=option_msg_with_url,
                            form=form)
- 
+
   elif request.method == 'GET':
     return render_template('fl_admin.html', form=form)
- 
+
   if 'email' not in session:
     return redirect(url_for('admin'))
- 
+
   user = User.query.filter_by(email = session['email']).first()
- 
+
 '''
   if user is None:
     return redirect(url_for('signin'))
   else:
     # Check if user has the permission to do admin services
     return render_template('fl_profile.html')   # FIXME: Placeholder
-'''    
+'''
 
 @app.route('/status/')
 def bcawCheckAllTaskStatus():
