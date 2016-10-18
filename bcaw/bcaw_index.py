@@ -36,11 +36,11 @@ logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
 
 class IndexFiles(object):
     """ IndexFiles takes the root of a directory structure and the destination
-        directory as arguments to create Lucene indexes for the directory 
-        and copy the indexs into the target directory. 
+        directory as arguments to create Lucene indexes for the directory
+        and copy the indexs into the target directory.
         Attributes:
         root: Root of the directory structure containing files to be indexed.
-        store_dir: Output directory where indexes are to be stored. 
+        store_dir: Output directory where indexes are to be stored.
     """
     def __init__(self, root, store_dir):
 
@@ -93,7 +93,6 @@ class IndexFiles(object):
         t2.setTokenized(True)
         t2.setIndexOptions(FieldInfo.IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
 
-        ## print("D1: indexDocs:root: ", root)
         for root, dirnames, filenames in os.walk(root):
             for filename in filenames:
                 # We can index only a certain types of files
@@ -105,27 +104,21 @@ class IndexFiles(object):
 
                     # First convert PDF and DOC files to text
                     if filename.endswith('.pdf'):
-                        ## print "[D2]: indexDocs: It Is a PDF file" , filename
                         outfile = filename.replace('.pdf', '.txt')
                         outfile_path = os.path.join(root, outfile)
-                        cmd = 'pdftotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
-                        ## print "[D1]: indexDocs: pdftotext Command: ", cmd
+                        cmd = 'pdftotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'"
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
                     elif filename.endswith('.doc'):
-                        ## print "[D2]: indexDocs: It Is a .DOC file" , filename
                         outfile = filename.replace('.doc', '.txt')
                         outfile_path = os.path.join(root, outfile)
                         cmd = 'antiword ' +  file_path + ' >> ' + outfile_path
-                        ## print "[D1]: indexDocs: antiword Command: ", cmd
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
                     elif filename.endswith('.odt'):
-                        ## print "[D2]: indexDocs: It Is a ODT file" , filename
                         outfile = filename.replace('.odt', '.txt')
                         outfile_path = os.path.join(root, outfile)
-                        cmd = 'odttotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
-                        ## print "[D1]: indexDocs: odttotext Command: ", cmd
+                        cmd = 'odttotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'"
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
 
@@ -139,12 +132,9 @@ class IndexFiles(object):
                         doc.add(Field("contents", contents, t2))
                     else:
                         logging.debug('warning: no content in %s', filename)
-                        # print "warning: no content in %s" % filename
                     writer.addDocument(doc)
-                    ## print "[D]: IndexDocs: Added Doc {}, numDocs: {} ".format(file_path, writer.numDocs())
                 except Exception, e:
                     logging.debug('Failed in indexDocs: %s', e)
-                    # print "Failed in indexDocs:", e
 
 def searchIndexedFiles(searcher, analyzer, search_text):
     """ Searces the Lucene index created by indexDocs for the given string,
@@ -152,22 +142,17 @@ def searchIndexedFiles(searcher, analyzer, search_text):
     """
     search_list = []
     logging.debug('Searching for: %s', search_text)
-    # print "Searching for:", search_text
     query = QueryParser(Version.LUCENE_CURRENT, "contents",
                         analyzer).parse(search_text)
     scoreDocs = searcher.search(query, 50).scoreDocs
     logging.debug('%s total matching documents', len(scoreDocs))
-    # print "%s total matching documents." % len(scoreDocs)
 
     if len(scoreDocs) == 0:
         logging.debug('Query: Not found for : %s', search_text)
-        # print "Query: Not found for : ",search_text
         return None
     else:
         for scoreDoc in scoreDocs:
             doc = searcher.doc(scoreDoc.doc)
-            ## print 'D: searchIndexedFiles: path:', doc.get("path"), 'name:', doc.get("name")
             file_path = doc.get("path") + "/" + doc.get("name")
             search_list.append(file_path)
-        ## print "D: searchIndexFiles: Search List from Lucene Indexing ", search_list
         return search_list

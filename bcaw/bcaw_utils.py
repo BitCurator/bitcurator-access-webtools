@@ -13,7 +13,7 @@
 
 # For is_text routine
 from __future__ import division
-import string 
+import string
 
 import pytsk3
 import os, sys, string, time, re
@@ -22,10 +22,10 @@ import subprocess
 import fileinput
 import xml.etree.ElementTree as ET
 
-#FIXME: Note: This file is created to be the common utils file. A few 
+#FIXME: Note: This file is created to be the common utils file. A few
 # routines are moved here from image_browse.py file, but are also retained
 # in that file for now, because image_browse part is not yet tested with
-# this file. Eventually those routines will go away and the routines from 
+# this file. Eventually those routines will go away and the routines from
 # this file will be called by both db and browse files.
 
 # Set up logging location for anyone importing these utils
@@ -55,7 +55,6 @@ class bcaw:
                 try:
                     fs = pytsk3.FS_Info(img, offset=(part.start * 512))
                 except:
-                    ## print ">> Exception in pytsk3.FS_Info in partition: ", self.num_partitions
                     continue
                 self.num_partitions += 1
         return (self.num_partitions)
@@ -71,7 +70,6 @@ class bcaw:
             volume = pytsk3.Volume_Info(img)
             is_partition_info = True
         except:
-            ## print "bcawGetPartionInfoForImage: Volume Info failed. Could be FAT12 "
             self.num_partitions = 1
             is_partition_info = False
             fs = pytsk3.FS_Info(img, offset=0)
@@ -128,14 +126,13 @@ class bcaw:
                 try:
                     fs = pytsk3.FS_Info(img, offset=(part.start * 512))
                 except:
-                    ## print "Exception in pytsk3.FS_Info for partition : ", self.num_partitions
                     continue
                 self.partDictList[image_index].append({self.part_array[0]:image_path, \
                                      self.part_array[1]:part.addr, \
                                      self.part_array[2]:part.slot_num, \
                                      self.part_array[3]:part.start, \
                                      self.part_array[4]:part.desc })
-    
+
                 self.num_partitions += 1
 
                 fs = pytsk3.FS_Info(img, offset=(part.start * 512))
@@ -143,19 +140,13 @@ class bcaw:
                 # First level files and directories off the root
                 # returns file_list for the root directory
                 file_list_root = self.bcawListFiles(fs, "/", image_index, part.slot_num)
-                ## print(file_list_root)
-    
+
         image_name = os.path.basename(image_path)
         self.num_partitions_ofimg[image_name] = self.num_partitions
-        ## print ("D: Number of Partitions for image = ", image_name, self.num_partitions)
         return (self.num_partitions)
 
     def bcawGenFileList(self, image_path, image_index, partition_num, root_path):
-        logging.debug('D1: image_path: %s', image_path)
-        logging.debug('D1: index: %s', image_index)
-        logging.debug('D1: part: %s', partition_num)
-        logging.debug('D1: root_path: %s', root_path)
-        # print("D1: image_path: {} index: {} part: {} rootpath: {}".format(image_path, image_index, partition_num, root_path))
+        logging.debug('D1: image_path: %s index: %s part: %s root_path: %s ', image_path, image_index, partition_num, root_path)
         img = pytsk3.Img_Info(image_path)
         # Get the start of the partition:
         part_start = self.partDictList[int(image_index)][partition_num-1]['start_offset']
@@ -167,7 +158,7 @@ class bcaw:
         file_list_root = self.bcawListFiles(fs, root_path, image_index, partition_num)
 
         return file_list_root, fs
-        
+
 
     bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted', 'name_slug']
 
@@ -183,25 +174,19 @@ class bcaw:
         i=0
         for f in directory:
             is_dir = False
-            '''
-            print("Func:bcawListFiles:root_path:{} size: {} inode: {} \
-            par inode: {} mode: {} type: {} ".format(f.info.name.name,\
-            f.info.meta.size, f.info.meta.addr, f.info.name.meta_addr,\
-            f.info.name.par_addr, f.info.meta.mode, f.info.meta.type))
-            '''
             # Some files may not have the metadta information. So
             # access it only if it exists.
             if f.info.meta != None:
                 if f.info.meta.type == 2:
                     is_dir = True
-           
+
                 # Since we are displaying the modified time for the file,
                 # Convert the mtime to isoformat to be passed in file_list.
                 ## d = date.fromtimestamp(f.info.meta.mtime)
                 ## mtime = d.isoformat()
                 mtime = time.strftime("%FT%TZ",time.gmtime(f.info.meta.mtime))
 
-    
+
                 if (int(f.info.meta.flags) & 0x01 == 0):
                     deleted = "Yes"
                 else:
@@ -229,14 +214,10 @@ class bcaw:
                               self.bcawFileInfo[9]:deleted, \
                               self.bcawFileInfo[10]:name_slug })
 
-        ##print("Func:bcawListFiles: Listing Directory for PATH: ", path)
-        ##print file_list
-        ##print "\n\n"
         return file_list
 
     def dbGetImageInfoXml(self, image_name):
         if image_name.endswith(".E01") or image_name.endswith(".e01"):
-            #ewfinfo_xmlfile = os.getcwd() +"/"+ image_name+".xml"
             ewfinfo_xmlfile = image_name+".xml"
             cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
             logging.debug('CMD xmlfile: %s', ewfinfo_xmlfile)
@@ -253,7 +234,6 @@ class bcaw:
             return None
 
     def fixup_dfxmlfile_temp(self, dfxmlfile):
-        ## print("D: Fix up the dfxml file: ")
         with open(dfxmlfile) as fin, open("/tmp/tempfile", "w") as fout:
             for line in fin:
                 if not "xmlns" in line:
@@ -267,62 +247,37 @@ class bcaw:
         cmd = "mv /tmp/tempfile " + dfxmlfile
         subprocess.check_output(cmd, shell=True)
         logging.debug('>> : Updated dfxmlfile ')
-        # print(">> : Updated dfxmlfile ")
         return dfxmlfile
 
     def fixup_dfxmlfile(self, dfxmlfile):
-        ##fin = open(dfxmlfile)
-        ##fout = open("tempfile", "w")
-
-        '''
-        with open(dfxmlfile) as fin, open("tempfile") as fout:
-            for line in fin:
-                if not "xmlns" in line:
-                    fout.write(line)
-        '''
         linenumber = 0
         for line in fileinput.input (dfxmlfile, inplace=1):
             linenumber += 1
             if "xmlns" in line:
                 logging.debug('Why is this here??? ')
-                # print "",
             if linenumber > 6:
                 break
 
     def dbGetInfoFromDfxml(self, image_name):
         # First generate the dfxml file for the image
-        #ewfinfo_xmlfile = os.getcwd() +"/"+ image_name+".xml"
         dfxmlfile = image_name+"_dfxml.xml"
-        #cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
-
-        '''
-        # FIXME: Just for testing: dfxml removed and recreted.
-        #if dfxml_dir:
-        if os.path.exists(dfxmlfile):
-            rmcmd = ['rm', dfxmlfile]
-            subprocess.check_output(rmcmd)
-        '''
 
 
         if not os.path.exists(dfxmlfile):
             printstr = "WARNING!!! DFXML FIle " + dfxmlfile + " does NOT exist. Creating one"
             logging.debug('Warning: %s ', printstr)
-            # print (printstr)
             cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_name]
             logging.debug('CMD: %s ', cmd)
-            # print ("CMD: ", dfxmlfile, cmd)
             subprocess.check_output(cmd)
 
         # Remove the name space info as the xml parsing won't give proper
         # tags with the name space prefix attached.
         logging.debug('D: Fiwalk generated dfxml file. Fixing it up now ')
-        # print("D: Fiwalk generated dfxml file. Fixing it up now ")
-        #self.fixup_dfxmlfile(dfxmlfile)
         dfxmlfile = self.fixup_dfxmlfile_temp(dfxmlfile)
-        
+
         return dfxmlfile
 
-# Routine to detect text files: Got from 
+# Routine to detect text files: Got from
 # http://stackoverflow.com/questions/1446549/how-to-identify-binary-and-text-files-using-python
 
 def istext(filename):
@@ -348,12 +303,10 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
     """ In order to get the complete path of each file being indexed, we use'
         the information from the dfxml file. This routine looks for the given file
         in the given dfxml file and returns the <filename> info, whic happens
-        to be the complete path. 
+        to be the complete path.
         NOTE: In case this process is contributing significantly
         to the indexing time, we need to find a better way to get this info.
     """
-    ## print("D1: bcawGetPathFromDfxml: in_filename: {}, dfxmlfile: {}".format(in_filename, dfxmlfile))
-
     try:
         tree = ET.parse( dfxmlfile )
     except IOError, e:
@@ -372,9 +325,8 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
                             f_name = fo_child.text
                             # if this is the filename, return the path.
                             # "fielname" has the complete path in the DFXML file.
-                            # Extract just the fiename to compare with 
+                            # Extract just the fiename to compare with
                             base_filename = os.path.basename(f_name)
-                            ## print("D2: base_filename: {}, f_name: {}".format(base_filename, f_name)) 
                             if in_filename == base_filename:
                                 return f_name
 
@@ -399,22 +351,18 @@ bcaw_raw_image_list = ['.raw', '.dd', '.iso']
 def bcaw_is_imgtype_supported(image):
     imgname, img_extension = os.path.splitext(image)
     if img_extension in bcaw_supported_imgtype_list:
-        ## print "D: Image {} is supported".format(image)
         logging.debug("D: Image %s is supported" ,image)
         return True
     else:
-        # print "> Image type {} not supported".format(img_extension)
         logging.debug("> Image type %s not supported", img_extension)
         return False
 
 def bcaw_is_sysmeta_supported(image):
     imgname, img_extension = os.path.splitext(image)
     if img_extension in bcaw_sysmeta_supported_list:
-        ## print "D: Image {} has system metadata info".format(image)
         logging.debug("D: Image %s has system metadata info", image)
         return True
     else:
-        ## print "> Image type {} doesnot have system metadata".format(img_extension)
         logging.debug("> Image type %s doesnot have system metadata", img_extension)
         return False
 
@@ -423,4 +371,3 @@ def is_image_raw(image):
     if img_extension in bcaw_raw_image_list:
         return True
     return False
-
