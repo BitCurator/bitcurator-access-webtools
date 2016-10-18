@@ -40,8 +40,8 @@ from subprocess import Popen,PIPE
 from flask import send_from_directory
 
 # Set up logging location for anyone importing these utils
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
-# logging.basicConfig(filename='/var/log/bcaw.log', filemode='w', level=logging.DEBUG)
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
 
 '''
 from sqlalchemy.ext.declarative import declarative_base

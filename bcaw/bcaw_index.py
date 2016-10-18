@@ -32,15 +32,16 @@ from org.apache.lucene.util import Version
 from org.apache.lucene.queryparser.classic import QueryParser
 
 # Set up logging location for anyone importing these utils
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
 
 class IndexFiles(object):
     """ IndexFiles takes the root of a directory structure and the destination
-        directory as arguments to create Lucene indexes for the directory 
-        and copy the indexs into the target directory. 
+        directory as arguments to create Lucene indexes for the directory
+        and copy the indexs into the target directory.
         Attributes:
         root: Root of the directory structure containing files to be indexed.
-        store_dir: Output directory where indexes are to be stored. 
+        store_dir: Output directory where indexes are to be stored.
     """
     def __init__(self, root, store_dir):
 
@@ -108,7 +109,7 @@ class IndexFiles(object):
                         ## print "[D2]: indexDocs: It Is a PDF file" , filename
                         outfile = filename.replace('.pdf', '.txt')
                         outfile_path = os.path.join(root, outfile)
-                        cmd = 'pdftotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
+                        cmd = 'pdftotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'"
                         ## print "[D1]: indexDocs: pdftotext Command: ", cmd
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
@@ -124,7 +125,7 @@ class IndexFiles(object):
                         ## print "[D2]: indexDocs: It Is a ODT file" , filename
                         outfile = filename.replace('.odt', '.txt')
                         outfile_path = os.path.join(root, outfile)
-                        cmd = 'odttotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'" 
+                        cmd = 'odttotext ' + '-layout ' + "'"+ file_path +  "'" + ' ' + "'" + outfile_path + "'"
                         ## print "[D1]: indexDocs: odttotext Command: ", cmd
                         subprocess.check_output(cmd, shell=True)
                         file_path = outfile_path
