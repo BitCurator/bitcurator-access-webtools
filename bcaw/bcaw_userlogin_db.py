@@ -22,11 +22,7 @@ from werkzeug import generate_password_hash, check_password_hash
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
 logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
 
-#app = Flask(__name__)
-#db_login = SQLAlchemy(app)
-
 db_login = SQLAlchemy()
-###from runserver import db_login
 
 class User(db_login.Model):
   __tablename__ = 'users'
@@ -34,7 +30,6 @@ class User(db_login.Model):
   firstname = db_login.Column(db_login.String(100))
   lastname = db_login.Column(db_login.String(100))
   email = db_login.Column(db_login.String(120), unique=True)
-  #pwdhash = db_login.Column(db_login.String(54))
   pwdhash = db_login.Column(db_login.String(200))
 
   def __init__(self, firstname, lastname, email, password):
@@ -51,6 +46,3 @@ class User(db_login.Model):
 
 def dbinit():
    logging.debug('>>> Creating tables ')
-   # print(">>> Creating tables ")
-   #db_login.drop_all()
-   #db_login.create_all()
