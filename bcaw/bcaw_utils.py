@@ -13,7 +13,7 @@
 
 # For is_text routine
 from __future__ import division
-import string 
+import string
 
 import pytsk3
 import os, sys, string, time, re
@@ -22,14 +22,15 @@ import subprocess
 import fileinput
 import xml.etree.ElementTree as ET
 
-#FIXME: Note: This file is created to be the common utils file. A few 
+#FIXME: Note: This file is created to be the common utils file. A few
 # routines are moved here from image_browse.py file, but are also retained
 # in that file for now, because image_browse part is not yet tested with
-# this file. Eventually those routines will go away and the routines from 
+# this file. Eventually those routines will go away and the routines from
 # this file will be called by both db and browse files.
 
 # Set up logging location for anyone importing these utils
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG)
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
 
 class bcaw:
     num_partitions = 0
@@ -135,7 +136,7 @@ class bcaw:
                                      self.part_array[2]:part.slot_num, \
                                      self.part_array[3]:part.start, \
                                      self.part_array[4]:part.desc })
-    
+
                 self.num_partitions += 1
 
                 fs = pytsk3.FS_Info(img, offset=(part.start * 512))
@@ -144,7 +145,7 @@ class bcaw:
                 # returns file_list for the root directory
                 file_list_root = self.bcawListFiles(fs, "/", image_index, part.slot_num)
                 ## print(file_list_root)
-    
+
         image_name = os.path.basename(image_path)
         self.num_partitions_ofimg[image_name] = self.num_partitions
         ## print ("D: Number of Partitions for image = ", image_name, self.num_partitions)
@@ -167,7 +168,7 @@ class bcaw:
         file_list_root = self.bcawListFiles(fs, root_path, image_index, partition_num)
 
         return file_list_root, fs
-        
+
 
     bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted', 'name_slug']
 
@@ -194,14 +195,14 @@ class bcaw:
             if f.info.meta != None:
                 if f.info.meta.type == 2:
                     is_dir = True
-           
+
                 # Since we are displaying the modified time for the file,
                 # Convert the mtime to isoformat to be passed in file_list.
                 ## d = date.fromtimestamp(f.info.meta.mtime)
                 ## mtime = d.isoformat()
                 mtime = time.strftime("%FT%TZ",time.gmtime(f.info.meta.mtime))
 
-    
+
                 if (int(f.info.meta.flags) & 0x01 == 0):
                     deleted = "Yes"
                 else:
@@ -319,10 +320,10 @@ class bcaw:
         # print("D: Fiwalk generated dfxml file. Fixing it up now ")
         #self.fixup_dfxmlfile(dfxmlfile)
         dfxmlfile = self.fixup_dfxmlfile_temp(dfxmlfile)
-        
+
         return dfxmlfile
 
-# Routine to detect text files: Got from 
+# Routine to detect text files: Got from
 # http://stackoverflow.com/questions/1446549/how-to-identify-binary-and-text-files-using-python
 
 def istext(filename):
@@ -348,7 +349,7 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
     """ In order to get the complete path of each file being indexed, we use'
         the information from the dfxml file. This routine looks for the given file
         in the given dfxml file and returns the <filename> info, whic happens
-        to be the complete path. 
+        to be the complete path.
         NOTE: In case this process is contributing significantly
         to the indexing time, we need to find a better way to get this info.
     """
@@ -372,9 +373,9 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
                             f_name = fo_child.text
                             # if this is the filename, return the path.
                             # "fielname" has the complete path in the DFXML file.
-                            # Extract just the fiename to compare with 
+                            # Extract just the fiename to compare with
                             base_filename = os.path.basename(f_name)
-                            ## print("D2: base_filename: {}, f_name: {}".format(base_filename, f_name)) 
+                            ## print("D2: base_filename: {}, f_name: {}".format(base_filename, f_name))
                             if in_filename == base_filename:
                                 return f_name
 
@@ -423,4 +424,3 @@ def is_image_raw(image):
     if img_extension in bcaw_raw_image_list:
         return True
     return False
-
