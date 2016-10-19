@@ -31,10 +31,6 @@ from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.util import Version
 from org.apache.lucene.queryparser.classic import QueryParser
 
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
-
 class IndexFiles(object):
     """ IndexFiles takes the root of a directory structure and the destination
         directory as arguments to create Lucene indexes for the directory

@@ -29,10 +29,6 @@ from org.apache.lucene.util import Version
 import os
 import logging
 
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
-
 class ContactForm(Form):
   name = TextField("Name")
   email = TextField("Email")
@@ -92,16 +88,12 @@ class QueryForm(Form):
         search_text: the actual text string being searched for
         radio_option: One of the two options: filename or contents
     """
-    #search_text = TextField("Search", [validators.Required("Please enter the search phrase"), validators.DataRequired("Please enter the search phrase") )
-    search_text = TextField("Search" )
+    search_text = TextField("Search")
     radio_option = RadioField('Label', choices=[('filename', 'Search by filename'), ('contents', 'Search by content')], default='contents')
     submit = SubmitField("Search")
     search_result = []
     q1 = []
     q2 = []
-
-    logging.debug('D: Search_text: %s', search_text)
-    logging.debug('D: Radio Option: %s', radio_option)
 
     def __init__(self, *args, **kwargs):
         Form.__init__(self, *args, **kwargs)

@@ -11,19 +11,21 @@
 #
 # This is a python __init__ script to create the app and import the
 # main package contents
-
 from flask import Flask
+import logging
+
+# Configure logging across all modules
+FORMAT="[%(levelname)-8s %(filename)-15s:%(lineno)-5d %(funcName)-30s] %(message)s"
+logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
+logging.debug("Restarting Flask application.");
 app = Flask(__name__)
-import bcaw.image_browse
-
-# main_app = app
-
 # Config file:
 
 # Adding the following line will allow the configurations to be
 # defined in the specified file - bcaw_default_settings.py. Doing so
 # will add the corresponding elements to the dectionary app.config
 # and populate them with the given values.
+logging.debug("Initialising default configuration.");
 app.config.from_object('bcaw_default_settings')
 
 # NOTE: From another site: http://code.tutsplus.com/tutorials/intro-to-flask-signing-in-and-out--net-29982
@@ -31,14 +33,8 @@ app.config.from_object('bcaw_default_settings')
 # default config file.
 app.secret_key = 'development key'
 
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 465
-app.config["MAIL_USE_SSL"] = True
-app.config["MAIL_USERNAME"] = 'contact@example.com'
-app.config["MAIL_PASSWORD"] = 'your-password'
+import bcaw_db as db
+logging.debug("Initialising database.");
+db.dbinit()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://vagrant:vagrant@localhost/bca_db'
-
-from bcaw_userlogin_db import db_login
-db_login.init_app(app)
 import bcaw.image_browse

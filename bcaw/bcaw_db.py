@@ -13,6 +13,7 @@
 #
 
 
+from bcaw import app
 from flask import Flask, render_template, url_for, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 from bcaw_default_settings import *
@@ -22,23 +23,15 @@ import image_browse
 
 from celery import Celery
 
-app = Flask(__name__)
-
 import os
 import logging
 from bcaw_utils import *
 import xml.etree.ElementTree as ET
 
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
-
 # FIXME: The following two lines for configuration are supposed to be
 # in __init__.py. But somehow they are not getting picked up here. So
 # added them here. Need to move it back there so these can be used by
 # all the files.
-
-app.config.from_object('bcaw_default_settings')
 
 image_list = []
 image_dir = app.config['IMAGEDIR']
@@ -68,8 +61,7 @@ def bcawGetXmlInfo(xmlfile):
     try:
         tree = ET.parse( xmlfile )
     except IOError, e:
-        logging.debug('Failure parsing %s: %s', xmlfile, e)
-        # print "Failure Parsing %s: %s" % (xmlfile, e)
+        logging.error('Failure parsing %s: %s', xmlfile, e)
 
     dbrec = dict()
     root = tree.getroot() # root node
@@ -119,8 +111,8 @@ def bcawGetDfxmlInfo(dfxmlfile, img):
     try:
         tree = ET.parse( dfxmlfile )
     except IOError, e:
-        logging.debug('Failure parsing %s', dfxmlfile)
-        logging.debug('error code: %s', e)
+        logging.error('Failure parsing %s', dfxmlfile)
+        logging.error('error code: %s', e)
         # print "Failure Parsing %s: %s" % (dfxmlfile, e)
 
     d_dbrec = dict()
@@ -168,16 +160,15 @@ def dbBrowseImages():
     del image_list[:]
 
     for img in os.listdir(image_dir):
-        ##if img.endswith(".E01") or img.endswith(".AFF"):
         if image_browse.bcaw_is_imgtype_supported(img):
             ## global image_list
             image_list.append(img)
 
             # Check if table entry already exists for this image:
             if dbu_does_table_exist_for_img(img, 'bcaw_images'):
-                logging.debug('>> Table already exists for Image %s', img)
+                logging.debug('Image %s already in bcaw_images table', img)
                 continue
-            logging.debug('D: dbBrowseImages: Table does not exist for image. Proceeding.')
+            logging.debug('Adding image %s to bcaw_images table.', img)
 
             # FIXME: Partition info will be added to the metadata info
             # Till then the following three lines are not necessary.
@@ -242,7 +233,6 @@ def dbBuildDb(self, task_id, bld_imgdb = False, bld_dfxmldb = False):
             return(-1, "No DB Specified");
 
     for img in os.listdir(image_dir):
-        #if img.endswith(".E01") or img.endswith(".AFF"):
         if image_browse.bcaw_is_imgtype_supported(img):
             logging.debug('\nD: Generating table contents for image: %s', img)
             retval, return_msg = dbBuildTableForImage(img, bld_imgdb, bld_dfxmldb)
@@ -284,7 +274,6 @@ def dbBuildTableForImage(img, bld_imgdb = False, bld_dfxmldb = False):
             # if bld_imgdb == False and bld_dfxmldb == False:
             return(-1, "No DB Specified")
 
-    #if not img.endswith(".E01") or img.endswith(".AFF"):
     if not image_browse.bcaw_is_imgtype_supported(img):
         logging.debug('>> Not building Table: Wrong image type: %s', img)
         return(-1, "Wrong Image Type")
@@ -525,16 +514,8 @@ def bcawDfxmlDbSessionAdd(d_dbrec):
 
 
 def dbinit():
+    logging.debug("Database initialisation")
     db_login.create_all()
-    '''
-    with app.app_context():
-        print(">>> Creating tables ")
-        #db_login.drop_all() ## FIXME: TEMP
-        db_login.create_all()
-    '''
-
-def bcawdb():
-    dbinit()
     dbBrowseImages()
 
 def dbu_get_conn():
@@ -550,14 +531,6 @@ def dbu_get_conn():
     return conn
 
 def dbu_print_records():
-    '''
-    conn = psycopg2.connect("\
-	dbname='bca_db'\
-	user='vagrant'\
-        host = '127.0.0.1' \
-	password='vagrant'\
-    ");
-    '''
     conn = dbu_get_conn()
     c = conn.cursor()
     try:
@@ -638,16 +611,6 @@ def dbu_execute_dbcmd(table_name, function, image_name):
         logging.debug('>> Table %s does not exist ', table_name)
         message_string = "Table "+ table_name + " does not exist"
         return(-1, message_string)
-
-def dbu_create_table_if_doesntexist(table_name):
-    conn = dbu_get_conn()
-    c = conn.cursor()
-    exec_cmd = "SELECT * FROM " + table_name
-    try:
-        c.execute(exec_cmd)
-    except:
-        # Table doesn't exist. so create.
-        db_login.create_all()
 
 def dbu_does_table_exist_for_img(image_name, table):
     """ DB utility function to check if a table entry for the given image

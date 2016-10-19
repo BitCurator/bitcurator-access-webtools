@@ -17,12 +17,8 @@ import logging
 from flask import Flask, render_template, url_for, Response
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import generate_password_hash, check_password_hash
-
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
-
-db_login = SQLAlchemy()
+from bcaw import app
+db_login = SQLAlchemy(app)
 
 class User(db_login.Model):
   __tablename__ = 'users'

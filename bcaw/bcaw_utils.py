@@ -28,10 +28,6 @@ import xml.etree.ElementTree as ET
 # this file. Eventually those routines will go away and the routines from
 # this file will be called by both db and browse files.
 
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
-
 class bcaw:
     num_partitions = 0
     part_array = ["image_path", "addr", "slot_num", "start_offset", "desc"]
@@ -112,16 +108,6 @@ class bcaw:
                 # The list will have one dictionary per partition. The image
                 # name is added as the first element of each partition to
                 # avoid a two-dimentional list.
-                logging.debug('D: image_path: %s', image_path)
-                # print "D: image_path: ", image_path
-                logging.debug('D: part_addr: %s', part.addr)
-                # print "D: part_addr: ", part.addr
-                logging.debug('D: part_slot_num: %s', part.slot_num)
-                # print "D: part_slot_num: ", part.slot_num
-                logging.debug('D: part_start_offset: %s', part.start)
-                # print "D: part_start_offset: ", part.start
-                logging.debug('D: part_description: %s', part.desc)
-                # print "D: part_description: ", part.desc
                 # Open the file system for this image at the extracted
                 # start_offset.
                 try:
@@ -161,7 +147,7 @@ class bcaw:
         return file_list_root, fs
 
 
-    bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted', 'name_slug']
+    bcawFileInfo = ['name', 'size', 'mode', 'inode', 'p_inode', 'mtime', 'atime', 'ctime', 'isdir', 'deleted']
 
 
     def bcawListFiles(self, fs, path, image_index, partition_num):
@@ -193,16 +179,6 @@ class bcaw:
                 else:
                     deleted = "No"
 
-                # NOTE: A new item "name_slug" is added to those file names which
-                # have a space. The space is replaced by %20 and saved as name_slug.
-                # This is used later when a file with a "non-None" name_slug shows
-                # up at the route. It is recognized as a filename with spaces and
-                # using the inode comparison, its real name is extracted before
-                # downloading the file.
-                name_slug = "None"
-                if " " in f.info.name.name:
-                    name_slug = f.info.name.name.replace(" ", "%20")
-
                 file_list.append({self.bcawFileInfo[0]:f.info.name.name, \
                               self.bcawFileInfo[1]:f.info.meta.size, \
                               self.bcawFileInfo[2]:f.info.meta.mode, \
@@ -212,8 +188,7 @@ class bcaw:
                               self.bcawFileInfo[6]:f.info.meta.atime, \
                               self.bcawFileInfo[7]:f.info.meta.ctime, \
                               self.bcawFileInfo[8]:is_dir, \
-                              self.bcawFileInfo[9]:deleted, \
-                              self.bcawFileInfo[10]:name_slug })
+                              self.bcawFileInfo[9]:deleted })
 
         return file_list
 
@@ -231,7 +206,6 @@ class bcaw:
             cmd = "affinfo "+image_name
             subprocess.check_output(cmd, shell=True)
             logging.debug('Need an E01 file to return xml file')
-            # print("Need an E01 file to return xml file")
             return None
 
     def fixup_dfxmlfile_temp(self, dfxmlfile):
@@ -247,7 +221,6 @@ class bcaw:
 
         cmd = "mv /tmp/tempfile " + dfxmlfile
         subprocess.check_output(cmd, shell=True)
-        logging.debug('>> : Updated dfxmlfile ')
         return dfxmlfile
 
     def fixup_dfxmlfile(self, dfxmlfile):
@@ -266,7 +239,7 @@ class bcaw:
 
         if not os.path.exists(dfxmlfile):
             printstr = "WARNING!!! DFXML FIle " + dfxmlfile + " does NOT exist. Creating one"
-            logging.debug('Warning: %s ', printstr)
+            logging.warning('Warning: %s ', printstr)
             cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_name]
             logging.debug('CMD: %s ', cmd)
             subprocess.check_output(cmd)
@@ -311,8 +284,7 @@ def bcawGetPathFromDfxml(in_filename, dfxmlfile):
     try:
         tree = ET.parse( dfxmlfile )
     except IOError, e:
-        logging.debug('Failure parsing DFXML file %s ', e)
-        # print "Failure Parsing %s: %s" % (dfxmlfile, e)
+        logging.error('Failure parsing DFXML file %s ', e)
 
     root = tree.getroot() # root node
     for child in root:
@@ -340,31 +312,28 @@ def bcawGetParentDir(filepath):
     parent_dir = '/'.join(temp_list)
     return parent_dir
 
-# list of image types supported
-bcaw_supported_imgtype_list = ['.E01', '.e01', '.aff', '.AFF', '.raw', '.dd', '.iso']
-
 # list of image types supporting system metadata
 bcaw_sysmeta_supported_list = ['.E01', '.e01', '.aff', '.AFF']
 
 # list of raw image types
 bcaw_raw_image_list = ['.raw', '.dd', '.iso']
 
+bcaw_supported_imgtype_list = bcaw_sysmeta_supported_list + bcaw_raw_image_list;
+
 def bcaw_is_imgtype_supported(image):
     imgname, img_extension = os.path.splitext(image)
     if img_extension in bcaw_supported_imgtype_list:
-        logging.debug("D: Image %s is supported" ,image)
         return True
     else:
-        logging.debug("> Image type %s not supported", img_extension)
+        logging.debug("Image type %s not supported", img_extension)
         return False
 
 def bcaw_is_sysmeta_supported(image):
     imgname, img_extension = os.path.splitext(image)
     if img_extension in bcaw_sysmeta_supported_list:
-        logging.debug("D: Image %s has system metadata info", image)
         return True
     else:
-        logging.debug("> Image type %s doesnot have system metadata", img_extension)
+        logging.debug("Image type %s doesnot have system metadata", img_extension)
         return False
 
 def is_image_raw(image):

@@ -17,7 +17,7 @@ from bcaw_forms import ContactForm, SignupForm, SigninForm, QueryForm, adminForm
 from celery import Celery
 
 import pytsk3
-import os, sys, string, time, re
+import os, sys, string, time, re, urllib
 import logging
 from mimetypes import MimeTypes
 from datetime import date
@@ -36,10 +36,6 @@ from werkzeug.routing import BaseConverter
 import subprocess
 from subprocess import Popen,PIPE
 from flask import send_from_directory
-
-# Set up logging location for anyone importing these utils
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-logging.basicConfig(filename='/var/log/bcaw.log', level=logging.DEBUG, format=FORMAT)
 
 image_list = []
 file_list_root = []
@@ -82,14 +78,12 @@ def bcawPopulateImgInfoTable(image_index, img, imgdb_flag, dfxmldb_flag, index_f
         if bcaw_db.dbu_does_table_exist_for_img(img, "bcaw_dfxmlinfo"):
             dfxml_db_exists = True
 
-
         # Add the querried info to the matrix.
         image_matrix.append({bcaw_imginfo[0]:image_index, bcaw_imginfo[1]:img, bcaw_imginfo[2]:img_db_exists, bcaw_imginfo[3]:dfxml_db_exists, bcaw_imginfo[4]:img_is_indexed})
 
 #FIXME: The following line should be called in __init__.py once.
 # Since that is not being recognized here, app.config.from_object is
 # added here. This needs to be fixed.
-app.config.from_object('bcaw_default_settings')
 image_dir = app.config['IMAGEDIR']
 dirFilesToIndex = app.config['FILES_TO_INDEX_DIR']
 indexDir = app.config['INDEX_DIR']
@@ -101,8 +95,12 @@ celery.conf.update(app.config)
 num_images = 0
 image_db_list = []
 
-@app.route("/")
-def bcawBrowseImages(db_init=True):
+@app.route("/home")
+def home():
+    return redirect(url_for("bcawBrowseImages"), code=302)
+
+@app.route('/')
+def bcawBrowseImages():
     global image_dir
     image_index = 0
 
@@ -116,26 +114,14 @@ def bcawBrowseImages(db_init=True):
     del image_db_list [:]
     global partition_in
 
-    # Create the DB. FIXME: This needs to be called from runserver.py
-    # before calling run. That seems to have some issues. So calling from
-    # here for now. Need to fix it.
-    if db_init == True:
-        session1 = bcaw_db.bcawdb()
-
     dm = bcaw()
     for img in os.listdir(image_dir):
-        #if img.endswith(".E01") or img.endswith(".AFF"):
         if bcaw_is_imgtype_supported(img):
-            ## print img
-            ### global image_list
-
-            image_path = image_dir+'/'+img
-
-            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             image_list.append(img)
-            partition_in[img] = dm.num_partitions
-
+            image_path = image_dir+'/'+img
+            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
             idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
+            partition_in[img] = dm.num_partitions
             image_db_list.append(idb)
 
             # Populate the image info table with this image name and index
@@ -273,12 +259,6 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
         else:
             filename = item['name'] # FIXME: Test more to make sure files with space work.
 
-            if item['name_slug'] != "None" :
-
-                # Strip the digits after the last "-" from filepath to get inode
-                #new_filepath, separater, inode = filepath.rpartition("-")
-                filename = item['name_slug']
-
             # If it is indexable file, download it and generate index.
             if isFileIndexable(filename):
 
@@ -301,8 +281,9 @@ def bcawGetImageIndex(image, is_path):
         image_name = os.path.basename(image_path)
     else:
         image_name = image
-    global image_list
+    logging.debug("HERE")
     for i in range(0, len(image_list)):
+        logging.debug('imageslist[%d]=%s', i, image_list[i])
         if image_list[i] == image_name:
             return i
         continue
@@ -312,7 +293,22 @@ def bcawGetImageIndex(image, is_path):
 #
 # Template rendering for Image Listing
 #
-@app.route('/image/<image_name>')
+@app.route('/image/imgdnld/<image_name>/')
+def image_dnld(image_name):
+    source_dir = app.config['IMAGEDIR']
+    return send_from_directory(source_dir, image_name, as_attachment=True)
+
+@app.route('/image/metadata/<image_name>/')
+def image_psql(image_name):
+
+    image_index =  bcawGetImageIndex(image_name, is_path=False)
+    meta = bcaw_is_sysmeta_supported(image_name)
+    return render_template("db_image_template.html",
+                           image_name = image_name,
+                           image=image_db_list[image_index],
+                           meta=meta)
+
+@app.route('/image/<image_name>/')
 def image(image_name):
     num_partitions = bcaw.num_partitions_ofimg[str(image_name)]
     part_desc = []
@@ -330,27 +326,6 @@ def image(image_name):
                             num_partitions=num_partitions,
                             part_desc=part_desc)
 
-@app.route('/image/imgdnld/<image_name>')
-def image_dnld(image_name):
-    source_dir = app.config['IMAGEDIR']
-    return send_from_directory(source_dir, image_name, as_attachment=True)
-
-@app.route('/image/metadata/<image_name>')
-def image_psql(image_name):
-
-    image_index =  bcawGetImageIndex(image_name, is_path=False)
-
-    '''
-    return render_template("db_image_template.html",
-                           image_name = image_name,
-                           image=image_db[int(image_index)])
-    '''
-    meta = bcaw_is_sysmeta_supported(image_name)
-    return render_template("db_image_template.html",
-                           image_name = image_name,
-                           image=image_db_list[image_index],
-                           meta=meta)
-
 #
 # Template rendering for Directory Listing per partition
 #
@@ -367,34 +342,20 @@ def root_directory_list(image_name, image_partition):
                            partition_num=image_partition,
                            file_list=file_list_root)
 
-# FIXME: Retained for possible later use
-def stream_template(template_name, **context):
-    app.update_template_context(context)
-    t = app.jinja_env.get_template(template_name)
-    rv = t.stream(context)
-    rv.enable_buffering(5)
-    return rv
-
-
 #
 # Template rendering when a File is clicked
 #
-@app.route('/image/<image_name>/<image_partition>/', defaults={'filepath': ''})
-@app.route('/image/<image_name>/<image_partition>/<path:filepath>/')
-def file_clicked(image_name, image_partition, filepath, inode=None):
+@app.route('/image/<image_name>/<image_partition>/', defaults={'encoded_filepath': ''})
+@app.route('/image/<image_name>/<image_partition>/<path:encoded_filepath>/')
+def file_clicked(image_name, image_partition, encoded_filepath):
     logging.debug('File_clicked: Rendering Template for subdirectory or contents of a file ')
-    logging.debug('D: image_name: %s', image_name)
-    logging.debug('D: image_partition: %s', image_partition)
-    logging.debug('D: filepath: %s', filepath)
-    logging.debug('D: inode: %s', inode)
-
+    logging.debug("image_partion:%s", image_partition);
     # Strip the digits after the last "-" from filepath to get inode
-    inode = request.args.get('inode')
-    logging.debug('D: Inode: %s ', inode)
 
     image_index = bcawGetImageIndex(str(image_name), False)
+    logging.debug("image_index:%d", image_index);
     image_path = image_dir+'/'+image_name
-
+    filepath=urllib.unquote(encoded_filepath)
     file_name_list = filepath.split('/')
     file_name = file_name_list[len(file_name_list)-1]
 
@@ -415,56 +376,19 @@ def file_clicked(image_name, image_partition, filepath, inode=None):
 
     # Look for file_name in file_list
     for item in file_list:
-        logging.debug('D: item-name = %s', item['name'])
-        logging.debug('D: slug-name = %s', item['name_slug'])
-        logging.debug('D: file-name = %s', file_name)
-
-        # NOTE: There is an issue with recognizing filenames that have spaces.
-        # All the characters after the space are chopped off at the route. As a
-        # work-around a "slug" name is maintained in the file_list for each such
-        # file. In order to recognize and map the chopped version of a file , the
-        # file name is appended by its inode number. So when it gets here, a file
-        # with a real name "Great Lunch.txt" will look like: "Great_Lunch.txt-xxx"
-        # where xxx is the inode number. (Underscore is used to replace the blank
-        # just for getting an idea on the file name. What is really used to recognize
-        # the file is the inode.
-        # Another issue is with the downloader not recognizing the spaces.
-        #
-        real_file_name = file_name
-        if item['name_slug'] != "None" and item['inode'] == int(inode) :
-
-            logging.debug('D >> Found a slug name %s', item['name'])
-            logging.debug('D >> The associated name_slug is %s', item['name_slug'])
-
-            #file_name =  item['name_slug'].replace("%20", " ")
-            # NOTE: Even the downloader doesn't like spaces in files. To keep
-            # the complete name of the file, spaces are replaced by %20. The name
-            # looks ugly, but till a cleaner solution is found, this is the best
-            # fix.
-            file_name =  item['name_slug']
-            real_file_name = item['name_slug'].replace("%20", " ")
-
-            logging.debug('D: real_file_name: %s', real_file_name)
-            logging.debug('D: slug name: %s', file_name)
-
-        if item['name'] == real_file_name:
-            logging.debug('D: File %s Found in the list', file_name)
+        if item['name'] == file_name:
             break
     else:
         logging.debug('D: File_clicked: File %s not found in file_list', file_name)
         # FIXME: Should we abort it here?
 
     if item['isdir'] == True:
-        logging.debug("D: File_clicked: It is a Directory: %s ", item['name'])
         # We will send the file_list under this directory to the template.
         # So calling once again the TSK API ipen_dir, with the current
         # directory, this time.
         file_list, fs = dm.bcawGenFileList(image_path, image_index,
                                         int(image_partition), filepath)
         # Generate the URL to communicate to the template:
-        with app.test_request_context():
-            url = url_for('file_clicked', image_name=str(image_name), image_partition=image_partition, filepath=filepath, inode=inode )
-
         '''
         ############ Work under progress
         #If user has signed in, see if there is config info
@@ -486,17 +410,14 @@ def file_clicked(image_name, image_partition, filepath, inode=None):
             # get config_list
         '''
 
-        logging.debug('>> File_Clicked: Rendering template with URL:%s, filepath:%s, inode:%s', url, filepath, inode)
+        logging.debug('>> File_Clicked: Rendering template with filepath:%s', filepath)
         return render_template('fl_dir_temp_ext.html',
                    image_name=str(image_name),
                    partition_num=image_partition,
                    filepath=filepath,
-                   file_list=file_list,
-                   url=url,
-                   inode=inode)
+                   file_list=file_list)
 
     else:
-        logging.debug('>> Downloading File: %s', real_file_name)
         # It is an ordinary file
         f = fs.open_meta(inode=item['inode'])
 
@@ -544,52 +465,6 @@ def signup():
     elif request.method == 'GET':
         return render_template('fl_signup.html', form=form)
 
-@app.route('/home')
-def home():
-    # FIXME: There is code duplication here. Merge the folowing with bcawBrowse
-    # and call from both places (root and /home)
-    ####return(bcawBrowse(db_init=False))
-
-    global image_dir
-    image_index = 0
-
-    # Since image_list is declared globally, empty it before populating
-    global image_list
-    del image_list[:]
-    global image_db_list
-    del image_db_list [:]
-
-    # Create the DB. FIXME: This needs to be called from runserver.py
-    # before calling run. That seems to have some issues. So calling from
-    # here for now. Need to fix it.
-    dm = bcaw()
-    for img in os.listdir(image_dir):
-        if bcaw_is_imgtype_supported(img):
-            ### global image_list
-            image_list.append(img)
-
-            image_path = image_dir+'/'+img
-            dm.num_partitions = dm.bcawGetPartInfoForImage(image_path, image_index)
-            idb = bcaw_db.BcawImages.query.filter_by(image_name=img).first()
-            image_db_list.append(idb)
-            image_index +=1
-        else:
-            continue
-
-    # Render the template for main page.
-    global num_images
-    num_images = len(image_list)
-
-    user = "Sign In"
-    signup_out = "Sign Up"
-    if 'email' in session:
-      user = session['email']
-      signup_out = "Sign Out"
-
-    qform = QueryForm()
-
-    return render_template('fl_temp_ext.html', image_list=image_list, np=dm.num_partitions, image_db_list=image_db_list, user=user, signup_out = signup_out, form=qform)
-
 @app.route('/about')
 def about():
     return render_template('fl_profile.html')
@@ -629,15 +504,12 @@ def config():
 @app.route('/fl_process_confinfo.html',  methods=['POST','GET'])
 def fl_process_confinfo():
     checked_list = request.form.getlist('config_item')
-    logging.debug('Checked File list: %s', checked_list)
 
     # FIXME: This needs to be made persistent
     if 'email' in session:
         email = session['email']
         logging.debug('D: Adding Email: %s', email)
         checked_list_dict[email] = checked_list
-
-    logging.debug('D: Checked DICT: %s', checked_list_dict)
 
     return render_template('fl_process_confinfo.html', checked_list=checked_list)
 
@@ -685,8 +557,6 @@ def query():
                     search_result_file_list.append(list_item.fo_filename)
                     search_result_image_list.append(list_item.image_name)
                     i += 1
-                logging.debug('D: query:Result:len: %s', len(search_result_list))
-                logging.debug('D: query:Result:file: %s', search_result_list[0].fo_filename)
 
                 num_results = len(search_result_list)
         else: # search type is "Contents"
@@ -730,7 +600,6 @@ def query():
           user = session['email']
           signup_out = "Sign Out"
 
-        logging.debug('>> Rendering template with ULR: ')
         return render_template('fl_search_results.html',
                                 searched_phrase=searched_phrase,
                                 search_type=search_type,
@@ -754,17 +623,12 @@ def bcaw_generate_file_list():
     outfile_dir = app.config['FILENAME_INDEXDIR']
     outfile = outfile_dir + '/filelist_to_index.txt'
 
-    logging.debug('D: bcaw_generatefile_list: Creating file: %s', outfile)
-    logging.debug('D: bcaw_generatefile_list: Creating dir: %s', outfile_dir)
-
     if not os.path.exists(outfile_dir):
         subprocess.check_output("mkdir " + outfile_dir, shell=True)
     subprocess.check_output("touch " + outfile, shell=True)
     for dfxml_file in os.listdir(image_dir):
         if dfxml_file.endswith("_dfxml.xml"):
-            logging.debug('Listing files from dfxml file %s', dfxml_file)
             file_list_cmd ="cd "+ image_dir + "; rm -rf tempdir; mkdir tempdir; " + "grep '\<filename\>' " + dfxml_file + " > tempdir/file1; sed \'s/<filename>//g\' tempdir/file1 > tempdir/file2; sed \'s/<\/filename>//g\' tempdir/file2 > tempdir/file3;"
-            logging.debug('D: bcaw_generate_file_list: File_list_cmd: %s', file_list_cmd)
 
             try:
                 subprocess.check_output(file_list_cmd, shell=True)
@@ -775,7 +639,6 @@ def bcaw_generate_file_list():
             cat_cmd =  "cat " + image_dir + "/tempdir/file3 >> " + outfile
             subprocess.check_output(cat_cmd, shell=True)
 
-    logging.debug('Returning outfile: %s', os.path.dirname(outfile))
     return os.path.dirname(outfile)
 
 def bcawSetIndexFlag(image_index, img):
@@ -783,7 +646,6 @@ def bcawSetIndexFlag(image_index, img):
         corresponding to the given image_index.
     """
 
-    logging.debug("Setting Idexed Flag %d ", image_index)
     # Get the index info from the DB:
     indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
     if not indexed:
@@ -816,10 +678,8 @@ def bcawIsImageIndexedInDb(img):
     """
     indexed =  bcaw_db.bcawDbGetIndexFlagForImage(img)
     if not indexed:
-        logging.debug('>> Image %s is NOT indexed', img)
         return False
     else:
-        logging.debug('>> Image %s is already indexed', img)
         return True
 
 def bcawClearIndexing():
@@ -847,10 +707,6 @@ def bcawSetFlagInMatrix(flag, value, image_name):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
         in the image matrix, for all the images present.
     """
-    logging.debug('[D] bcawSetFlagInMatrix: flag %s', flag)
-    logging.debug('[D] bcawSetFlagInMatrix: value %s', value)
-    logging.debug('[D] bcawSetFlagInMatrix: image_name %s', image_name)
-    logging.debug('[D] bcawSetFlagInMatrix: Image Matrix Before size %s', len(image_matrix))
     i = 0
     for img_tbl_item in image_matrix:
         if flag == 'img_index':
@@ -863,7 +719,6 @@ def bcawSetFlagInMatrix(flag, value, image_name):
             if img_tbl_item['img_name'] == image_name:
                 img_tbl_item.update({bcaw_imginfo[2]:value})
                 img_tbl_item.update({bcaw_imginfo[1]:image_name})
-                logging.debug('[D] Setting flag img_db_exists in the image matrix for image %s', image_name)
                 break
             else:
                 # Update the flag for all images
@@ -872,7 +727,6 @@ def bcawSetFlagInMatrix(flag, value, image_name):
         elif flag == 'dfxml_db_exists':
             # Set dfxml_db_exists to the given value for every image in the image_table
             if img_tbl_item['img_name'] == image_name:
-                logging.debug('[D] Setting flag dfxml_db_exists to %s in the image matrix for the image', value)
                 img_tbl_item.update({bcaw_imginfo[3]:value})
                 img_tbl_item.update({bcaw_imginfo[1]:image_name})
                 break
@@ -893,7 +747,6 @@ def bcawUpdateMatrixWithDfxmlFlagsFromDbForAllImages():
                            "find_dfxml_table_for_image", img)
         if ret != -1:
             # update the flag with True
-            logging.debug("D: Updating matrix for dfxml_table_exists with True for image %s", img)
             img_tbl_item.update({bcaw_imginfo[3]:True})
 
 def bcawUpdateMatrixWithImageFlagsFromDbForAllImages():
@@ -906,7 +759,6 @@ def bcawUpdateMatrixWithImageFlagsFromDbForAllImages():
                            "find_image_table_for_image", img)
         if ret != -1:
             # update the flag with True
-            logging.debug("D: Updating matrix for image_table_exists with True for image%s", img)
             img_tbl_item.update({bcaw_imginfo[2]:True})
 
 def bcawUpdateMatrixWithlIndexFlagsFromDbForAllImages():
@@ -929,9 +781,6 @@ def bcawSetFlagInMatrixPerImage(flag, value, image):
     """ This routine sets the given flag (in bcaw_imginfo) to the given value,
         in the image matrix, for the given image
     """
-    logging.debug('[D] bcawSetFlagInMatrixPerImage: (flag) %s', flag)
-    logging.debug('[D] bcawSetFlagInMatrixPerImage: (value) %s', value)
-    logging.debug('[D2] bcawSetFlagInMatrixPerImage: Image Matrix Before: ', image_matrix)
     i = 0
     for img_tbl_item in image_matrix:
         if image == img_tbl_item['img_name']:
@@ -1013,7 +862,6 @@ def bcawIndexAllFiles(self, task_id):
             # image and continue to the next image if indexing exiss for this img.
             # Code needs to be added.
             if bcawIsImageIndexedInDb(img) == True:
-                logging.debug('IndexFile: Image %s is already indexed ', img)
                 continue
 
             # If user has chosen not to build index for this image, skip it.
@@ -1040,8 +888,6 @@ def bcawIndexAllFiles(self, task_id):
             # First set the index flag in the DB
             indexed = bcaw_db.bcawDbGetIndexFlagForImage(img)
 
-            logging.debug('>> Setting the index for the image %s', img)
-            logging.debug('>> Original value was: %s', indexed)
             bcaw_db.bcawSetIndexForImageInDb(img, True)
 
             # Now Set the index flag in the matrix
