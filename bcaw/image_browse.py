@@ -226,7 +226,6 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
             dfxml_file = image_path + "_dfxml.xml"
 
             new_path = bcawGetPathFromDfxml(str(item['name']), dfxml_file)
-            logging.debug("D: bcawDnldRepo: path from Dfxml file: ", new_path)
             if new_path == None:
                continue
 
@@ -243,8 +242,8 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 try:
                     shelloutput = subprocess.check_output(cmd, shell=True)
                 except subprocess.CalledProcessError as cmdexcept:
-                    logging.debug('Error return code: %s ', cmdexcept.returncode)
-                    logging.debug('Error output: %s ', cmdexcept.output)
+                    logging.error('Error return code: %s ', cmdexcept.returncode)
+                    logging.error('Error output: %s ', cmdexcept.output)
 
             # Generate the file-list under this directory
             new_filelist_root, fs = dm.bcawGenFileList(image_path, image_index, partnum, new_path)
@@ -254,7 +253,6 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
                 continue
 
             # Call the function recursively
-            logging.debug("bcawDnldRepo: D2: Calling func recursively with item-name: {}, new_path:{}, item: {}".format(item['name'], new_path, item))
             bcawDnldRepo(img, new_filelist_root, fs, image_index, partnum, image_path, new_path)
         else:
             filename = item['name'] # FIXME: Test more to make sure files with space work.
@@ -271,7 +269,7 @@ def bcawDnldRepo(img, root_dir_list, fs, image_index, partnum, image_path, root_
 
                 file_path = app.config['FILES_TO_INDEX_DIR'] + "/" + str(image_index) + "/" + str(new_file_path)
 
-                logging.debug(">> Index-debug1: Indexing Image:{}-{}, File: {}".format(img,\
+                logging.debug("Indexing Image:{}-{}, File: {}".format(img,\
                                   partnum, file_path))
                 bcawDnldSingleFile(item, fs, file_path, indexDir)
 
@@ -281,14 +279,12 @@ def bcawGetImageIndex(image, is_path):
         image_name = os.path.basename(image_path)
     else:
         image_name = image
-    logging.debug("HERE")
     for i in range(0, len(image_list)):
-        logging.debug('imageslist[%d]=%s', i, image_list[i])
         if image_list[i] == image_name:
             return i
         continue
     else:
-        logging.debug('Image %s not found in the list ', image_name)
+        logging.debug('Image %s not found in image_list.', image_name)
 
 #
 # Template rendering for Image Listing
@@ -331,7 +327,7 @@ def image(image_name):
 #
 @app.route('/image/<image_name>/<image_partition>/')
 def root_directory_list(image_name, image_partition):
-    logging.debug('D: Files: Rendering Template with files for partition: %s', image_partition)
+    logging.debug('Rendering Template with files for partition: %s', image_partition)
     image_index = bcawGetImageIndex(str(image_name), False)
     dm = bcaw()
     image_path = image_dir+'/'+image_name
@@ -349,11 +345,9 @@ def root_directory_list(image_name, image_partition):
 @app.route('/image/<image_name>/<image_partition>/<path:encoded_filepath>/')
 def file_clicked(image_name, image_partition, encoded_filepath):
     logging.debug('File_clicked: Rendering Template for subdirectory or contents of a file ')
-    logging.debug("image_partion:%s", image_partition);
     # Strip the digits after the last "-" from filepath to get inode
 
     image_index = bcawGetImageIndex(str(image_name), False)
-    logging.debug("image_index:%d", image_index);
     image_path = image_dir+'/'+image_name
     filepath=urllib.unquote(encoded_filepath)
     file_name_list = filepath.split('/')
@@ -379,7 +373,7 @@ def file_clicked(image_name, image_partition, encoded_filepath):
         if item['name'] == file_name:
             break
     else:
-        logging.debug('D: File_clicked: File %s not found in file_list', file_name)
+        logging.warning('Requested file %s not found in file_list', file_name)
         # FIXME: Should we abort it here?
 
     if item['isdir'] == True:
@@ -410,7 +404,7 @@ def file_clicked(image_name, image_partition, encoded_filepath):
             # get config_list
         '''
 
-        logging.debug('>> File_Clicked: Rendering template with filepath:%s', filepath)
+        logging.debug('Rendering template with filepath:%s', filepath)
         return render_template('fl_dir_temp_ext.html',
                    image_name=str(image_name),
                    partition_num=image_partition,
@@ -508,7 +502,6 @@ def fl_process_confinfo():
     # FIXME: This needs to be made persistent
     if 'email' in session:
         email = session['email']
-        logging.debug('D: Adding Email: %s', email)
         checked_list_dict[email] = checked_list
 
     return render_template('fl_process_confinfo.html', checked_list=checked_list)
@@ -543,56 +536,44 @@ def query():
         searched_phrase = form.search_text.data.lower()
 
         search_result_list, search_type = form.searchDfxmlDb()
-        if search_type == "filename":
-            if search_result_list == None:
-                logging.debug('No search results for %s', searched_phrase)
-                num_results = 0
-            else:
-                i = 0
-                # Note; For now, two separae lists are maintained - one for filename
-                # and another for the corresponding image. If we need more than two
-                # columns to display then it makes sense to have an array of structues
-                # instead of 2 separate lists.
-                for list_item in search_result_list:
-                    search_result_file_list.append(list_item.fo_filename)
-                    search_result_image_list.append(list_item.image_name)
-                    i += 1
-
-                num_results = len(search_result_list)
-        else: # search type is "Contents"
-            if search_result_list == None:
-                logging.debug('>> No search results for %s', searched_phrase)
-                num_results = 0
-            else:
-                # The search results list will have the unncessary leading text
-                # for each result. We will chop it off. But the last part of the
-                # string contains the image name, which is a usefule info for us
-                # do send to the template. Some string and list manipulations
-                # done here to extract the useful info and get rid of the unwanted
-                # stuff. NOTE: There could be a better and more efficient way of
-                # doing the same. We will address it later.
-                search_result_list = [w.replace('/var/www/bcaw/files_to_index/', '') for w in search_result_list]
-                index = 0
-                search_result_image_list = []
-                for j in search_result_list:
-                    j_list = j.split("/")
-                    j_index = int(j_list[0])
-                    j_image = image_list[j_index]
-                    search_result_image_list.append(j_image)
-
-                    # Now remove the leading index number from the fielname
-                    j_list.pop(0)
-                    search_result_list[index] = "/".join(j_list)
-                    index += 1
-
-                num_results = len(search_result_list)
-                search_result_file_list = search_result_list
-
         if search_result_list == None:
-            logging.debug('>> Query: searchDfxmlDb FAILED')
+            logging.info('No search results for %s', searched_phrase)
             num_results = 0
-        else:
-            logging.debug('>> Searched for %s', searched_phrase)
+        elif search_type == "filename":
+            i = 0
+            # Note; For now, two separae lists are maintained - one for filename
+            # and another for the corresponding image. If we need more than two
+            # columns to display then it makes sense to have an array of structues
+            # instead of 2 separate lists.
+            for list_item in search_result_list:
+                search_result_file_list.append(list_item.fo_filename)
+                search_result_image_list.append(list_item.image_name)
+                i += 1
+            num_results = len(search_result_list)
+        else: # search type is "Contents"
+            # The search results list will have the unncessary leading text
+            # for each result. We will chop it off. But the last part of the
+            # string contains the image name, which is a usefule info for us
+            # do send to the template. Some string and list manipulations
+            # done here to extract the useful info and get rid of the unwanted
+            # stuff. NOTE: There could be a better and more efficient way of
+            # doing the same. We will address it later.
+            search_result_list = [w.replace('/var/www/bcaw/files_to_index/', '') for w in search_result_list]
+            index = 0
+            search_result_image_list = []
+            for j in search_result_list:
+                j_list = j.split("/")
+                j_index = int(j_list[0])
+                j_image = image_list[j_index]
+                search_result_image_list.append(j_image)
+
+                # Now remove the leading index number from the fielname
+                j_list.pop(0)
+                search_result_list[index] = "/".join(j_list)
+                index += 1
+
+            num_results = len(search_result_list)
+            search_result_file_list = search_result_list
 
         user = "Sign In"
         signup_out = "Sign Up"

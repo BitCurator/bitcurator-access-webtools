@@ -194,60 +194,24 @@ class bcaw:
 
     def dbGetImageInfoXml(self, image_name):
         if image_name.endswith(".E01") or image_name.endswith(".e01"):
-            ewfinfo_xmlfile = image_name+".xml"
-            cmd = "ewfinfo -f dfxml "+image_name+ " > "+ewfinfo_xmlfile
-            logging.debug('CMD xmlfile: %s', ewfinfo_xmlfile)
-            logging.debug('CMD: %s', cmd)
-            if not os.path.exists(ewfinfo_xmlfile):
+            ewfinfo_xml = image_name + ".xml"
+            if not os.path.exists(ewfinfo_xml):
+                cmd = "ewfinfo -f dfxml " + image_name + " > " + ewfinfo_xml
+                logging.debug('CMD: %s for xmlfile: %s', cmd, ewfinfo_xml)
                 c=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            return ewfinfo_xmlfile
-        elif image_name.endswith(".AFF") or image_name.endswith(".aff"):
-            # FIXME: does affinfo create xml output?
-            cmd = "affinfo "+image_name
-            subprocess.check_output(cmd, shell=True)
-            logging.debug('Need an E01 file to return xml file')
-            return None
+            return ewfinfo_xml
 
-    def fixup_dfxmlfile_temp(self, dfxmlfile):
-        with open(dfxmlfile) as fin, open("/tmp/tempfile", "w") as fout:
-            for line in fin:
-                if not "xmlns" in line:
-                    if "dc:type" in line:
-                        line = line.replace("dc:type","type")
-                    fout.write(line)
-
-        fin.close()
-        fout.close()
-
-        cmd = "mv /tmp/tempfile " + dfxmlfile
-        subprocess.check_output(cmd, shell=True)
-        return dfxmlfile
-
-    def fixup_dfxmlfile(self, dfxmlfile):
-        linenumber = 0
-        for line in fileinput.input (dfxmlfile, inplace=1):
-            linenumber += 1
-            if "xmlns" in line:
-                logging.debug('Why is this here??? ')
-            if linenumber > 6:
-                break
+        return None
 
     def dbGetInfoFromDfxml(self, image_name):
         # First generate the dfxml file for the image
         dfxmlfile = image_name+"_dfxml.xml"
-
-
         if not os.path.exists(dfxmlfile):
-            printstr = "WARNING!!! DFXML FIle " + dfxmlfile + " does NOT exist. Creating one"
-            logging.warning('Warning: %s ', printstr)
+            printstr =  + " does NOT exist. Creating one"
+            logging.info("Creating DFXML file for image: %s", image_name)
             cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_name]
             logging.debug('CMD: %s ', cmd)
             subprocess.check_output(cmd)
-
-        # Remove the name space info as the xml parsing won't give proper
-        # tags with the name space prefix attached.
-        logging.debug('D: Fiwalk generated dfxml file. Fixing it up now ')
-        dfxmlfile = self.fixup_dfxmlfile_temp(dfxmlfile)
 
         return dfxmlfile
 
@@ -319,14 +283,14 @@ bcaw_sysmeta_supported_list = ['.E01', '.e01', '.aff', '.AFF']
 bcaw_raw_image_list = ['.raw', '.dd', '.iso']
 
 bcaw_supported_imgtype_list = bcaw_sysmeta_supported_list + bcaw_raw_image_list;
-
+BCAW_IGNORED_EXTENSIONS = ['.xml', '.XML', '']
 def bcaw_is_imgtype_supported(image):
     imgname, img_extension = os.path.splitext(image)
     if img_extension in bcaw_supported_imgtype_list:
         return True
-    else:
+    elif img_extension not in BCAW_IGNORED_EXTENSIONS:
         logging.debug("Image type %s not supported", img_extension)
-        return False
+    return False
 
 def bcaw_is_sysmeta_supported(image):
     imgname, img_extension = os.path.splitext(image)

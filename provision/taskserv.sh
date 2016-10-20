@@ -18,4 +18,4 @@ SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
 #su www-data -c "celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO &"
 
 cd /var/www/bcaw
-su vagrant -c "/var/www/bcaw/venv/bin/celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO &"
+su vagrant -c "/var/www/bcaw/venv/bin/celery -A bcaw_celery_task.celery worker --concurrency=1 --loglevel=INFO &>> /tmp/celery.log &"

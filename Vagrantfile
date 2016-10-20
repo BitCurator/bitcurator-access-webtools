@@ -14,14 +14,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Set the box host-name
     config.vm.hostname = "bca-webtools-0.6.14"
 
-    # Run the provisioning script	
+    # Run the provisioning script
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
 
-    # Run the server start script	
-    config.vm.provision :shell, :path => "./provision/servstart.sh",
-     run: "always"
+    # Run the server start script
+    # config.vm.provision :shell, :path => "./provision/servstart.sh",
+    # run: "always"
 
-    # Run the Celery daemon start script	
+    # Run the Celery daemon start script
     config.vm.provision :shell, :path => "./provision/taskserv.sh",
      run: "always"
 
