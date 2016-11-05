@@ -205,9 +205,9 @@ class bcaw:
 
     def dbGetInfoFromDfxml(self, image_name):
         # First generate the dfxml file for the image
-        dfxmlfile = image_name+"_dfxml.xml"
+        dfxmlfile = image_name + "_dfxml.xml"
         if not os.path.exists(dfxmlfile):
-            printstr =  + " does NOT exist. Creating one"
+            printstr = dfxmlfile + " does NOT exist. Creating one"
             logging.info("Creating DFXML file for image: %s", image_name)
             cmd = ['fiwalk', '-b', '-g', '-z', '-X', dfxmlfile, image_name]
             logging.debug('CMD: %s ', cmd)
