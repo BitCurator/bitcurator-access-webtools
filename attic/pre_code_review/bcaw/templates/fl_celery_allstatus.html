@@ -1,0 +1,55 @@
+{% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #222; }
+    </style>
+{% endblock %}
+{% block content %}
+
+<div id="wrap">
+
+  <div id="header">
+    <div style="width: 30%; display: table;">
+      <div style="display: table-row">
+        <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" h
+eight="80" width="80" align="center" > </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="nav">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+    </ul>
+  </div>
+
+  <body>
+    <h1>Task Status </h1>
+    <p class="note">
+        (Note: Refresh the page to get latest status)
+    </p>
+
+    <ul>
+    <table class="tight">
+       <tr>
+              <th align="left">Task</th>
+              <th align="left">Task-State</th>
+              <th align="left">Task-Status</th>
+       </tr>
+       {% for task_type, response in task_response_table.iteritems() %}
+          <p style="font-size:9">
+            <tr>
+              <td>{{ task_type }}</td>
+              <td>{{ response.state }}</td>
+              <td>{{ response.status }}</td>
+            </tr>
+          </p>
+       {% endfor %}
+    </table>
+    </ul>
+  </body>
+{% endblock %}

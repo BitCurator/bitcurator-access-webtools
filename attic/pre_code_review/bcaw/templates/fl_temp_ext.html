@@ -1,0 +1,117 @@
+{% extends "flask_template.html" %}
+{% block title %}Disk Image Access for the Web{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #704040; }
+    </style>
+{% endblock %}
+{% block content %}
+
+<div id="wrap">
+
+  <div id="header">
+    <div style="width: 30%; display: table;">
+      <div style="display: table-row">
+        <div style="display: table-cell;"> <img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="80" width="80" align="center" > </div>
+        <div style="width: 300px; display: table-cell;"> <div id="btext">BCA Webtools</div> </div>
+      </div>
+    </div>
+
+      {# <!--<h3 align="left">BCA Webtools</h3>-->
+      <!--<div id="btext">BCA Webtools</div>-->
+      <!--<img src="{{ url_for('static', filename ='bc2-icon.png') }}" height="72" width="72" align="center" >--> #}
+  </div>
+
+  <div id="nav">
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></td></li>
+
+      {#
+      <!-- Sign in/up currently disabled -->
+      <!-- <li><a href=signin>{{ user }}</a></li> -->
+      <!-- {% if signup_out in "Sign Up" %} -->
+      <!--  <li><a href=signup>Sign Up</a></li> -->
+      <!-- {% elif signup_out in "Sign Out" %} -->
+      <!--  <li><a href=signout>Sign Out</a></li> -->
+      <!-- {% endif %} --> #}
+
+    </ul>
+  </div>
+
+  <div id="main">
+
+    <p class="important">
+      The bca-webtools application provides access to forensically-packaged (.E01 and .AFF) disk images. Supported file systems include FAT16, FAT32, NTFS, HFS+, and EXT2/3/4. Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
+      <BR>&nbsp;<BR>
+
+          <!--<table style="width:300px"> -->
+          <table class="spaced">
+          {#<caption><i>Image List</i></caption>#}
+          <tr>
+              <!-- <th align="left"></th> -->
+              <th align="left">Image Name</th>
+              <th align="left">Info</th>
+              <th align="left">Browse</th>
+              <th align="left">Download</th>
+              <th> </th>
+          </tr>
+          {% set item_num = 0 %}
+          {% for item in image_list %}
+            {% set imginfo_html = "image/" ~ item  %}
+            {% set img_md_html = "image/metadata/" ~ item  %}
+            {% set imgdnld_html = "image/imgdnld/" ~ item  %}
+            <p style='font-size:9'>
+            <tr>
+               <td> {{ item }} </td>
+               <td> <a href={{ img_md_html }}><img src="{{ url_for('static', filename ='metadata.png') }}" height="20" width="20" align="center" border="0"></a> </td>
+               <td> <a href={{ imginfo_html }}><img src="{{ url_for('static', filename ='browse.png') }}" height="20" width="20" align="center" border="0" ></a> </td>
+               <td> <a href={{ imgdnld_html }}><img src="{{ url_for('static', filename ='download.png') }}" height="20" width="20" align="center" border="0" ></a> </td>
+               {# <!-- <td><a href={{ imginfo_html }}>Browse</a></td> -->
+               <!-- <td><a href=imgdnld.html>Download</a></td> --> #}
+            </tr>
+            </p>
+            {% set item_num = item_num + 1 %}
+            {#<li>{{ item }} <a href={{ imginfo_html }}>Browse</a> <a href=imgdnld.html>Download</a></li>#}
+          {% endfor %}
+          </table>
+  </div>
+
+  <div id="sidebar">
+
+    <p>Select an option below to search available disk images by filename or file contents. (Currently indexing all filenames, contents of .doc, .odt, .pdf, and .txt)
+
+    <p>
+      <form action="{{ url_for('query') }}" method=post>
+        {{ form.hidden_tag() }}
+        <!--{{ form.search_text.label }}-->
+
+        <table>
+        {% for subfield in form.radio_option %}
+        <tr>
+          <td>{{ subfield }}</td>
+          <td>{{ subfield.label }}</td>
+        </tr>
+        {% endfor %}
+        <!--{{ form.radio_option }}-->
+        </table>
+
+        {{ form.search_text }}
+        {{ form.submit }}
+      </form>
+    </p>
+
+    <p>Note: This software is in beta. You must populate the DFXML database and generate a search index prior to searching.</p>
+
+    <p>Visit the <a href="{{ url_for('admin') }}">Admin</a> page and select "Build DFXML Table" to enable search by filename. Select "Generate Index" to build the primary content search index.
+    </p>
+
+  </div>
+
+  <div id="footer">
+    <li><a href="{{ url_for('admin') }}">Admin</a></td></li>
+  </div>
+
+</div>
+
+{% endblock %}

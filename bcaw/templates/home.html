@@ -1,0 +1,43 @@
+{% extends "page.html" %}
+{% block title %}Home{% endblock %}
+{% block page_content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron media">
+      <div class="media-left">
+        <img alt="BitCurator Access logo." title="BCA WebTools logo" src="{{ url_for('static', filename='img/bc2-icon.png') }}" />
+      </div>
+      <div class="media-body">
+        <h1 class="media-heading">BitCurator Access WebTools</h1>
+        <p>
+          The bca-webtools application provides access to forensically-packaged (.E01 and .AFF) disk images.
+          Supported file systems include FAT16, FAT32, NTFS, HFS+, and EXT2/3/4.
+          Click on 'Browse' to navigate through the file system(s) within the disk image, or 'Download' to download the complete disk image.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <h2>Images:</h2>
+        <table class="table table-striped">
+          <tr>
+            <th>Id</th>
+            <th>Image Name</th>
+            <th>Metadata</th>
+            <th>Browse</th>
+            <th>Download</th>
+          </tr>
+          {% for image in db_images %}
+          <tr>
+            <td>{{ image.id }}</td>
+            <td>{{ image.name }}</td>
+            <td><a href="{{ "/image/meta/" + image.id|string }}" ><span class="glyphicon glyphicon-hdd" aria-hidden="true"></span></a></td>
+            <td><a href="{{ "/image/" + image.id|string  }}" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></a></td>
+            <td><a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
+{% endblock page_content %}

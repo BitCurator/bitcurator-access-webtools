@@ -4,7 +4,7 @@
 # bootstrap.sh: Build and configuration script for bca-webtools in Vagrant
 # ------------------------------------------------------------------------
 # <http://access.bitcurator.net>
-# 
+#
 # This bash script provisions the VM, installing and/or compiling the necessary
 # forensics and other tools needed to run the bca-webtools Flask application.
 #
@@ -24,12 +24,15 @@
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
 #===============================================================================
 #
-# Needed for Vagrant build
-SCRIPT_PATH=$(dirname $(readlink -f $0 ) )
-
 # Base directory for build log
 LOG_BASE=/var/log
-
+WWW_ROOT=/var/www
+BCAW_ROOT="$WWW_ROOT/bcaw"
+BCAW_TARGET="$BCAW_ROOT/bcaw"
+DISK_IMAGE_TARGET="$BCAW_ROOT/disk-images"
+SOURCE_ROOT="/vagrant"
+BCAW_SOURCE="$SOURCE_ROOT/bcaw"
+DISK_IMAGE_SOURCE="$SOURCE_ROOT/disk-images"
 #--- FUNCTION ----------------------------------------------------------------
 # NAME: __function_defined
 # DESCRIPTION: Checks if a function is defined within this scripts scope
@@ -42,7 +45,7 @@ __function_defined() {
         echoinfo "Found function $FUNC_NAME"
         return 0
     fi
-    
+
     echodebug "$FUNC_NAME not found...."
     return 1
 }
@@ -52,7 +55,7 @@ __function_defined() {
 # DESCRIPTION: Strip duplicate strings
 #-------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo $@ | tr -s '[:space:]' '\n' | awk '!x[$0]++'
+    echo "$@" | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #--- FUNCTION ----------------------------------------------------------------
@@ -60,7 +63,7 @@ __strip_duplicates() {
 # DESCRIPTION: Echo errors to stderr.
 #-------------------------------------------------------------------------------
 echoerror() {
-    printf "${RC} * ERROR${EC}: $@\n" 1>&2;
+    printf "%s * ERROR%s: %s\n" "${RC}" "${EC}" "$@" 1>&2;
 }
 
 #--- FUNCTION ----------------------------------------------------------------
@@ -68,7 +71,7 @@ echoerror() {
 # DESCRIPTION: Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    printf "${GC} * STATUS${EC}: %s\n" "$@";
+    printf "%s * STATUS%s: %s\n" "${GC}" "${EC}" "$@";
 }
 
 #--- FUNCTION ----------------------------------------------------------------
@@ -76,7 +79,7 @@ echoinfo() {
 # DESCRIPTION: Echo warning informations to stdout.
 #-------------------------------------------------------------------------------
 echowarn() {
-    printf "${YC} * WARN${EC}: %s\n" "$@";
+    printf "%s * WARN%s: %s\n" "${YC}" "${EC}" "$@";
 }
 
 #--- FUNCTION ----------------------------------------------------------------
@@ -93,7 +96,7 @@ echodebug() {
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #-------------------------------------------------------------------------------
 __apt_get_install_noinput() {
-    apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get install -y -o DPkg::Options::=--force-confold "$@"; return $?
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -101,7 +104,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #-------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
-    apt-get upgrade -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -109,7 +112,7 @@ __apt_get_upgrade_noinput() {
 #   DESCRIPTION:  (DRY)
 #-------------------------------------------------------------------------------
 __pip_install_noinput() {
-    pip install --upgrade $@; return $?
+    pip install --upgrade "$@"; return $?
     # Uncomment for Python 3
     #pip3 install --upgrade $@; return $?
 }
@@ -119,7 +122,7 @@ __pip_install_noinput() {
 #   DESCRIPTION:  (DRY)
 #-------------------------------------------------------------------------------
 __pip_pre_install_noinput() {
-    pip install --pre --upgrade $@; return $?
+    pip install --pre --upgrade "$@"; return $?
     # Uncomment for Python 3
     # pip3 install --pre --upgrade $@; return $?
 }
@@ -246,47 +249,48 @@ install_ubuntu_16.04_deps() {
 # Celery: celeryd (don't use, deprecated)
 
 install_ubuntu_14.04_packages() {
-    packages="dkms 
-subversion 
-libatlas-base-dev 
-gcc 
-gfortran 
-g++ 
-build-essential 
-libtool 
-automake 
-autopoint 
-git 
-bison 
-flex 
-python 
-python-pip 
-python-dev 
-python-virtualenv 
-nginx 
-zlib1g-dev 
-postgresql 
-pgadmin3 
-postgresql-server-dev-9.3 
-libtalloc2 
-libtalloc-dev 
+    packages="dkms
+subversion
+libatlas-base-dev
+gcc
+gfortran
+g++
+build-essential
+libtool
+automake
+autopoint
+git
+bison
+flex
+python
+python-pip
+python-dev
+python-virtualenv
+nginx
+zlib1g-dev
+postgresql
+pgadmin3
+postgresql-server-dev-9.3
+libtalloc2
+libtalloc-dev
 libpcre3
 libpcre3-dev
-antiword 
-poppler-utils 
+antiword
+poppler-utils
 odt2txt
-redis-server 
-openjdk-7-jdk 
-openjdk-7-jre-headless 
-openjdk-7-jre-lib 
-ant 
-ant-doc 
-ant-optional 
-ivy 
-ivy-doc 
-rabbitmq-server 
-uwsgi 
-uwsgi-plugin-python"
+redis-server
+openjdk-7-jdk
+openjdk-7-jre-headless
+openjdk-7-jre-lib
+ant
+ant-doc
+ant-optional
+ivy
+ivy-doc
+rabbitmq-server
+uwsgi
+uwsgi-plugin-python
+nginx"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -320,45 +324,45 @@ uwsgi-plugin-python"
 # Celery: celeryd (don't use, deprecated)
 
 install_ubuntu_16.04_packages() {
-    packages="dkms 
-subversion 
-libatlas-base-dev 
-gcc 
-gfortran 
-g++ 
-build-essential 
-libtool 
-automake 
-autopoint 
-git 
-bison 
-flex 
-python 
-python-pip 
-python-dev 
-python-virtualenv 
-nginx 
-zlib1g-dev 
-postgresql 
-pgadmin3 
-postgresql-server-dev-9.5 
-libtalloc2 
-libtalloc-dev 
+    packages="dkms
+subversion
+libatlas-base-dev
+gcc
+gfortran
+g++
+build-essential
+libtool
+automake
+autopoint
+git
+bison
+flex
+python
+python-pip
+python-dev
+python-virtualenv
+nginx
+zlib1g-dev
+postgresql
+pgadmin3
+postgresql-server-dev-9.5
+libtalloc2
+libtalloc-dev
 libpcre3
 libpcre3-dev
-antiword 
-poppler-utils 
+antiword
+poppler-utils
 odt2txt
-redis-server 
-openjdk-8-jdk 
-openjdk-8-jre-headless 
-ant 
-ant-doc 
-ant-optional 
-ivy 
-ivy-doc 
-rabbitmq-server 
-uwsgi 
+redis-server
+openjdk-8-jdk
+openjdk-8-jre-headless
+ant
+ant-doc
+ant-optional
+ivy
+ivy-doc
+rabbitmq-server
+uwsgi
 uwsgi-plugin-python"
 
     if [ "$@" = "dev" ]; then
@@ -384,18 +388,18 @@ install_ubuntu_14.04_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
-# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf 
+# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf
 # Scipy: scipy, numpy, pandas, redis, tornado, greenlet, pyzmq
 # Bokeh: beautifulsoup, colorama, boto, nose, mock, coverage, websocket-client, blaze, bokeh
 # Celery: celery
 #
 
-pip_packages="flask 
-psycopg2 
-Flask-SQLAlchemy 
-flask-wtf 
-celery 
-nltk 
+pip_packages="flask
+psycopg2
+Flask-SQLAlchemy
+flask-wtf
+celery
+nltk
 numpy"
 
     pip_pre_packages="bitstring"
@@ -437,19 +441,21 @@ install_ubuntu_16.04_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
-# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf 
+# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf
 # Scipy: scipy, numpy, pandas, redis, tornado, greenlet, pyzmq
 # Bokeh: beautifulsoup, colorama, boto, nose, mock, coverage, websocket-client, blaze, bokeh
 # Celery: celery
 #
 
-pip_packages="flask 
-psycopg2 
-Flask-SQLAlchemy 
-flask-wtf 
+pip_packages="flask
+psycopg2
+Flask-SQLAlchemy
+flask-wtf
 celery
 nltk
 numpy"
+
+    source "$BCAW_ROOT/venv/bin/activate"
 
     pip_pre_packages="bitstring"
 
@@ -489,12 +495,13 @@ numpy"
 
 install_source_packages() {
 
+  source "$BCAW_ROOT/venv/bin/activate"
+
   # Install pylucene (also installs JCC)
   echoinfo "bca-webtools: Building and installing pylucene"
   echoinfo " -- This may take several minutes..."
-        CDIR=$(pwd)
         cd /tmp
-        sudo wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar -zxvf pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pylucene-4.10.1-1
         pushd jcc >> $LOG_BASE/bca-install.log 2>&1
@@ -506,7 +513,7 @@ install_source_packages() {
         # First we look for the requred string in the makefile and copy the 5 lines
         # strting from the 4th line after the pattern match, into a temp file (temp),
         # after removing the leading hash (to uncomment the lines).
-  
+
         # Then we fix some paths for the virtualenv.
 
         # Then we append these lines from temp file to Makefile after the given pattern
@@ -514,17 +521,14 @@ install_source_packages() {
         grep -A 8 "Ubuntu 11.10 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
         sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i -e '/Ubuntu 11.10 64-bit/r temp' Makefile
-        make >> $LOG_BASE/bca-install.log 2>&1 
+        make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
         sudo ldconfig
         # Clean up
-        cd /tmp
-        rm pylucene-4.10.1-1-src.tar.gz
-        rm -rf pylucene-4.10.1.-1
+        rm -rf /tmp/pylucene-4.10.1.-1*
 
   # Checking postgres setup
   echoinfo "bca-webtools: Checking postgres setup"
-        CDIR=$(pwd)
         cd /tmp
         check_install postgresql postgresql >> $LOG_BASE/bca-install.log 2>&1
 
@@ -557,14 +561,8 @@ install_source_packages() {
         # Verify
         sudo ldconfig
 
-  # Install libewf
-  echoinfo "bca-webtools: Building and installing libewf..."
-        CDIR=$(pwd)
-        cd /tmp
-
-  # Install libewf from current sources
-  echoinfo "BitCurator environment: Building and installing libewf"
-        CDIR=$(pwd)
+        # Install libewf from current sources
+        echoinfo "bca-webtools: Building and installing libewf..."
         cd /tmp
 #        git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
         # Hackery: build a recent version, but not so recent that we break Sleuthkit 4.2.0, which won't
@@ -578,7 +576,7 @@ install_source_packages() {
 #        make -s >> $HOME/bitcurator-install.log 2>&1
 #        make install >> $HOME/bitcurator-install.log 2>&1
 #        ldconfig >> $HOME/bitcurator-install.log 2>&1
- 
+
         #wget -q https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cp /vagrant/externals/libewf-20140608.tar.gz .
         tar zxvf libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -589,13 +587,11 @@ install_source_packages() {
         ldconfig >> $LOG_BASE/bca-install.log 2>&1
 
         # Now clean up
-        cd /tmp
-        rm -rf libewf-20140608
+        rm -rf /tmp/libewf-20140608
 
 
   # Install libqcow (needed for pytsk)
   echoinfo "bca-webtools: Building and installing libqcow..."
-        CDIR=$(pwd)
         cd /tmp
         wget -q https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -607,7 +603,6 @@ install_source_packages() {
 
   # Install The Sleuth Kit
   echoinfo "bca-webtools: Building and installing The Sleuth Kit..."
-        CDIR=$(pwd)
         cd /tmp
         wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.2.0.tar.gz -O sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -618,9 +613,8 @@ install_source_packages() {
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
         sudo ldconfig
         # Clean up
-        cd /tmp
-        rm sleuthkit-4.2.0.tar.gz
-        rm -rf sleuthkit-sleuthkit-4.2.0
+        rm /tmp/sleuthkit-4.2.0.tar.gz
+        rm -rf /tmp/sleuthkit-sleuthkit-4.2.0
 
         #sudo wget http://sourceforge.net/projects/sleuthkit/files/latest/download?source=files -O sleuthkit.tar.gz
         #tar -xzvf sleuthkit.tar.gz
@@ -636,54 +630,70 @@ install_source_packages() {
 
   # Install TSK Python bindings
   echoinfo "bca-webtools: Building and installing pytsk..."
-        CDIR=$(pwd)
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
         wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
         tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
         #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        /var/www/bcaw/venv/bin/python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        "$BCAW_ROOT/venv/bin/python" setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Modified for use in virtualenv
-        /var/www/bcaw/venv/bin/python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
-        cd /tmp
-        rm -rf pytsk
+        rm -rf /tmp/pytsk
+}
 
-  # Temporary: Create and perm-fix log file
+create_virtualenv() {
+  echoinfo "bca-webtools: Creating and activating Python virtualenv..."
+  if [ -d "$WWW_ROOT" ]; then
+  	rm -rf "$WWW_ROOT"
+  fi
+   mkdir "$WWW_ROOT"
+   mkdir "$BCAW_ROOT"
+   chmod -R 777 "$BCAW_ROOT"
+   chown -R www-data:www-data "$BCAW_ROOT"
+   virtualenv "$BCAW_ROOT/venv"
+   source "$BCAW_ROOT/venv/bin/activate"
+}
+
+copy_source() {
+  echoinfo "bca-webtools: Copying BCA Webtools source..."
+  if [ -d "$BCAW_TARGET" ]; then
+    rm "$BCAW_ROOT/"*.pyc
+    find "$BCAW_TARGET" -name "*.pyc" -type f -exec rm {} \;
+  fi
+
+  cp -f "$SOURCE_ROOT/"*.py "$BCAW_ROOT"
+  cp -fr "$BCAW_SOURCE" "$BCAW_ROOT"
+  chown www-data:www-data "$BCAW_ROOT/"*.py
+  chown -R www-data:www-data "$BCAW_TARGET"
+}
+
+copy_disk_images() {
+  echoinfo "bca-webtools: Copying disk images from source..."
+   cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
+   chown -R www-data:www-data "$DISK_IMAGE_TARGET"
+   chmod 777 "$DISK_IMAGE_TARGET"
+   chmod 666 "$DISK_IMAGE_TARGET/"*
+}
+
+configure_webstack() {
+  echoinfo "bca-webtools: Configuring BCA Webtools web stack..."
+
+   # Temporary: Create and perm-fix log file
   echoinfo "bca-webtools: Preparing log file"
-        sudo touch /var/log/bcaw.log
-        sudo chmod 666 /var/log/bcaw.log
+  sudo touch /var/log/bcaw.log
+  sudo chmod 666 /var/log/bcaw.log
 
-}
+  if [ -d "$WWW_ROOT/run" ]; then
+    rm -rf "$WWW_ROOT/run"
+  fi
 
-setup_virtualenv() {
-
-   mkdir /var/www
-   mkdir /var/www/bcaw
-   cp -r /vagrant/* /var/www/bcaw
-   #cp /vagrant/runbcaw.py /var/www/bcaw
-   chown -R www-data:www-data /var/www/bcaw
-   chmod 777 /var/www/bcaw
-   chmod 777 /var/www/bcaw/disk-images
-   chmod 666 /var/www/bcaw/disk-images/*
-
-   virtualenv /var/www/bcaw/venv
-   source /var/www/bcaw/venv/bin/activate
-   #pip install flask
-
-}
-
-configure_environment() {
-
-   # UWSGI Setup
-   #apt-get -y install uwsgi uwsgi-plugin-python
-
-   mkdir /var/www/run
-   chown www-data:www-data /var/www/run
-   chmod 777 /var/www/run
+   mkdir "$WWW_ROOT/run"
+   chown www-data:www-data "$WWW_ROOT/run"
+   chmod 777 "$WWW_ROOT/run"
 
    touch /var/log/uwsgi/emperor.log
    chown www-data:www-data /var/log/uwsgi/emperor.log
@@ -698,14 +708,15 @@ configure_environment() {
    ln -s /etc/uwsgi/apps-available/uwsgi_config.ini /etc/uwsgi/apps-enabled
 
    # NGINX Setup
-   apt-get -y install nginx
    rm /etc/nginx/sites-enabled/default
    cp /vagrant/nginx_config /etc/nginx/sites-available/
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
    # Start UWSGI and NGINX
+   echoinfo "bca-webtools: Restarting nginx.....";
    service nginx restart
-   service uwsgi restart
+   echoinfo "bca-webtools: starting usgi.....";
+   service uwsgi start
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
@@ -715,7 +726,7 @@ configure_environment() {
 complete_message() {
     echo
     echo "Installation Complete!"
-    echo 
+    echo
     echo "Additional documentation at: http://access.bitcurator.net"
     echo
 }
@@ -740,12 +751,12 @@ fi
 #    exit 2
 #fi
 
-if [ $VER != "14.04" ] && [ $VER != "16.04"]; then
+if [ $VER != "14.04" ] && [ $VER != "16.04" ]; then
     echo "bca-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
     exit 3
 fi
 
-if [ `whoami` != "root" ]; then
+if [ "`whoami`" != "root" ]; then
     echoerror "The bca-webtools bootstrap script must run as root."
     echoinfo "Preferred Usage: sudo bootstrap.sh (options)"
     echo ""
@@ -765,7 +776,7 @@ fi
 while getopts ":hv" opt
 do
 case "${opt}" in
-    h ) usage; exit 0 ;;  
+    h ) usage; exit 0 ;;
     v ) echo "$0 -- Version $__ScriptVersion"; exit 0 ;;
     \?) echo
         echoerror "Option does not exist: $OPTARG"
@@ -808,7 +819,7 @@ echoinfo "The current user is: $SUDO_USER"
 #if [ "$SKIN" -eq 1 ] && [ "$YESTOALL" -eq 0 ]; then
 #    echo
 #    echo "You have chosen to apply the BitCurator skin to the Ubuntu system."
-#    echo 
+#    echo
 #    echo "You did not choose to say YES to all, so we are going to exit."
 #    echo
 #    echo
@@ -822,10 +833,13 @@ echoinfo "The current user is: $SUDO_USER"
     export DEBIAN_FRONTEND=noninteractive
     install_ubuntu_${VER}_deps $ITYPE
     install_ubuntu_${VER}_packages $ITYPE
-    setup_virtualenv
+    create_virtualenv
     install_ubuntu_${VER}_pip_packages $ITYPE
     install_source_packages
-    configure_environment
+    copy_disk_images
+
+    copy_source
+    configure_webstack
 
 #fi
 
@@ -864,17 +878,17 @@ complete_message
   #sudo apt-get -y -q install oracle-java8-installer
   ##apt-get -y -q install oracle-java7-installer
   #sudo update-java-alternatives -s java-8-oracle
-  
+
   # For reference only - download bokeh samples
   #>>> import bokeh.sampledata
   #>>> bokeh.sampledata.download()
- 
+
   # Now install Bokeh from source
   ##cd /tmp
   ##git clone https://github.com/bokeh/bokeh.git
   ##cd bokeh/bokehjs
   # More instruction here if we decide to do this in the future. For now, pip.
-  
+
   # link to the shared image folder
   #sudo mkdir /home/bcadmin
   #sudo ln -s /vagrant/disk-images /home/bcadmin/disk_images

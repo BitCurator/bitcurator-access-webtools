@@ -1,0 +1,27 @@
+{% extends "page.html" %}
+{% block title %}{{ image.name }} | partitions {% endblock %}
+{% block page_content %}
+    <h1>Images Partitions</h1>
+    <table class="table">
+      <tr>
+        <th>Id</th>
+        <th>Image Name</th>
+        <th>File System</th>
+        <th>Start</th>
+        <th>Browse</th>
+      </tr>
+      {% for part in partitions %}
+      <tr>
+        <td>{{ part.id }}</td>
+        <td>{{ image.name }}</td>
+        <td>{{ part.description }}</td>
+        <td>{{ part.start }}</td>
+        {% if part.description is equalto 'Error Parsing' %}
+        <td><span class="glyphicon glyphicon-warning-sign alert-danger" aria-hidden="true"></span></a></td>
+        {% else %}
+        <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></a></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock page_content %}

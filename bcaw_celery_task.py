@@ -28,7 +28,6 @@ celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
 
 @celery.task(bind=True)
-#def bcawIndexAsynchronously(bind=True):
 def bcawIndexAsynchronously(self):
     """ This is the Celery worker task which is run in parallel with the
         bcaw app. When user chooses to generate Lucene indexes for the disk
@@ -52,7 +51,7 @@ def bcawBuildDfxmlTableAsynchronously(self):
         # print "Calling dbBuildDb for DFXML..."
         # print "Current app: ", current_app.name
         bcaw.bcaw_db.dbBuildDb(self.request.id, bld_imgdb = False, bld_dfxmldb = True)
-    
+
 @celery.task(bind=True)
 def bcawBuildAllTablesAsynchronously(self):
     """ Background task to build image and dfxml table """
