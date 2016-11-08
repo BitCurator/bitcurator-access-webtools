@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Page{% endblock %}
+{% block page_header %}
+{% include "navbar.html" %}
+{% endblock %}
+{% block page_layout %}
+  <div class="container" role="main">
+    {% block page_content %}
+    {% endblock page_content %}
+  </div>
+{% endblock page_layout %}

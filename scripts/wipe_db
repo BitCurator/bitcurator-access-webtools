@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+sudo service postgresql restart
+sudo -u postgres dropdb bca_db
+sudo -u postgres createdb -O vagrant bca_db
