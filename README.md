@@ -16,8 +16,6 @@ to get you started.
 
 Find out more at <http://access.bitcurator.net/>
 
-See a previous version of bca-webtools (DIMAC) in action at <http://www.youtube.com/watch?v=BwiWFqxYzQ8>.
-
 # Getting started
 This software uses Vagrant to provision a virtual machine in which bca-webtools runs. To start, make sure you have VirtualBox installed:
 
