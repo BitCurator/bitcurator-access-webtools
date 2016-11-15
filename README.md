@@ -31,12 +31,16 @@ You can download the latest release of the bca-webtools application here:
 
 (or, if you'd like to test the development branch, you can check the current commit out directly):
 
-  * git clone https://github.com/bitcurator/bca-webtools
+```shell
+git clone https://github.com/bitcurator/bca-webtools
+```
 
 Once you have the source code (and you have unzipped it if you're using a release), change directory into bca-webtools, and make sure the associated Vagrant box (ubuntu/trusty64) is added:
 
-  * cd bca-webtools
-  * vagrant box add ubuntu/trusty64
+```shell
+cd bca-webtools
+vagrant box add ubuntu/trusty64
+```
 
 The first time you run "vagrant box add ubuntu/trusty64" may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
 
@@ -44,7 +48,9 @@ The bca-webtools application can be used to view raw (.dd) and EWF (.E01) images
 
 Once the base box is downloaded, you can start the service by running the command: 
 
-  * vagrant up
+```shell
+vagrant up
+```
 
 from within the bca-webtools directory. This step can take a long time the first time you run the software (15-30 minutes depending on your computer). The installation script will provide feedback in the console as it installs each package. Once the virtual machine has been provisioned, open a web browser on your host and navigate to:
 
@@ -66,13 +72,17 @@ Click on the "Admin" link at the bottom left of the window, and do the following
 
 If you need to stop the service, you can type:
 
-  * vagrant halt
+```shell
+vagrant halt
+```
 
 in the bca-webtools directory in the console or terminal on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. 
 
 If you need to delete the VM entirely, you can the the following command after halting the VM:
 
-  * vagrant destroy
+```shell
+vagrant destroy
+```
 
 If you wish to build a new VM with updated sources, simply delete the bca-webtools directory after halting and destroying the previous VM, and clone or download the current sources from GitHub.
 
