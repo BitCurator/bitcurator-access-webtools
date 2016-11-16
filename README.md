@@ -9,12 +9,9 @@ This repository includes a simple build script that deploys the web service as i
 Find out more at <http://access.bitcurator.net/>
 
 # Getting started
-This software uses Vagrant to provision a virtual machine in which **bitcurator-access-webtools** runs. To start, make sure you have VirtualBox installed:
+This software uses Vagrant to provision a virtual machine in which **bitcurator-access-webtools** runs. To start, make sure you have VirtualBox and Vagrant installed on your Windows, Mac, or Linux host:
 
   * http://www.virtualbox.org/
-
-and Vagrant installed:
-
   * https://vagrantup.com
 
 You can download the latest release of the bca-webtools application here:
