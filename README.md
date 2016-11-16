@@ -36,7 +36,7 @@ vagrant box add ubuntu/trusty64
 
 The first time you run **vagrant box add ubuntu/trusty64** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
 
-The bca-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the bca-webtools/disk-images directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
+The bitcurator-access-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the **bitcurator-access-webtools/disk-images** directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
 
 Once the base box is downloaded, you can start the service by running the command: 
 
@@ -52,7 +52,7 @@ from within the bitcurator-access-webtools directory. This step can take a long 
 
 to see the **bitcurator-access-webtools** service running. The first time you bring the service up, you must follow the steps in the next section to enable all browsing and search features. 
 
-# Terminating the bca-webtools service and virtual machine
+# Terminating the bitcurator-access-webtools service and virtual machine
 
 If you need to stop the service, you can type:
 
@@ -60,7 +60,7 @@ If you need to stop the service, you can type:
 vagrant halt
 ```
 
-in the bca-webtools directory in the console or terminal on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. 
+in the **bitcurator-access-webtools** directory in the console or terminal on your host machine. The next time you issue the "vagrant up" command, the VM will restart in its previous state. 
 
 If you need to delete the VM entirely, you can the the following command after halting the VM:
 
@@ -77,9 +77,9 @@ Several other libraries and tools are required, including AFFLIB (v3.7.4 or late
 
 Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the **vagrant up** command.
 
-# bca-webtools Documentation
+# Documentation
 
-More documentation coming soon. bca-webtools is currently in alpha; updates will be posted here and on our website at [http://access.bitcurator.net/](http://access.bitcurator.net/) as they become available.
+The latest documentation can be found on the BitCurator Access wiki at [http://access.bitcurator.net/](http://access.bitcurator.net/).
 
 # License(s)
 
