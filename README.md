@@ -1,5 +1,5 @@
-BitCurator Access Webtools: Browse disk images and file system metadata in a web service
-----------------------------------------------------------------------------------------
+# BitCurator Access Webtools: Browse disk images and file system metadata in a web service
+
 The **BitCurator Access Webtools** project allows users to browse a wide range of file systems contained within disk images using a web browser. It is intended to support access requirements in libraries, archives, and museums preserving born-digital materials extracted from source media as raw or forensically-packaged disk images. 
 
 The service uses open source libraries and toolkits including The Sleuth Kit, PyTSK, and the Flask web microservices framework. It uses PyLucene along with format-specific text-extraction tools to index the contents of files contained in disk images, allowing users to search for relevant content without individually inspecting files.
@@ -8,7 +8,7 @@ This repository includes a simple build script that deploys the web service as i
 
 Find out more at <http://access.bitcurator.net/>
 
-# Getting started
+## Getting started
 This software uses Vagrant to provision a virtual machine in which **bitcurator-access-webtools** runs. To start, make sure you have VirtualBox and Vagrant installed on your Windows, Mac, or Linux host:
 
   * http://www.virtualbox.org/
@@ -49,7 +49,7 @@ from within the bitcurator-access-webtools directory. This step can take a long 
 
 to see the **bitcurator-access-webtools** service running. The first time you bring the service up, you must follow the steps in the next section to enable all browsing and search features. 
 
-# Terminating the bitcurator-access-webtools service and virtual machine
+## Terminating the bitcurator-access-webtools service and virtual machine
 
 If you need to stop the service, you can type:
 
@@ -67,18 +67,18 @@ vagrant destroy
 
 If you wish to build a new VM with updated sources, simply delete the bitcurator-access-webtools directory after halting and destroying the previous VM, and clone or download the current sources from GitHub.
 
-# Dependencies
+## Dependencies
 
 This is a Flask application that is deployed automatically into an appropriately configured Ubuntu 14.04LTS virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
 Several other libraries and tools are required, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the **vagrant up** command.
 
-# Documentation
+## Documentation
 
 The latest documentation can be found on the BitCurator Access wiki at [http://access.bitcurator.net/](http://access.bitcurator.net/).
 
-# License(s)
+## License(s)
 
 The BitCurator logo, BitCurator project documentation, and other non-software products of the BitCurator team are subject to the the Creative Commons Attribution 4.0 Generic license (CC By 4.0).
 
