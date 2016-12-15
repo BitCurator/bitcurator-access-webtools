@@ -501,9 +501,11 @@ install_source_packages() {
   echoinfo "bca-webtools: Building and installing pylucene"
   echoinfo " -- This may take several minutes..."
         cd /tmp
-        wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-4.10.1-1
+        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd pylucene-6.2.0
+        export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+        export JCC_JDK=/usr/lib/jvm/java-7-openjdk-amd64
         pushd jcc >> $LOG_BASE/bca-install.log 2>&1
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         python setup.py install >> $LOG_BASE/bca-install.log 2>&1
@@ -518,14 +520,42 @@ install_source_packages() {
 
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
-        grep -A 8 "Ubuntu 11.10 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
-        sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i -e '/Ubuntu 11.10 64-bit/r temp' Makefile
+        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-openjdk-amd64/g" temp
+        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install >> $LOG_BASE/bca-install.log 2>&1
         sudo ldconfig
         # Clean up
-        rm -rf /tmp/pylucene-4.10.1.-1*
+        # rm -rf /tmp/pylucene-6.2.0*
+
+        #wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        #tar -zxvf pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        #cd pylucene-4.10.1-1
+        #pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+        #python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+        #popd >> $LOG_BASE/bca-install.log 2>&1
+
+        # Edit the Makefile to uncomment the config info for Linux.
+        # First we look for the requred string in the makefile and copy the 5 lines
+        # strting from the 4th line after the pattern match, into a temp file (temp),
+        # after removing the leading hash (to uncomment the lines).
+
+        # Then we fix some paths for the virtualenv.
+
+        # Then we append these lines from temp file to Makefile after the given pattern
+        # is found.
+        #grep -A 8 "Ubuntu 11.10 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+        #sed -i -e '/Ubuntu 11.10 64-bit/r temp' Makefile
+        #make >> $LOG_BASE/bca-install.log 2>&1
+        #sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        #sudo ldconfig
+        ## Clean up
+        #rm -rf /tmp/pylucene-4.10.1.-1*
 
   # Checking postgres setup
   echoinfo "bca-webtools: Checking postgres setup"
@@ -561,23 +591,24 @@ install_source_packages() {
         # Verify
         sudo ldconfig
 
-        # Install libewf from current sources
+        # Install libuna from dedicated copy
+        echoinfo "bca-webtools: Building and installing libuna..."
+        cd /tmp
+        cp /vagrant/externals/libuna-alpha-20150927.tar.gz .
+        tar zxvf libuna-alpha-20150927.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd libuna-20150927
+        ./configure >> $LOG_BASE/bca-install.log 2>&1
+        make -s >> $LOG_BASE/bca-install.log 2>&1
+        make install >> $LOG_BASE/bca-install.log 2>&1
+        ldconfig >> $LOG_BASE/bca-install.log 2>&1
+
+        # Now clean up
+        rm -rf /tmp/libuna-20150927
+
+
+        # Install libewf from dedicated copy
         echoinfo "bca-webtools: Building and installing libewf..."
         cd /tmp
-#        git clone --recursive https://github.com/libyal/libewf /tmp/libewf >> $HOME/bitcurator-install.log 2>&1
-        # Hackery: build a recent version, but not so recent that we break Sleuthkit 4.2.0, which won't
-        # build with the current experimental source. This means pulling a specific commit from 2015.
-#        cd /tmp/libewf
-#        git checkout 1fb9693145907f59ef3401b58d7ec43a7b14ca15 .
-#        ./synclibs.sh >> $HOME/bitcurator-install.log 2>&1
-#        ./autogen.sh >> $HOME/bitcurator-install.log 2>&1
-#        ./configure --enable-python --enable-v1-api >> $HOME/bitcurator-install.log 2>&1
-        # ./configure --enable-python --enable-python2 --enable-python3 >> $HOME/bitcurator-install.log 2>&1
-#        make -s >> $HOME/bitcurator-install.log 2>&1
-#        make install >> $HOME/bitcurator-install.log 2>&1
-#        ldconfig >> $HOME/bitcurator-install.log 2>&1
-
-        #wget -q https://53efc0a7187d0baa489ee347026b8278fe4020f6.googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg/libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cp /vagrant/externals/libewf-20140608.tar.gz .
         tar zxvf libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd libewf-20140608
@@ -615,18 +646,6 @@ install_source_packages() {
         # Clean up
         rm /tmp/sleuthkit-4.2.0.tar.gz
         rm -rf /tmp/sleuthkit-sleuthkit-4.2.0
-
-        #sudo wget http://sourceforge.net/projects/sleuthkit/files/latest/download?source=files -O sleuthkit.tar.gz
-        #tar -xzvf sleuthkit.tar.gz
-        #wget https://4a014e8976bcea5c2cd7bfa3cac120c3dd10a2f1.googledrive.com/host/0B3fBvzttpiiScUxsUm54cG02RDA/tsk4.1.3_external_type.patch
-        #sed  -i '/TSK_IMG_TYPE_EWF_EWF = 0x0040,  \/\/\/< EWF version/a \
-        #\
-        #        TSK_IMG_TYPE_EXTERNAL = 0x1000,  \/\/\/< external defined format which at least implements TSK_IMG_INFO, used by pytsk' /tmp/sleuthkit-4.1.3/tsk/img/tsk_img.h
-        #cd sleuthkit-4.1.3
-        #./configure
-        #make
-        #sudo make install
-        #sudo ldconfig
 
   # Install TSK Python bindings
   echoinfo "bca-webtools: Building and installing pytsk..."
@@ -715,8 +734,12 @@ configure_webstack() {
    # Start UWSGI and NGINX
    echoinfo "bca-webtools: Restarting nginx.....";
    service nginx restart
+   # Future: use systemctl for 16.04
+   #systemctl restart nginx
    echoinfo "bca-webtools: starting usgi.....";
    service uwsgi start
+   # Future: use systemctl for 16.04
+   #systemctl start uwsgi
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
@@ -860,34 +883,7 @@ complete_message
 #    complete_message_skin
 #fi
 
-
-
 # REFERENCE ONLY - DO NOT UNCOMMENT
-
-  # Start the server
-  # Reference only - service is no longer started in this script
-  # cd /vagrant
-  # python runserver.py &
-
-  # Oracle Java 8 silent install
-  #sudo apt-get -y -q install software-properties-common htop
-  #sudo add-apt-repository -y ppa:webupd8team/java
-  #sudo apt-get -y -q update
-  #echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-  #echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-  #sudo apt-get -y -q install oracle-java8-installer
-  ##apt-get -y -q install oracle-java7-installer
-  #sudo update-java-alternatives -s java-8-oracle
-
-  # For reference only - download bokeh samples
-  #>>> import bokeh.sampledata
-  #>>> bokeh.sampledata.download()
-
-  # Now install Bokeh from source
-  ##cd /tmp
-  ##git clone https://github.com/bokeh/bokeh.git
-  ##cd bokeh/bokehjs
-  # More instruction here if we decide to do this in the future. For now, pip.
 
   # link to the shared image folder
   #sudo mkdir /home/bcadmin
