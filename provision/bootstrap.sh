@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 #
-# bootstrap.sh: Build and configuration script for bca-webtools in Vagrant
-# ------------------------------------------------------------------------
+# bootstrap.sh: Build and configuration script for bitcurator-access-webtools in Vagrant
+# --------------------------------------------------------------------------------------
 # <http://access.bitcurator.net>
 #
 # This bash script provisions the VM, installing and/or compiling the necessary
-# forensics and other tools needed to run the bca-webtools Flask application.
+# forensics and other tools needed to run the bitcurator-access-webtools Flask application.
 #
 # This script is only the *first time* you issue the command:
 #
@@ -498,7 +498,7 @@ install_source_packages() {
   source "$BCAW_ROOT/venv/bin/activate"
 
   # Install pylucene (also installs JCC)
-  echoinfo "bca-webtools: Building and installing pylucene"
+  echoinfo "bitcurator-access-webtools: Building and installing pylucene"
   echoinfo " -- This may take several minutes..."
         cd /tmp
         wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -558,12 +558,12 @@ install_source_packages() {
         #rm -rf /tmp/pylucene-4.10.1.-1*
 
   # Checking postgres setup
-  echoinfo "bca-webtools: Checking postgres setup"
+  echoinfo "bitcurator-access-webtools: Checking postgres setup"
         cd /tmp
         check_install postgresql postgresql >> $LOG_BASE/bca-install.log 2>&1
 
   # Starting postgres
-  echoinfo "bca-webtools: Starting postgres service and creating DB"
+  echoinfo "bitcurator-access-webtools: Starting postgres service and creating DB"
         # Commented out - not needed currently???
         # .pgpass contains the password for the vagrant user. Needs to be in the home directory.
         #sudo cp /vagrant/.pgpass /home/vagrant/.pgpass
@@ -573,11 +573,11 @@ install_source_packages() {
 
         # Create the database bca_db with owner vagrant
         # Create user first
-  echoinfo "bca-webtools: Creating postgres user"
+  echoinfo "bitcurator-access-webtools: Creating postgres user"
         sudo -u postgres psql -c"CREATE user vagrant WITH PASSWORD 'vagrant'"
 
         # Create the database
-  echoinfo "bca-webtools: Creating bca_db database"
+  echoinfo "bitcurator-access-webtools: Creating bca_db database"
         sudo -u postgres createdb -O vagrant bca_db
 
         # Legacy - kept for reference
@@ -592,7 +592,7 @@ install_source_packages() {
         sudo ldconfig
 
         # Install libuna from dedicated copy
-        echoinfo "bca-webtools: Building and installing libuna..."
+        echoinfo "bitcurator-access-webtools: Building and installing libuna..."
         cd /tmp
         cp /vagrant/externals/libuna-alpha-20150927.tar.gz .
         tar zxvf libuna-alpha-20150927.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -607,7 +607,7 @@ install_source_packages() {
 
 
         # Install libewf from dedicated copy
-        echoinfo "bca-webtools: Building and installing libewf..."
+        echoinfo "bitcurator-access-webtools: Building and installing libewf..."
         cd /tmp
         cp /vagrant/externals/libewf-20140608.tar.gz .
         tar zxvf libewf-20140608.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -622,7 +622,7 @@ install_source_packages() {
 
 
   # Install libqcow (needed for pytsk)
-  echoinfo "bca-webtools: Building and installing libqcow..."
+  echoinfo "bitcurator-access-webtools: Building and installing libqcow..."
         cd /tmp
         wget -q https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -633,7 +633,7 @@ install_source_packages() {
         sudo ldconfig
 
   # Install The Sleuth Kit
-  echoinfo "bca-webtools: Building and installing The Sleuth Kit..."
+  echoinfo "bitcurator-access-webtools: Building and installing The Sleuth Kit..."
         cd /tmp
         wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.2.0.tar.gz -O sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -648,7 +648,7 @@ install_source_packages() {
         rm -rf /tmp/sleuthkit-sleuthkit-4.2.0
 
   # Install TSK Python bindings
-  echoinfo "bca-webtools: Building and installing pytsk..."
+  echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
         cd /tmp
         #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
         wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
@@ -665,7 +665,7 @@ install_source_packages() {
 }
 
 create_virtualenv() {
-  echoinfo "bca-webtools: Creating and activating Python virtualenv..."
+  echoinfo "bitcurator-access-webtools: Creating and activating Python virtualenv..."
   if [ -d "$WWW_ROOT" ]; then
   	rm -rf "$WWW_ROOT"
   fi
@@ -678,7 +678,7 @@ create_virtualenv() {
 }
 
 copy_source() {
-  echoinfo "bca-webtools: Copying BCA Webtools source..."
+  echoinfo "bitcurator-access-webtools: Copying BCA Webtools source..."
   if [ -d "$BCAW_TARGET" ]; then
     rm "$BCAW_ROOT/"*.pyc
     find "$BCAW_TARGET" -name "*.pyc" -type f -exec rm {} \;
@@ -691,7 +691,7 @@ copy_source() {
 }
 
 copy_disk_images() {
-  echoinfo "bca-webtools: Copying disk images from source..."
+  echoinfo "bitcurator-access-webtools: Copying disk images from source..."
    cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
    chown -R www-data:www-data "$DISK_IMAGE_TARGET"
    chmod 777 "$DISK_IMAGE_TARGET"
@@ -699,10 +699,10 @@ copy_disk_images() {
 }
 
 configure_webstack() {
-  echoinfo "bca-webtools: Configuring BCA Webtools web stack..."
+  echoinfo "bitcurator-access-webtools: Configuring BCA Webtools web stack..."
 
    # Temporary: Create and perm-fix log file
-  echoinfo "bca-webtools: Preparing log file"
+  echoinfo "bitcurator-access-webtools: Preparing log file"
   sudo touch /var/log/bcaw.log
   sudo chmod 666 /var/log/bcaw.log
 
@@ -732,11 +732,11 @@ configure_webstack() {
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
    # Start UWSGI and NGINX
-   echoinfo "bca-webtools: Restarting nginx.....";
+   echoinfo "bitcurator=access-webtools: Restarting nginx.....";
    service nginx restart
    # Future: use systemctl for 16.04
    #systemctl restart nginx
-   echoinfo "bca-webtools: starting usgi.....";
+   echoinfo "bitcurator-access-webtools: starting usgi.....";
    service uwsgi start
    # Future: use systemctl for 16.04
    #systemctl start uwsgi
@@ -765,22 +765,22 @@ ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
 
 if [ $OS != "Ubuntu" ]; then
-    echo "bca-webtools is only installable on Ubuntu operating systems at this time."
+    echo "bitcurator-access-webtools is only installable on Ubuntu operating systems at this time."
     exit 1
 fi
 
 #if [ $ARCH != "64" ]; then
-#    echo "bca-webtools is only installable on a 64-bit architecture at this time."
+#    echo "bitcurator-access-webtools is only installable on a 64-bit architecture at this time."
 #    exit 2
 #fi
 
 if [ $VER != "14.04" ] && [ $VER != "16.04" ]; then
-    echo "bca-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
+    echo "bitcurator-access-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
     exit 3
 fi
 
 if [ "`whoami`" != "root" ]; then
-    echoerror "The bca-webtools bootstrap script must run as root."
+    echoerror "The bitcurator-access-webtools bootstrap script must run as root."
     echoinfo "Preferred Usage: sudo bootstrap.sh (options)"
     echo ""
     exit 3
@@ -825,9 +825,9 @@ if [ "$(echo $ITYPE | egrep '(dev|stable)')x" = "x" ]; then
     exit 1
 fi
 
-echoinfo "*******************************************************"
-echoinfo "The bca-webtools script will now configure your system."
-echoinfo "*******************************************************"
+echoinfo "*********************************************************************"
+echoinfo "The bitcurator-access-webtools script will now configure your system."
+echoinfo "*********************************************************************"
 echoinfo ""
 
 #if [ "$YESTOALL" -eq 1 ]; then
