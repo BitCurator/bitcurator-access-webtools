@@ -76,7 +76,7 @@ Some of these dependencies have existing apt or pip packages in Ubuntu. Others d
 
 ## Documentation
 
-The latest documentation can be found on the BitCurator Access wiki at https://wiki.bitcurator.net/index.php?title=BitCurator_Access.
+The latest documentation can be found on the BitCurator Access wiki page at https://wiki.bitcurator.net/index.php?title=BitCurator_Access.
 
 ## License(s)
 
