@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-
 #
 # bootstrap.sh: Build and configuration script for bitcurator-access-webtools in Vagrant
 # --------------------------------------------------------------------------------------
-# <http://access.bitcurator.net>
-#
-# This bash script provisions the VM, installing and/or compiling the necessary
-# forensics and other tools needed to run the bitcurator-access-webtools Flask application.
+# Build and populate the VM: install and/or compile the necessary
+# tools needed to run the bitcurator-access-webtools Flask application.
 #
 # This script is only the *first time* you issue the command:
 #
@@ -18,7 +15,7 @@
 #    vagrant destroy
 #    vagrant up
 #
-# See the README for further detais.
+# See the README.md for further detais.
 #
 #===============================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
@@ -246,51 +243,63 @@ install_ubuntu_16.04_deps() {
 # Text extraction: antiword, poppler-utils
 # Java: openjdk-7-*, ant-*, ivy-*
 # Bokeh: npm, node
-# Celery: celeryd (don't use, deprecated)
+# textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
 install_ubuntu_14.04_packages() {
     packages="dkms
-subversion
-libatlas-base-dev
-gcc
-gfortran
-g++
-build-essential
-libtool
+ant
+ant-doc
+ant-optional
+antiword
 automake
 autopoint
-git
 bison
+build-essential
+ffmpeg
+flac
 flex
+g++
+gcc
+gfortran
+git
+ivy
+ivy-doc
 python
 python-pip
 python-dev
 python-virtualenv
 nginx
 zlib1g-dev
-postgresql
-pgadmin3
-postgresql-server-dev-9.3
+lame
+libatlas-base-dev
+libjpeg-dev
+libmad0
 libtalloc2
 libtalloc-dev
+libtool
 libpcre3
 libpcre3-dev
-antiword
-poppler-utils
+libsox-fmt-mp3
+libxml2-dev
+libxslt1-dev
 odt2txt
-redis-server
 openjdk-7-jdk
 openjdk-7-jre-headless
 openjdk-7-jre-lib
-ant
-ant-doc
-ant-optional
-ivy
-ivy-doc
+poppler-utils
+postgresql
+pgadmin3
+postgresql-server-dev-9.3
+pstotext
 rabbitmq-server
+redis-server
+sox
+subversion
+tesseract-ocr
+unrtf
 uwsgi
 uwsgi-plugin-python
-nginx"
+zlib1g-dev"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -400,7 +409,8 @@ Flask-SQLAlchemy
 flask-wtf
 celery
 nltk
-numpy"
+numpy
+textract"
 
     pip_pre_packages="bitstring"
 
