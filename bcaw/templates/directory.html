@@ -7,11 +7,12 @@
       <tr>
         <th>Type</th>
         <th>Filename</th>
-        <th>Size</th>
+        <th>Bytes</th>
         <th>Modified</th>
         <th>Created</th>
         <th>Accessed</th>
         <th>Deleted</th>
+        <th>Text</th>
       </tr>
       {% for file in files %}
       <tr>
@@ -22,6 +23,7 @@
         <td>{{ file.ctime }}</td>
         <td>{{ file.atime }}</td>
         <td><span class="glyphicon glyphicon-{{ 'trash' if file.isDeleted else 'floppy-disk' }}" aria-hidden="true"></span></td>
+        <td><span class="glyphicon glyphicon-{{ 'file-export' if file.isDeleted else 'minus' }}" aria-hidden="true"></span></td>
       </tr>
       {% endfor %}
     </table>
