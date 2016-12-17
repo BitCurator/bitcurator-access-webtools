@@ -43,10 +43,10 @@ class Extns:
 # Make this smarter for release
 class FileExtns:
     # See http://textract.readthedocs.io/en/stable/ for deps to support these
-    BASEEXT = ['.csv', '.doc', '.docx', '.eml', '.epub', '.gif', '.jpg', \
-               '.jpeg', '.json', '.html', '.htm', '.mp3', '.msg', '.odt', \
-               ',ogg', '.pdf', '.png', '.pptx', '.ps', '.rtf', '.tiff', \
-               '.tif', '.wav', '.xlsx', '.xls']
+    BASEEXT = ['csv', 'doc', 'docx', 'eml', 'epub', 'gif', 'jpg', \
+               'jpeg', 'json', 'html', 'htm', 'mp3', 'msg', 'odt', \
+               'ogg', 'pdf', 'png', 'pptx', 'ps', 'rtf', 'tiff', \
+               'tif', 'txt', 'wav', 'xlsx', 'xls']
     # Lower and upper case list
     ALLEXT = BASEEXT + map(lambda x:x.upper(),BASEEXT)
 

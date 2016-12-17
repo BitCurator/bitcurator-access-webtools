@@ -194,10 +194,8 @@ install_ubuntu_14.04_deps() {
     echoinfo "Enabling Universal Repository ... "
     __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
-    # TESTING ONLY - DO NOT UNCOMMENT
-    # echoinfo "Adding Oracle Java Repository"
-    # add-apt-repository -y ppa:webupd8team/java >> $LOG_BASE/bca-install.log 2>&1 || return 1
-    # Need oracle-java8-installer to replace openjdk in package list below (future)
+    echoinfo "Enabling mc3man PPA for ffmpeg ... "
+    add-apt-repository -y ppa:mc3man/trusty-media >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
     echoinfo "Updating Repository Package List ..."
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1

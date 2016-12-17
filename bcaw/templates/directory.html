@@ -23,7 +23,7 @@
         <td>{{ file.ctime }}</td>
         <td>{{ file.atime }}</td>
         <td><span class="glyphicon glyphicon-{{ 'trash' if file.isDeleted else 'floppy-disk' }}" aria-hidden="true"></span></td>
-        <td><span class="glyphicon glyphicon-{{ 'file-export' if file.isDeleted else 'minus' }}" aria-hidden="true"></span></td>
+        <td><span class="glyphicon glyphicon-{{ 'align-left' if file.isCandidate else 'minus' }}" aria-hidden="true"></span></td>
       </tr>
       {% endfor %}
     </table>
