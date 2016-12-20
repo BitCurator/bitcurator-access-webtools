@@ -69,6 +69,16 @@ def file_handler(image_id, part_id, encoded_filepath):
                     mimetype=mime_type,
                     headers={ "Content-Disposition" : "attachment;filename=" + fsEle.name })
 
+@app.route('/analysis/<image_id>/<part_id>/<path:encoded_filepath>')
+def analysis_handler(image_id, part_id, encoded_filepath):
+    file_path = urllib.unquote(encoded_filepath)
+    image = Image.byId(image_id)
+    imagePart = Partition.byId(part_id)
+    fsEle = FileSysEle.fromImagePath(image.path, imagePart, image.bps, file_path)
+    
+    # Do something for directory handling here, not sure what yet
+    return render_template('analysis.html', image=image, partition=imagePart, file_path=file_path)
+
 
 class DbSynch:
     __not_in_db__ = []
