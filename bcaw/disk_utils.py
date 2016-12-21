@@ -208,7 +208,8 @@ class ImagePart(object):
         }
 
 class FileSysEle(object):
-    def __init__(self, path, size, mode, mtime, atime, ctime, addr, isDir, isDeleted):
+    #def __init__(self, path, size, mode, mtime, atime, ctime, addr, isDir, isDeleted):
+    def __init__(self, path, size, mode, mtime, atime, ctime, addr, isDir, isDeleted, isCandidate):
         self.path = path
         self.name = ntpath.basename(path)
         self.size = size
@@ -219,13 +220,14 @@ class FileSysEle(object):
         self.addr = addr
         self.isDir = isDir
         self.isDeleted = isDeleted
+        self.isCandidate = isCandidate
 
     def isDirectory(self):
         return self.isDir
 
     @classmethod
     def rootElement(cls):
-        rootObj = cls('/', 0, '', 0, 0, 0, -1, True, False)
+        rootObj = cls('/', 0, '', 0, 0, 0, -1, True, False, False)
         return rootObj
 
     @classmethod
@@ -248,7 +250,7 @@ class FileSysEle(object):
 
     @classmethod
     def fromFileInfo(cls, path, info):
-        ele = cls(path + info.name.name, info.meta.size, info.meta.mode, info.meta.mtime, info.meta.atime, info.meta.ctime, info.meta.addr, is_dir(info.meta.type), is_deleted(info))
+        ele = cls(path + info.name.name, info.meta.size, info.meta.mode, info.meta.mtime, info.meta.atime, info.meta.ctime, info.meta.addr, is_dir(info.meta.type), is_deleted(info), is_candidate(info))
         return ele
 
     @staticmethod
@@ -324,6 +326,16 @@ def strip_mtime(mtime):
 
 def is_deleted(info):
     return (int(info.meta.flags) & 0x01 == 0)
+
+# Check if this is a candidate for text extraction
+def is_candidate(info):
+    # Get just the extension (this is dirty, also gets dotfile names now)
+    fa = (info.name.name).rsplit('.',1)
+    if len(fa) > 1:
+        return fa[1] in FileExtns.ALLEXT
+        #logging.debug("End after split:" + fa[1])
+    else: 
+        return False
 
 def is_dir(meta_type):
     return (meta_type == 2)

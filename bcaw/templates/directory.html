@@ -2,16 +2,17 @@
 {% block title %}{{ image.name }} | files{% endblock %}
 {% block page_content %}
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <h2>Directory Listing:</h2>
+    <h2>Directory Listing</h2>
     <table class="table table-striped">
       <tr>
         <th>Type</th>
         <th>Filename</th>
-        <th>Size</th>
+        <th>Bytes</th>
         <th>Modified</th>
         <th>Created</th>
         <th>Accessed</th>
         <th>Deleted</th>
+ <!--       <th>Analysis</th>       -->
       </tr>
       {% for file in files %}
       <tr>
@@ -22,6 +23,11 @@
         <td>{{ file.ctime }}</td>
         <td>{{ file.atime }}</td>
         <td><span class="glyphicon glyphicon-{{ 'trash' if file.isDeleted else 'floppy-disk' }}" aria-hidden="true"></span></td>
+
+<!--        <td>
+            <a href="{{ "/analysis/" + image.id|string + "/" + partition.id|string + file.path }}" ><span class="glyphicon glyphicon-{{ 'align-left' if file.isCandidate else 'minus' }}" aria-hidden="true"></span></a>
+        </td>
+-->
       </tr>
       {% endfor %}
     </table>

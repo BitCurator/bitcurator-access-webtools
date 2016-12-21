@@ -39,6 +39,17 @@ class Extns:
     SUPPORTED = META + RAW;
     IGNORED = [XML, XML.upper()]
 
+# Extensions for text extraction support (via textract)
+# Make this smarter for release
+class FileExtns:
+    # See http://textract.readthedocs.io/en/stable/ for deps to support these
+    BASEEXT = ['csv', 'doc', 'docx', 'eml', 'epub', 'gif', 'jpg', \
+               'jpeg', 'json', 'html', 'htm', 'mp3', 'msg', 'odt', \
+               'ogg', 'pdf', 'png', 'pptx', 'ps', 'rtf', 'tiff', \
+               'tif', 'txt', 'wav', 'xlsx', 'xls']
+    # Lower and upper case list
+    ALLEXT = BASEEXT + map(lambda x:x.upper(),BASEEXT)
+
 # Field names for mappings from EWF tags
 class ImgFlds:
     PATH = 'path'
