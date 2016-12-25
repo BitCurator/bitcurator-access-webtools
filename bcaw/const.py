@@ -9,49 +9,53 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-# Constants used across BitCurator modules.
-#
-# These need to map to the names used in the default config file, but better
-# than multiple hardcoded strings in code.
+"""Constants used across BitCurator modules.
+These need to map to the names used in the default config file, but better
+than multiple hardcoded strings in code.
+"""
 
 import datetime
 
-class ConfKey:
+class ConfKey(object):
+    """Config key string constatnts"""
     LOG_FORMAT = 'LOG_FORMAT'
-    LOG_FILE   = 'LOG_FILE'
-    IMAGE_DIR  = 'IMAGE_DIR'
+    LOG_FILE = 'LOG_FILE'
+    IMAGE_DIR = 'IMAGE_DIR'
 
-class Defaults:
+class Defaults(object):
+    """Default values"""
     NA = 'N/A'
     NULL_MD5 = 'd41d8cd98f00b204e9800998ecf8427e'
 
-class Extns:
+class Extns(object):
+    """File extensions for disk image types and XML."""
     E01 = '.e01'
     AFF = '.aff'
     RAW = '.raw'
-    DD  = '.dd'
+    DD = '.dd'
     ISO = '.iso'
     XML = '.xml'
     DFXML = '_dfxml' + XML
     # list of image types supporting system metadata
     META = [E01, E01.upper(), AFF, AFF.upper()]
     RAW = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
-    SUPPORTED = META + RAW;
+    SUPPORTED = META + RAW
     IGNORED = [XML, XML.upper()]
 
-# Extensions for text extraction support (via textract)
-# Make this smarter for release
-class FileExtns:
-    # See http://textract.readthedocs.io/en/stable/ for deps to support these
+
+class FileExtns(object):
+    """Extensions for text extraction support (via textract)
+    See http://textract.readthedocs.io/en/stable/ for deps to support these
+    """
     BASEEXT = ['csv', 'doc', 'docx', 'eml', 'epub', 'gif', 'jpg', \
                'jpeg', 'json', 'html', 'htm', 'mp3', 'msg', 'odt', \
                'ogg', 'pdf', 'png', 'pptx', 'ps', 'rtf', 'tiff', \
                'tif', 'txt', 'wav', 'xlsx', 'xls']
     # Lower and upper case list
-    ALLEXT = BASEEXT + map(lambda x:x.upper(),BASEEXT)
+    ALLEXT = BASEEXT + [x.upper() for x in BASEEXT]
 
-# Field names for mappings from EWF tags
-class ImgFlds:
+class ImgFlds(object):
+    """Field names for mappings from EWF tags"""
     PATH = 'path'
     NAME = 'name'
     ACQUIRED = 'acquired'
@@ -63,7 +67,7 @@ class ImgFlds:
     BPS = 'bps'
     SECTORS = 'sectors'
     SIZE = 'size'
-    MD5 ='md5'
+    MD5 = 'md5'
     DEFAULT = {
         ACQUIRED    : datetime.date.today(),
         SYS_DATE    : datetime.date.today(),
@@ -77,11 +81,12 @@ class ImgFlds:
         MD5         : Defaults.NULL_MD5
     }
 
-class PartFlds:
-    ADDR  = 'addr'
-    SLOT  = 'slot'
+class PartFlds(object):
+    """Database fields and defaults for DB partition table"""
+    ADDR = 'addr'
+    SLOT = 'slot'
     START = 'start'
-    DESC  = 'description'
+    DESC = 'description'
     IMAGE = 'image_id'
     DEFAULT = {
         ADDR  : 0,
@@ -90,13 +95,15 @@ class PartFlds:
         DESC  : Defaults.NA
     }
 
-class PathChars:
+class PathChars(object):
+    """File path separator characters"""
     PATH_SEP_FOR = '/'
     PATH_SEP_BACK = '\\'
     SEPS = [PATH_SEP_FOR, PATH_SEP_BACK]
 
-# EWF XMl element tags
-class EwfTags:
+
+class EwfTags(object):
+    """EWF XMl element tags"""
     # Parent tags
     EWINFO = 'ewfinfo'
     ACQ_INFO = 'acquiry_information'
@@ -119,7 +126,8 @@ class EwfTags:
     MEDIA_SIZE = 'media_size'
     HASH_DIGEST = 'hashdigest'
 
-class EwfTagMap:
+class EwfTagMap(object):
+    """Maps Expert Witness Format tags to DB Image table fields"""
     LOOKUP = {
         EwfTags.ACQ_DATE    : ImgFlds.ACQUIRED,
         EwfTags.SYS_DATE    : ImgFlds.SYS_DATE,
@@ -134,5 +142,6 @@ class EwfTagMap:
     }
 
 # Exceptions
-class ExcepMess:
+class ExcepMess(object):
+    """Messages for exceptions"""
     PARSING = 'Exception when parsing %s: %s'
