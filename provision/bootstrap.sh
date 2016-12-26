@@ -21,6 +21,8 @@
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
 #===============================================================================
 #
+# Script Version
+__ScriptVersion="0.7"
 # Base directory for build log
 LOG_BASE=/var/log
 WWW_ROOT=/var/www
@@ -534,7 +536,7 @@ install_source_packages() {
         sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-openjdk-amd64/g" temp
         sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
         make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
         # Clean up
         # rm -rf /tmp/pylucene-6.2.0*
@@ -637,7 +639,7 @@ install_source_packages() {
         cd libqcow-20160123
         ./configure --enable-python >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        sudo make install |& sudo tee -a  $LOG_BASE/bca-install.log
         sudo ldconfig
 
   # Install The Sleuth Kit
@@ -649,7 +651,7 @@ install_source_packages() {
         ./bootstrap >> $LOG_BASE/bca-install.log 2>&1
         ./configure >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install >> $LOG_BASE/bca-install.log 2>&1
+        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
         # Clean up
         rm /tmp/sleuthkit-4.2.0.tar.gz
