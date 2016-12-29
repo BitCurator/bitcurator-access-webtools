@@ -351,6 +351,7 @@ gfortran
 git
 ivy
 ivy-doc
+jcc
 python
 python-pip
 python-dev
