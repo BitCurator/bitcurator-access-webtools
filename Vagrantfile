@@ -7,14 +7,16 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Use a properly configured Ubuntu 14.04 box (note: issues with xenial at this time)
-    config.vm.box = "ubuntu/trusty64"
+    #config.vm.box = "https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
+
+    #config.vm.box = "ubuntu/trusty64"
 
     # Alternative boxes for future migration:
-    #config.vm.box = "bento/ubuntu-16.04"
+    config.vm.box = "bento/ubuntu-16.04"
     #config.vm.box = "ubuntu/xenial64"
 
     # Set the box host-name
-    config.vm.hostname = "bcaw"
+    # config.vm.hostname = "ubuntu-xenial"
 
     # Run the provisioning script
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
@@ -26,6 +28,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Run the Celery daemon start script
     config.vm.provision :shell, :path => "./provision/taskserv.sh",
      run: "always"
+
+    # Configure synced folder
+    # config.vm.synced_folder "", "/vagrant"
 
     # Port forward HTTP (80) to host 2020
     config.vm.network :forwarded_port, :host => 8080, :guest => 80

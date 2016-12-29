@@ -339,6 +339,7 @@ zlib1g-dev"
 
 install_ubuntu_16.04_packages() {
     packages="dkms
+virtualbox-guest-utils
 ant
 ant-doc
 ant-optional
@@ -610,7 +611,12 @@ install_source_packages() {
         #sudo cp /vagrant/.pgpass /home/vagrant/.pgpass
 
         # Start postgress and setup up postgress user
-        sudo service postgresql start
+        # See: http://askubuntu.com/questions/810008/after-upgrade-14-04-to-16-04-1-postgresql-server-does-not-start
+        rm /lib/systemd/system/postgresql.service
+        sudo systemctl daemon-reload
+        sudo systemctl enable postgresql
+        sudo systemctl start postgresql
+        #sudo service postgresql start
 
         # Create the database bca_db with owner vagrant
         # Create user first
@@ -627,7 +633,8 @@ install_source_packages() {
         #sudo -u postgres createdb -O bcadmin bcdb
 
         # Restart postgres
-        sudo service postgresql restart
+        sudo systemctl restart postgresql
+        #sudo service postgresql restart
 
         # Verify
         sudo ldconfig
@@ -774,11 +781,13 @@ configure_webstack() {
 
    # Start UWSGI and NGINX
    echoinfo "bitcurator=access-webtools: Restarting nginx.....";
-   service nginx restart
+   systemctl restart nginx
+   #service nginx restart
    # Future: use systemctl for 16.04
    #systemctl restart nginx
    echoinfo "bitcurator-access-webtools: starting usgi.....";
-   service uwsgi start
+   systemctl start uwsgi
+   #service uwsgi start
    # Future: use systemctl for 16.04
    #systemctl start uwsgi
 
