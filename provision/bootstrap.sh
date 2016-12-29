@@ -196,6 +196,9 @@ install_ubuntu_14.04_deps() {
     echoinfo "Enabling Universal Repository ... "
     __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
+    echoinfo "Enabling openjdk-r PPA for OpenJDK 8 in 14.04LTS ... "
+    add-apt-repository -y ppa:openjdk-r/ppa >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
     echoinfo "Enabling mc3man PPA for ffmpeg ... "
     add-apt-repository -y ppa:mc3man/trusty-media >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
@@ -242,6 +245,9 @@ install_ubuntu_16.04_deps() {
 # Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
 # Text extraction: antiword, poppler-utils
 # Java: openjdk-7-*, ant-*, ivy-*
+#  openjdk-7-jdk
+#  openjdk-7-jre-headless
+#  openjdk-7-jre-lib
 # Bokeh: npm, node
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
@@ -283,9 +289,8 @@ libsox-fmt-mp3
 libxml2-dev
 libxslt1-dev
 odt2txt
-openjdk-7-jdk
-openjdk-7-jre-headless
-openjdk-7-jre-lib
+openjdk-8-jdk
+openjdk-8-jre-headless
 poppler-utils
 postgresql
 pgadmin3
@@ -528,9 +533,15 @@ install_source_packages() {
         wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pylucene-6.2.0
-        export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-        export JCC_JDK=/usr/lib/jvm/java-7-openjdk-amd64
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+
         pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+
+        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
+        # without this!
+        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
+
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         popd >> $LOG_BASE/bca-install.log 2>&1
@@ -549,6 +560,12 @@ install_source_packages() {
         sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
         sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+
+        # Finally, remove the shared flag for the time being. See
+        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
+        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
+        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
+
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
