@@ -483,7 +483,8 @@ Flask-SQLAlchemy
 flask-wtf
 celery
 nltk
-numpy"
+numpy
+textract"
 
     source "$BCAW_ROOT/venv/bin/activate"
 
