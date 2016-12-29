@@ -334,45 +334,58 @@ zlib1g-dev"
 
 install_ubuntu_16.04_packages() {
     packages="dkms
-subversion
-libatlas-base-dev
-gcc
-gfortran
-g++
-build-essential
-libtool
+ant
+ant-doc
+ant-optional
+antiword
 automake
 autopoint
-git
 bison
+build-essential
+ffmpeg
+flac
 flex
+g++
+gcc
+gfortran
+git
+ivy
+ivy-doc
 python
 python-pip
 python-dev
 python-virtualenv
 nginx
 zlib1g-dev
+lame
+libatlas-base-dev
+libjpeg-dev
+libmad0
+libtalloc2
+libtalloc-dev
+libtool
+libpcre3
+libpcre3-dev
+libsox-fmt-mp3
+libxml2-dev
+libxslt1-dev
+odt2txt
+openjdk-8-jdk
+openjdk-8-jre-headless
+poppler-utils
 postgresql
 pgadmin3
 postgresql-server-dev-9.5
-libtalloc2
-libtalloc-dev
-libpcre3
-libpcre3-dev
-antiword
-poppler-utils
-odt2txt
-redis-server
-openjdk-8-jdk
-openjdk-8-jre-headless
-ant
-ant-doc
-ant-optional
-ivy
-ivy-doc
+pstotext
 rabbitmq-server
+redis-server
+sox
+subversion
+tesseract-ocr
+unrtf
 uwsgi
-uwsgi-plugin-python"
+uwsgi-plugin-python
+zlib1g-dev"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -533,7 +546,7 @@ install_source_packages() {
         grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
         #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-openjdk-amd64/g" temp
+        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
         sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
