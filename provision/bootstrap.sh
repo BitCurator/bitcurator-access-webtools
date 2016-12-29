@@ -196,6 +196,9 @@ install_ubuntu_14.04_deps() {
     echoinfo "Enabling Universal Repository ... "
     __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
+    echoinfo "Enabling openjdk-r PPA for OpenJDK 8 in 14.04LTS ... "
+    add-apt-repository -y ppa:openjdk-r/ppa >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
     echoinfo "Enabling mc3man PPA for ffmpeg ... "
     add-apt-repository -y ppa:mc3man/trusty-media >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
@@ -242,6 +245,9 @@ install_ubuntu_16.04_deps() {
 # Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
 # Text extraction: antiword, poppler-utils
 # Java: openjdk-7-*, ant-*, ivy-*
+#  openjdk-7-jdk
+#  openjdk-7-jre-headless
+#  openjdk-7-jre-lib
 # Bokeh: npm, node
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
@@ -283,9 +289,8 @@ libsox-fmt-mp3
 libxml2-dev
 libxslt1-dev
 odt2txt
-openjdk-7-jdk
-openjdk-7-jre-headless
-openjdk-7-jre-lib
+openjdk-8-jdk
+openjdk-8-jre-headless
 poppler-utils
 postgresql
 pgadmin3
@@ -334,45 +339,59 @@ zlib1g-dev"
 
 install_ubuntu_16.04_packages() {
     packages="dkms
-subversion
-libatlas-base-dev
-gcc
-gfortran
-g++
-build-essential
-libtool
+ant
+ant-doc
+ant-optional
+antiword
 automake
 autopoint
-git
 bison
+build-essential
+ffmpeg
+flac
 flex
+g++
+gcc
+gfortran
+git
+ivy
+ivy-doc
+jcc
 python
 python-pip
 python-dev
 python-virtualenv
 nginx
 zlib1g-dev
+lame
+libatlas-base-dev
+libjpeg-dev
+libmad0
+libtalloc2
+libtalloc-dev
+libtool
+libpcre3
+libpcre3-dev
+libsox-fmt-mp3
+libxml2-dev
+libxslt1-dev
+odt2txt
+openjdk-8-jdk
+openjdk-8-jre-headless
+poppler-utils
 postgresql
 pgadmin3
 postgresql-server-dev-9.5
-libtalloc2
-libtalloc-dev
-libpcre3
-libpcre3-dev
-antiword
-poppler-utils
-odt2txt
-redis-server
-openjdk-8-jdk
-openjdk-8-jre-headless
-ant
-ant-doc
-ant-optional
-ivy
-ivy-doc
+pstotext
 rabbitmq-server
+redis-server
+sox
+subversion
+tesseract-ocr
+unrtf
 uwsgi
-uwsgi-plugin-python"
+uwsgi-plugin-python
+zlib1g-dev"
 
     if [ "$@" = "dev" ]; then
         packages="$packages"
@@ -514,9 +533,15 @@ install_source_packages() {
         wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pylucene-6.2.0
-        export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-        export JCC_JDK=/usr/lib/jvm/java-7-openjdk-amd64
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+
         pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+
+        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
+        # without this!
+        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
+
         python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         popd >> $LOG_BASE/bca-install.log 2>&1
@@ -533,8 +558,14 @@ install_source_packages() {
         grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
         #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-7-openjdk-amd64/g" temp
+        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
         sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+
+        # Finally, remove the shared flag for the time being. See
+        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
+        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
+        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
+
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
