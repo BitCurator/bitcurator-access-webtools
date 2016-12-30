@@ -608,11 +608,11 @@ install_source_packages() {
   echoinfo "bitcurator-access-webtools: Starting postgres service and creating DB"
         # Start postgress and setup up postgress user
         # See: http://askubuntu.com/questions/810008/after-upgrade-14-04-to-16-04-1-postgresql-server-does-not-start
-        rm /lib/systemd/system/postgresql.service
-        sudo systemctl daemon-reload
-        sudo systemctl enable postgresql
-        sudo systemctl start postgresql
-        #sudo service postgresql start
+        #rm /lib/systemd/system/postgresql.service
+        #sudo systemctl daemon-reload
+        #sudo systemctl enable postgresql
+        #sudo systemctl start postgresql
+        sudo service postgresql start
 
         # Create the database bca_db with owner vagrant
         # Create user first
@@ -624,8 +624,8 @@ install_source_packages() {
         sudo -u postgres createdb -O vagrant bca_db
 
         # Restart postgres
-        sudo systemctl restart postgresql
-        #sudo service postgresql restart
+        #sudo systemctl restart postgresql
+        sudo service postgresql restart
 
         # Verify
         sudo ldconfig
@@ -770,16 +770,18 @@ configure_webstack() {
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
    # Start UWSGI and NGINX
-   echoinfo "bitcurator=access-webtools: Restarting nginx.....";
-   systemctl restart nginx
-   #service nginx restart
-   # Future: use systemctl for 16.04
-   #systemctl restart nginx
-   echoinfo "bitcurator-access-webtools: starting usgi.....";
-   systemctl start uwsgi
-   #service uwsgi start
-   # Future: use systemctl for 16.04
-   #systemctl start uwsgi
+   if [ $VER == "14.04" ]; then
+       echoinfo "bitcurator=access-webtools: Restarting nginx (via service)";
+       service nginx restart
+       echoinfo "bitcurator-access-webtools: Starting usgi (via service)";
+       service uwsgi start
+   fi
+   if [ $VER == "16.04" ]; then
+       echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
+       systemctl restart nginx
+       echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
+       systemctl start uwsgi
+   fi
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
@@ -825,10 +827,6 @@ if [ "$SUDO_USER" = "" ]; then
     echo "The SUDO_USER variable doesn't seem to be set"
     exit 4
 fi
-
-#    echo "APT Package Manager appears to be locked. Close all package managers."
-#    exit 15
-#fi
 
 # while getopts ":hvcsiyu" opt
 while getopts ":hv" opt
