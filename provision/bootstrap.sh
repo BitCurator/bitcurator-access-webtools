@@ -222,10 +222,9 @@ install_ubuntu_16.04_deps() {
     echoinfo "Enabling Universal Repository ... "
     __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
-    # TESTING ONLY - DO NOT UNCOMMENT
+    # Reference only - use OpenJDK in current build
     # echoinfo "Adding Oracle Java Repository"
     # add-apt-repository -y ppa:webupd8team/java >> $LOG_BASE/bca-install.log 2>&1 || return 1
-    # Need oracle-java8-installer to replace openjdk in package list below (future)
 
     echoinfo "Updating Repository Package List ..."
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
@@ -327,15 +326,11 @@ zlib1g-dev"
 
 #
 # Packages below will be installed. Dependencies listed here:
-# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
-# Access Git repositories: git
-# libewf specific depends: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
-# pyewf specific depends: python, python-dev, python-pip
-# Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
-# Text extraction: antiword, poppler-utils
-# Java: openjdk-7-*, ant-*, ivy-*
-# Bokeh: npm, node
-# Celery: celeryd (don't use, deprecated)
+# Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
+# libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
+# pyewf requires: python, python-dev, python-pip
+# postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.3
+# pylucene: openjdk-7-*, ant-*, ivy-*
 
 install_ubuntu_16.04_packages() {
     packages="dkms
@@ -602,7 +597,7 @@ install_source_packages() {
         ## Clean up
         #rm -rf /tmp/pylucene-4.10.1.-1*
 
-        # ******* START: Previous instructions for pylucene 4.10.1-1 *******
+        # ******* END: Previous instructions for pylucene 4.10.1-1 *******
 
   # Checking postgres setup
   echoinfo "bitcurator-access-webtools: Checking postgres setup"
@@ -611,10 +606,6 @@ install_source_packages() {
 
   # Starting postgres
   echoinfo "bitcurator-access-webtools: Starting postgres service and creating DB"
-        # Commented out - not needed currently???
-        # .pgpass contains the password for the vagrant user. Needs to be in the home directory.
-        #sudo cp /vagrant/.pgpass /home/vagrant/.pgpass
-
         # Start postgress and setup up postgress user
         # See: http://askubuntu.com/questions/810008/after-upgrade-14-04-to-16-04-1-postgresql-server-does-not-start
         rm /lib/systemd/system/postgresql.service
@@ -799,7 +790,7 @@ complete_message() {
     echo
     echo "Installation Complete!"
     echo
-    echo "Additional documentation at: http://access.bitcurator.net"
+    echo "Additional documentation at: https://wiki.bitcurator.net"
     echo
 }
 
@@ -817,11 +808,6 @@ if [ $OS != "Ubuntu" ]; then
     echo "bitcurator-access-webtools is only installable on Ubuntu operating systems at this time."
     exit 1
 fi
-
-#if [ $ARCH != "64" ]; then
-#    echo "bitcurator-access-webtools is only installable on a 64-bit architecture at this time."
-#    exit 2
-#fi
 
 if [ $VER != "14.04" ] && [ $VER != "16.04" ]; then
     echo "bitcurator-access-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."

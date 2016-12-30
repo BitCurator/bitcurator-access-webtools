@@ -6,7 +6,7 @@ The service uses open source libraries and toolkits including The Sleuth Kit, Py
 
 This repository includes a simple build script that deploys the web service as in a VirtualBox VM using Vagrant. It includes several sample images (in the "disk-images" directory) to get you started.
 
-Find out more at <http://access.bitcurator.net/>
+Find out more at <http://wiki.bitcurator.net/>
 
 ## Getting started
 This software uses Vagrant to provision a virtual machine in which **bitcurator-access-webtools** runs. To start, make sure you have VirtualBox and Vagrant installed on your Windows, Mac, or Linux host:
