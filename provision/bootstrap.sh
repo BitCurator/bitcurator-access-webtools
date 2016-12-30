@@ -523,51 +523,56 @@ install_source_packages() {
 
   source "$BCAW_ROOT/venv/bin/activate"
 
+  echoinfo "bitcurator-access-webtools: Setting JAVA_HOME and JCC_JDK"
+  export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+  export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+
   # Install pylucene (also installs JCC)
   echoinfo "bitcurator-access-webtools: Building and installing pylucene"
-  echoinfo " -- This may take several minutes..."
-        cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-6.2.0
-        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
-
-        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
-
-        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
-        # without this!
-        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
-
-        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
-        popd >> $LOG_BASE/bca-install.log 2>&1
-
-        # Edit the Makefile to uncomment the config info for Linux.
-        # First we look for the requred string in the makefile and copy the 5 lines
-        # strting from the 4th line after the pattern match, into a temp file (temp),
-        # after removing the leading hash (to uncomment the lines).
-
-        # Then we fix some paths for the virtualenv.
-
-        # Then we append these lines from temp file to Makefile after the given pattern
-        # is found.
-        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
-        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
-        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
-
-        # Finally, remove the shared flag for the time being. See
-        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
-        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
-        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
-
-        make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
-        sudo ldconfig
-        # Clean up
-        # rm -rf /tmp/pylucene-6.2.0*
+  echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
+#  echoinfo " -- This may take several minutes..."
+#        cd /tmp
+#        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        cd pylucene-6.2.0
+#        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+#        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+#
+#        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+#
+#        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
+#        # without this!
+#        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
+#
+#        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+#        popd >> $LOG_BASE/bca-install.log 2>&1
+#
+#        # Edit the Makefile to uncomment the config info for Linux.
+#        # First we look for the requred string in the makefile and copy the 5 lines
+#        # strting from the 4th line after the pattern match, into a temp file (temp),
+#        # after removing the leading hash (to uncomment the lines).
+#
+#        # Then we fix some paths for the virtualenv.
+#
+#        # Then we append these lines from temp file to Makefile after the given pattern
+#        # is found.
+#        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+#        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
+#        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+#
+#        # Finally, remove the shared flag for the time being. See
+#        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
+#        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
+#        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
+#
+#        make >> $LOG_BASE/bca-install.log 2>&1
+#        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
+#        sudo ldconfig
+#        # Clean up
+#        # rm -rf /tmp/pylucene-6.2.0*
 
         # ******* START: Previous instructions for pylucene 4.10.1-1 *******
 
