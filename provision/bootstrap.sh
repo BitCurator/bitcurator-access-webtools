@@ -574,6 +574,8 @@ install_source_packages() {
         # Clean up
         # rm -rf /tmp/pylucene-6.2.0*
 
+        # ******* START: Previous instructions for pylucene 4.10.1-1 *******
+
         #wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         #tar -zxvf pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         #cd pylucene-4.10.1-1
@@ -599,6 +601,8 @@ install_source_packages() {
         #sudo ldconfig
         ## Clean up
         #rm -rf /tmp/pylucene-4.10.1.-1*
+
+        # ******* START: Previous instructions for pylucene 4.10.1-1 *******
 
   # Checking postgres setup
   echoinfo "bitcurator-access-webtools: Checking postgres setup"
@@ -628,11 +632,6 @@ install_source_packages() {
   echoinfo "bitcurator-access-webtools: Creating bca_db database"
         sudo -u postgres createdb -O vagrant bca_db
 
-        # Legacy - kept for reference
-        #sudo -u postgres psql -c"ALTER user postgres WITH PASSWORD 'bcadmin'"
-        #sudo -u postgres psql -c"CREATE user bcadmin WITH PASSWORD 'bcadmin'"
-        #sudo -u postgres createdb -O bcadmin bcdb
-
         # Restart postgres
         sudo systemctl restart postgresql
         #sudo service postgresql restart
@@ -653,7 +652,6 @@ install_source_packages() {
 
         # Now clean up
         rm -rf /tmp/libuna-20150927
-
 
         # Install libewf from dedicated copy
         echoinfo "bitcurator-access-webtools: Building and installing libewf..."
@@ -890,52 +888,16 @@ echoinfo "Arch: $ARCH"
 echoinfo "Version: $VER"
 echoinfo "The current user is: $SUDO_USER"
 
-#if [ "$SKIN" -eq 1 ] && [ "$YESTOALL" -eq 0 ]; then
-#    echo
-#    echo "You have chosen to apply the BitCurator skin to the Ubuntu system."
-#    echo
-#    echo "You did not choose to say YES to all, so we are going to exit."
-#    echo
-#    echo
-#    echo "Re-run this command with the -y option"
-#    echo
-#    exit 10
-#fi
+export DEBIAN_FRONTEND=noninteractive
+install_ubuntu_${VER}_deps $ITYPE
+install_ubuntu_${VER}_packages $ITYPE
+create_virtualenv
+install_ubuntu_${VER}_pip_packages $ITYPE
+install_source_packages
+copy_disk_images
 
-#if [ "$INSTALL" -eq 1 ] && [ "$CONFIGURE_ONLY" -eq 0 ]; then
-
-    export DEBIAN_FRONTEND=noninteractive
-    install_ubuntu_${VER}_deps $ITYPE
-    install_ubuntu_${VER}_packages $ITYPE
-    create_virtualenv
-    install_ubuntu_${VER}_pip_packages $ITYPE
-    install_source_packages
-    copy_disk_images
-
-    copy_source
-    configure_webstack
-
-#fi
-
-#configure_elasticsearch
-
-# Configure for BitCurator
-# configure_ubuntu
-
-# Configure BitCurator VM (if selected)
-#if [ "$SKIN" -eq 1 ]; then
-#    configure_ubuntu_bitcurator_vm
-#    configure_ubuntu_${VER}_bitcurator_vm
-#fi
+copy_source
+configure_webstack
 
 complete_message
 
-#if [ "$SKIN" -eq 1 ]; then
-#    complete_message_skin
-#fi
-
-# REFERENCE ONLY - DO NOT UNCOMMENT
-
-  # link to the shared image folder
-  #sudo mkdir /home/bcadmin
-  #sudo ln -s /vagrant/disk-images /home/bcadmin/disk_images
