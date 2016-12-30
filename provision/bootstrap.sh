@@ -222,10 +222,9 @@ install_ubuntu_16.04_deps() {
     echoinfo "Enabling Universal Repository ... "
     __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
 
-    # TESTING ONLY - DO NOT UNCOMMENT
+    # Reference only - use OpenJDK in current build
     # echoinfo "Adding Oracle Java Repository"
     # add-apt-repository -y ppa:webupd8team/java >> $LOG_BASE/bca-install.log 2>&1 || return 1
-    # Need oracle-java8-installer to replace openjdk in package list below (future)
 
     echoinfo "Updating Repository Package List ..."
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
@@ -327,18 +326,15 @@ zlib1g-dev"
 
 #
 # Packages below will be installed. Dependencies listed here:
-# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
-# Access Git repositories: git
-# libewf specific depends: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
-# pyewf specific depends: python, python-dev, python-pip
-# Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
-# Text extraction: antiword, poppler-utils
-# Java: openjdk-7-*, ant-*, ivy-*
-# Bokeh: npm, node
-# Celery: celeryd (don't use, deprecated)
+# Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
+# libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
+# pyewf requires: python, python-dev, python-pip
+# postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.3
+# pylucene: openjdk-7-*, ant-*, ivy-*
 
 install_ubuntu_16.04_packages() {
     packages="dkms
+virtualbox-guest-utils
 ant
 ant-doc
 ant-optional
@@ -482,7 +478,8 @@ Flask-SQLAlchemy
 flask-wtf
 celery
 nltk
-numpy"
+numpy
+textract"
 
     source "$BCAW_ROOT/venv/bin/activate"
 
@@ -526,51 +523,58 @@ install_source_packages() {
 
   source "$BCAW_ROOT/venv/bin/activate"
 
+  echoinfo "bitcurator-access-webtools: Setting JAVA_HOME and JCC_JDK"
+  export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+  export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+
   # Install pylucene (also installs JCC)
   echoinfo "bitcurator-access-webtools: Building and installing pylucene"
-  echoinfo " -- This may take several minutes..."
-        cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-6.2.0
-        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+  echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
+#  echoinfo " -- This may take several minutes..."
+#        cd /tmp
+#        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        cd pylucene-6.2.0
+#        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+#        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+#
+#        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+#
+#        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
+#        # without this!
+#        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
+#
+#        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+#        popd >> $LOG_BASE/bca-install.log 2>&1
+#
+#        # Edit the Makefile to uncomment the config info for Linux.
+#        # First we look for the requred string in the makefile and copy the 5 lines
+#        # strting from the 4th line after the pattern match, into a temp file (temp),
+#        # after removing the leading hash (to uncomment the lines).
+#
+#        # Then we fix some paths for the virtualenv.
+#
+#        # Then we append these lines from temp file to Makefile after the given pattern
+#        # is found.
+#        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+#        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
+#        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+#
+#        # Finally, remove the shared flag for the time being. See
+#        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
+#        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
+#        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
+#
+#        make >> $LOG_BASE/bca-install.log 2>&1
+#        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
+#        sudo ldconfig
+#        # Clean up
+#        # rm -rf /tmp/pylucene-6.2.0*
 
-        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
-
-        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
-        # without this!
-        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
-
-        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
-        popd >> $LOG_BASE/bca-install.log 2>&1
-
-        # Edit the Makefile to uncomment the config info for Linux.
-        # First we look for the requred string in the makefile and copy the 5 lines
-        # strting from the 4th line after the pattern match, into a temp file (temp),
-        # after removing the leading hash (to uncomment the lines).
-
-        # Then we fix some paths for the virtualenv.
-
-        # Then we append these lines from temp file to Makefile after the given pattern
-        # is found.
-        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
-        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
-        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
-
-        # Finally, remove the shared flag for the time being. See
-        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
-        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
-        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
-
-        make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
-        sudo ldconfig
-        # Clean up
-        # rm -rf /tmp/pylucene-6.2.0*
+        # ******* START: Previous instructions for pylucene 4.10.1-1 *******
 
         #wget http://apache.mirrors.pair.com/lucene/pylucene/pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         #tar -zxvf pylucene-4.10.1-1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
@@ -598,6 +602,8 @@ install_source_packages() {
         ## Clean up
         #rm -rf /tmp/pylucene-4.10.1.-1*
 
+        # ******* END: Previous instructions for pylucene 4.10.1-1 *******
+
   # Checking postgres setup
   echoinfo "bitcurator-access-webtools: Checking postgres setup"
         cd /tmp
@@ -605,11 +611,12 @@ install_source_packages() {
 
   # Starting postgres
   echoinfo "bitcurator-access-webtools: Starting postgres service and creating DB"
-        # Commented out - not needed currently???
-        # .pgpass contains the password for the vagrant user. Needs to be in the home directory.
-        #sudo cp /vagrant/.pgpass /home/vagrant/.pgpass
-
         # Start postgress and setup up postgress user
+        # See: http://askubuntu.com/questions/810008/after-upgrade-14-04-to-16-04-1-postgresql-server-does-not-start
+        #rm /lib/systemd/system/postgresql.service
+        #sudo systemctl daemon-reload
+        #sudo systemctl enable postgresql
+        #sudo systemctl start postgresql
         sudo service postgresql start
 
         # Create the database bca_db with owner vagrant
@@ -621,12 +628,8 @@ install_source_packages() {
   echoinfo "bitcurator-access-webtools: Creating bca_db database"
         sudo -u postgres createdb -O vagrant bca_db
 
-        # Legacy - kept for reference
-        #sudo -u postgres psql -c"ALTER user postgres WITH PASSWORD 'bcadmin'"
-        #sudo -u postgres psql -c"CREATE user bcadmin WITH PASSWORD 'bcadmin'"
-        #sudo -u postgres createdb -O bcadmin bcdb
-
         # Restart postgres
+        #sudo systemctl restart postgresql
         sudo service postgresql restart
 
         # Verify
@@ -645,7 +648,6 @@ install_source_packages() {
 
         # Now clean up
         rm -rf /tmp/libuna-20150927
-
 
         # Install libewf from dedicated copy
         echoinfo "bitcurator-access-webtools: Building and installing libewf..."
@@ -773,14 +775,18 @@ configure_webstack() {
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
    # Start UWSGI and NGINX
-   echoinfo "bitcurator=access-webtools: Restarting nginx.....";
-   service nginx restart
-   # Future: use systemctl for 16.04
-   #systemctl restart nginx
-   echoinfo "bitcurator-access-webtools: starting usgi.....";
-   service uwsgi start
-   # Future: use systemctl for 16.04
-   #systemctl start uwsgi
+   if [ $VER == "14.04" ]; then
+       echoinfo "bitcurator=access-webtools: Restarting nginx (via service)";
+       service nginx restart
+       echoinfo "bitcurator-access-webtools: Starting usgi (via service)";
+       service uwsgi start
+   fi
+   if [ $VER == "16.04" ]; then
+       echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
+       systemctl restart nginx
+       echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
+       systemctl start uwsgi
+   fi
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
@@ -791,7 +797,7 @@ complete_message() {
     echo
     echo "Installation Complete!"
     echo
-    echo "Additional documentation at: http://access.bitcurator.net"
+    echo "Additional documentation at: https://wiki.bitcurator.net"
     echo
 }
 
@@ -810,11 +816,6 @@ if [ $OS != "Ubuntu" ]; then
     exit 1
 fi
 
-#if [ $ARCH != "64" ]; then
-#    echo "bitcurator-access-webtools is only installable on a 64-bit architecture at this time."
-#    exit 2
-#fi
-
 if [ $VER != "14.04" ] && [ $VER != "16.04" ]; then
     echo "bitcurator-access-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
     exit 3
@@ -831,10 +832,6 @@ if [ "$SUDO_USER" = "" ]; then
     echo "The SUDO_USER variable doesn't seem to be set"
     exit 4
 fi
-
-#    echo "APT Package Manager appears to be locked. Close all package managers."
-#    exit 15
-#fi
 
 # while getopts ":hvcsiyu" opt
 while getopts ":hv" opt
@@ -880,52 +877,16 @@ echoinfo "Arch: $ARCH"
 echoinfo "Version: $VER"
 echoinfo "The current user is: $SUDO_USER"
 
-#if [ "$SKIN" -eq 1 ] && [ "$YESTOALL" -eq 0 ]; then
-#    echo
-#    echo "You have chosen to apply the BitCurator skin to the Ubuntu system."
-#    echo
-#    echo "You did not choose to say YES to all, so we are going to exit."
-#    echo
-#    echo
-#    echo "Re-run this command with the -y option"
-#    echo
-#    exit 10
-#fi
+export DEBIAN_FRONTEND=noninteractive
+install_ubuntu_${VER}_deps $ITYPE
+install_ubuntu_${VER}_packages $ITYPE
+create_virtualenv
+install_ubuntu_${VER}_pip_packages $ITYPE
+install_source_packages
+copy_disk_images
 
-#if [ "$INSTALL" -eq 1 ] && [ "$CONFIGURE_ONLY" -eq 0 ]; then
-
-    export DEBIAN_FRONTEND=noninteractive
-    install_ubuntu_${VER}_deps $ITYPE
-    install_ubuntu_${VER}_packages $ITYPE
-    create_virtualenv
-    install_ubuntu_${VER}_pip_packages $ITYPE
-    install_source_packages
-    copy_disk_images
-
-    copy_source
-    configure_webstack
-
-#fi
-
-#configure_elasticsearch
-
-# Configure for BitCurator
-# configure_ubuntu
-
-# Configure BitCurator VM (if selected)
-#if [ "$SKIN" -eq 1 ]; then
-#    configure_ubuntu_bitcurator_vm
-#    configure_ubuntu_${VER}_bitcurator_vm
-#fi
+copy_source
+configure_webstack
 
 complete_message
 
-#if [ "$SKIN" -eq 1 ]; then
-#    complete_message_skin
-#fi
-
-# REFERENCE ONLY - DO NOT UNCOMMENT
-
-  # link to the shared image folder
-  #sudo mkdir /home/bcadmin
-  #sudo ln -s /vagrant/disk-images /home/bcadmin/disk_images
