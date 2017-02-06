@@ -693,16 +693,25 @@ install_source_packages() {
   # Install TSK Python bindings
   echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
         cd /tmp
-        #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
-        tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
+        cp /vagrant/externals/pytsk-20160111-1.tar.gz .
+        tar zxvf pytsk-20160111-1.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
-        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         "$BCAW_ROOT/venv/bin/python" setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Modified for use in virtualenv
         "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
+
+#        #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
+#        wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
+#        tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
+#        cd pytsk
+#        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        "$BCAW_ROOT/venv/bin/python" setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+#        # Modified for use in virtualenv
+#        "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         rm -rf /tmp/pytsk
 }
