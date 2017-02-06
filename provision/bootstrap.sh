@@ -678,17 +678,17 @@ install_source_packages() {
   # Install The Sleuth Kit
   echoinfo "bitcurator-access-webtools: Building and installing The Sleuth Kit..."
         cd /tmp
-        wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.2.0.tar.gz -O sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar zxvf sleuthkit-4.2.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd sleuthkit-sleuthkit-4.2.0
+        wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.4.0.tar.gz -O sleuthkit-4.4.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar zxvf sleuthkit-4.4.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd sleuthkit-sleuthkit-4.4.0
         ./bootstrap >> $LOG_BASE/bca-install.log 2>&1
         ./configure >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
         # Clean up
-        rm /tmp/sleuthkit-4.2.0.tar.gz
-        rm -rf /tmp/sleuthkit-sleuthkit-4.2.0
+        rm /tmp/sleuthkit-4.4.0.tar.gz
+        rm -rf /tmp/sleuthkit-sleuthkit-4.4.0
 
   # Install TSK Python bindings
   echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
