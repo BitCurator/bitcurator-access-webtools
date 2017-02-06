@@ -215,9 +215,14 @@ class ImageFile(object):
                              imageFile.getPath())
                 cmd = "ewfinfo -f dfxml " + imageFile.path + " > " + ewfinfo_xml
                 logging.debug('CMD: %s for xmlfile: %s', cmd, ewfinfo_xml)
+
+                # This creates but does not write to file in 16.04 (systemd) build.
+                # Maybe need something like...
+                # http://uwsgi-docs.readthedocs.io/en/latest/PythonDecorators.html
                 proc = subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 proc.wait()
+
             imageFile.ewf_file = ewfinfo_xml
 
     @staticmethod
