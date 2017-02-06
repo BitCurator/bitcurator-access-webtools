@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve minimal. This file goes in /etc/systemd/system
+After=network.target
+
+[Service]
+User=vagrant
+Group=www-data
+WorkingDirectory=/var/www/bcaw
+Environment="PATH=/var/www/bcaw/venv/bin"
+ExecStart=/usr/bin/uwsgi --ini /vagrant/uwsgi_config.ini
+
+[Install]
+WantedBy=multi-user.target

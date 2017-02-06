@@ -186,7 +186,7 @@ class ImageFile(object):
     @staticmethod
     def ewfToImageTableMap(xmlfile):
         logging.debug("Parsing XML File: " + xmlfile)
-        if xmlfile == None:
+        if xmlfile == None or os.stat(xmlfile).st_size == 0:
             # It could be a raw image which has no metadata. Still we need to
             # create the image table for indexing purpose. Create a table with
             # dummy info.

@@ -729,6 +729,10 @@ copy_source() {
 
   cp -f "$SOURCE_ROOT/"*.py "$BCAW_ROOT"
   cp -fr "$BCAW_SOURCE" "$BCAW_ROOT"
+
+  # This cp will only succeed in 16.04LTS builds
+  cp -f "$SOURCE_ROOT/"*.service /etc/systemd/system
+
   chown www-data:www-data "$BCAW_ROOT/"*.py
   chown -R www-data:www-data "$BCAW_TARGET"
 }
