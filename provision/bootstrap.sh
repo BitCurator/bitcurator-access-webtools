@@ -778,6 +778,10 @@ configure_webstack() {
    cp /vagrant/nginx_config /etc/nginx/sites-available/
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
+   # Start and enable bcaw
+   systemctl start bcaw
+   systemctl enable bcaw
+
    # Start UWSGI and NGINX
    if [ $VER == "14.04" ]; then
        echoinfo "bitcurator=access-webtools: Restarting nginx (via service)";
