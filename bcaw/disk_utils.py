@@ -213,15 +213,31 @@ class ImageFile(object):
             if not os.path.exists(ewfinfo_xml):
                 logging.info("Generating EWF for image: " +
                              imageFile.getPath())
-                cmd = "ewfinfo -f dfxml " + imageFile.path + " > " + ewfinfo_xml
+                #cmd = "ewfinfo -f dfxml " + imageFile.path + " > " + ewfinfo_xml
+                #cmd = "ewfinfo -f dfxml " + imageFile.path
+                cmd = ['ewfinfo', '-f', 'dfxml', imageFile.path]
+                #out_xml = open(ewfinfo_xml, "w")
+
                 logging.debug('CMD: %s for xmlfile: %s', cmd, ewfinfo_xml)
 
                 # This creates but does not write to file in 16.04 (systemd) build.
                 # Maybe need something like...
                 # http://uwsgi-docs.readthedocs.io/en/latest/PythonDecorators.html
-                proc = subprocess.Popen(
-                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                proc.wait()
+                #proc = ubprocess.Popen(
+                #    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                #proc.wait()
+
+                #try:
+                #    p = subprocess.check_output(cmd, stderr=subprocess.PIPE, shell=True)
+                #    out_xml.write(p)
+                #except subprocess.CalledProcessError as e:
+                #    logging.debug('FAILED: %s for xmlfile: %s', cmd, ewfinfo_xml)
+                #out_xml.close()
+
+                with open(ewfinfo_xml, 'w') as ewf_output:
+                     #p = subprocess.Popen(['echo', '$PATH'], stdout=ewf_output, stderr=subprocess.PIPE, shell=True)
+                     p = subprocess.Popen(['ewfinfo', '-f', 'dfxml', imageFile.path], stdout=ewf_output, stderr=subprocess.PIPE, shell=True)
+                     p.communicate()
 
             imageFile.ewf_file = ewfinfo_xml
 

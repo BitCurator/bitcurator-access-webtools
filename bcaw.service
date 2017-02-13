@@ -6,7 +6,7 @@ After=network.target
 User=vagrant
 Group=www-data
 WorkingDirectory=/var/www/bcaw
-Environment="PATH=/var/www/bcaw/venv/bin"
+Environment="PATH=$PATH:/var/www/bcaw/venv/bin"
 ExecStart=/usr/bin/uwsgi --ini /vagrant/uwsgi_config.ini
 
 [Install]
