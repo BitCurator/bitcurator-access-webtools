@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-service nginx stop
-service uwsgi stop
+systemctl stop nginx
+systemctl stop uwsgi
+#service nginx stop
+#service uwsgi stop
 
 ## vagrant ssh --command /vagrant/restart-dev.sh
 WWW_ROOT=/var/www
@@ -27,5 +29,7 @@ sudo rm /var/log/bcaw.log
 sudo touch /var/log/bcaw.log
 sudo chmod 666 /var/log/bcaw.log
 
-service nginx start
-service uwsgi start
+systemctl start nginx
+systemctl start uwsgi
+#service nginx start
+#service uwsgi start

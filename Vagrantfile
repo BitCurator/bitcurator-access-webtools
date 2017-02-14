@@ -6,8 +6,10 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
+    # Note: The current build may require changes to use legacy (14.04LTS) Ubuntu.
+    #       Use the 14.04LTS base box at your own risk!
     # Uncomment FIRST line to use 14.04LTS, or SECOND line to use 16.04LTS.
-    #config.vm.box = "ubuntu/trusty64"
+    # config.vm.box = "ubuntu/trusty64"
     config.vm.box = "bento/ubuntu-16.04"
 
     # Optional "official" cloud xenial box (currently broken):
@@ -33,8 +35,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.7.X"
-      vb.memory = 8192
+      vb.name = "bca-webtools-0.7.8"
+      vb.memory = 4096
       vb.cpus = 2
     end
 end

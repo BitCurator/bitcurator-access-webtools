@@ -24,14 +24,14 @@ You can download the latest release of the bca-webtools application here:
 git clone https://github.com/bitcurator/bitcurator-access-webtools
 ```
 
-Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (ubuntu/trusty64) is added:
+Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-16.04) is added:
 
 ```shell
 cd bitcurator-access-webtools
-vagrant box add ubuntu/trusty64
+vagrant box add bento/ubuntu-16.04
 ```
 
-The first time you run **vagrant box add ubuntu/trusty64** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
+The first time you run **vagrant box add bento/ubuntu-16.04** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
 
 The bitcurator-access-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the **bitcurator-access-webtools/disk-images** directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
 
