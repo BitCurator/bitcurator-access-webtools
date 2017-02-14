@@ -234,6 +234,9 @@ class ImageFile(object):
                 #    logging.debug('FAILED: %s for xmlfile: %s', cmd, ewfinfo_xml)
                 #out_xml.close()
 
+                # Check:
+                # https://chriswarrick.com/blog/2016/02/10/deploying-python-web-apps-with-nginx-and-uwsgi-emperor/
+
                 with open(ewfinfo_xml, 'w') as ewf_output:
                      #p = subprocess.Popen(['echo', '$PATH'], stdout=ewf_output, stderr=subprocess.PIPE, shell=True)
                      p = subprocess.Popen(['ewfinfo', '-f', 'dfxml', imageFile.path], stdout=ewf_output, stderr=subprocess.PIPE, shell=True)
