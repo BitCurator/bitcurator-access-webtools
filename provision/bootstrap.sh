@@ -528,25 +528,25 @@ install_source_packages() {
   export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
 
   # Install pylucene (also installs JCC)
-  echoinfo "bitcurator-access-webtools: Building and installing pylucene"
-  #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
-  echoinfo " -- This may take several minutes..."
-        cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-6.2.0
-        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
-
-        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
-
-        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
-        # without this!
-        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
-
-        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
-        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
-        popd >> $LOG_BASE/bca-install.log 2>&1
+#  echoinfo "bitcurator-access-webtools: Building and installing pylucene"
+#  #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
+#  echoinfo " -- This may take several minutes..."
+#        cd /tmp
+#        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+#        cd pylucene-6.2.0
+#        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+#        export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+#
+#        pushd jcc >> $LOG_BASE/bca-install.log 2>&1
+#
+#        # Must manually tweak setup.py for JCC with openjdk8 - JCC build will fail
+#        # without this!
+#        sed -i "s/java-8-oracle/java-8-openjdk-amd64/g" setup.py
+#
+#        python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+#        popd >> $LOG_BASE/bca-install.log 2>&1
 
         # Edit the Makefile to uncomment the config info for Linux.
         # First we look for the requred string in the makefile and copy the 5 lines
@@ -557,20 +557,20 @@ install_source_packages() {
 
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
-        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
-        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
-        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
-        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
-
-        # Finally, remove the shared flag for the time being. See
-        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
-        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
-        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
-
-        make >> $LOG_BASE/bca-install.log 2>&1
-        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
-        sudo ldconfig
+#        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+#        #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
+#        sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
+#        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+#
+#        # Finally, remove the shared flag for the time being. See
+#        # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
+#        # flag is used. Setuptools in 14.04LTS is not properly patched for this right now.
+#        sed -i "s/JCC=\$(PYTHON)\ -m\ jcc\ --shared/JCC=\$(PYTHON)\ -m\ jcc/g" Makefile
+#
+#        make >> $LOG_BASE/bca-install.log 2>&1
+#        sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
+#        sudo ldconfig
         # Clean up
         # rm -rf /tmp/pylucene-6.2.0*
 
@@ -693,16 +693,25 @@ install_source_packages() {
   # Install TSK Python bindings
   echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
         cd /tmp
-        #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
-        wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
-        tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
+        cp /vagrant/externals/pytsk-20160111-1.tar.gz .
+        tar zxvf pytsk-20160111-1.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pytsk
-        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         "$BCAW_ROOT/venv/bin/python" setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
         #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Modified for use in virtualenv
         "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
+
+#        #git clone https://github.com/py4n6/pytsk >> $LOG_BASE/bca-install.log 2>&1
+#        wget -q https://github.com/py4n6/pytsk/releases/download/20150406/pytsk-20150406.tgz
+#        tar zxvf pytsk-20150406.tgz >> $LOG_BASE/bca-install.log 2>&1
+#        cd pytsk
+#        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        "$BCAW_ROOT/venv/bin/python" setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        #python setup.py build >> $LOG_BASE/bca-install.log 2>&1
+#        #sudo python setup.py install >> $LOG_BASE/bca-install.log 2>&1
+#        # Modified for use in virtualenv
+#        "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         rm -rf /tmp/pytsk
 }
@@ -729,6 +738,10 @@ copy_source() {
 
   cp -f "$SOURCE_ROOT/"*.py "$BCAW_ROOT"
   cp -fr "$BCAW_SOURCE" "$BCAW_ROOT"
+
+  # This cp will only succeed in 16.04LTS builds
+  cp -f "$SOURCE_ROOT/"*.service /etc/systemd/system
+
   chown www-data:www-data "$BCAW_ROOT/"*.py
   chown -R www-data:www-data "$BCAW_TARGET"
 }
@@ -773,6 +786,10 @@ configure_webstack() {
    rm /etc/nginx/sites-enabled/default
    cp /vagrant/nginx_config /etc/nginx/sites-available/
    ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
+
+   # Start and enable bcaw
+   systemctl start bcaw
+   systemctl enable bcaw
 
    # Start UWSGI and NGINX
    if [ $VER == "14.04" ]; then
