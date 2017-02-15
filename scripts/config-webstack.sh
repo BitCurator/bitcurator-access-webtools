@@ -36,10 +36,10 @@ ln -s /etc/nginx/sites-available/nginx_config /etc/nginx/sites-enabled
 
 # Start UWSGI and NGINX
 echo "bca-webtools: Restarting nginx.....";
-systemctl restart nginx
+sudo systemctl restart nginx
 #service nginx restart
 echo "bca-webtools: Restarting usgi.....";
-systemctl restart uwsgi
+sudo systemctl restart uwsgi
 #service uwsgi restart
 
 # Give vagrant user access to www-data

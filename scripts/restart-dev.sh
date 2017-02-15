@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-systemctl stop nginx
-systemctl stop uwsgi
+sudo systemctl stop nginx
+sudo systemctl stop uwsgi
 #service nginx stop
 #service uwsgi stop
 
@@ -29,7 +29,7 @@ sudo rm /var/log/bcaw.log
 sudo touch /var/log/bcaw.log
 sudo chmod 666 /var/log/bcaw.log
 
-systemctl start nginx
-systemctl start uwsgi
+sudo systemctl start nginx
+sudo systemctl start uwsgi
 #service nginx start
 #service uwsgi start
