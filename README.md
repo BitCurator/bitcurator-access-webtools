@@ -1,5 +1,8 @@
 # BitCurator Access Webtools: Browse disk images and file system metadata in a web service
 
+[![GitHub issues](https://img.shields.io/github/issues/bitcurator/bitcurator-access-webtools.svg)](https://github.com/bitcurator/bitcurator-access-webtools/issues)
+[![GitHub forks](https://img.shields.io/github/forks/bitcurator/bitcurator-access-webtools.svg)](https://github.com/bitcurator/bitcurator-access-webtools/network)
+
 The **BitCurator Access Webtools** project allows users to browse file systems contained within disk images using a web browser. It is intended to support access requirements in libraries, archives, and museums preserving born-digital materials extracted from source media as raw or forensically-packaged disk images. 
 
 The service uses open source libraries and toolkits including The Sleuth Kit, PyTSK, and the Flask web microservices framework. It uses PyLucene along with format-specific text-extraction tools to index the contents of files contained in disk images, allowing users to search for relevant content without individually inspecting files.
