@@ -366,9 +366,9 @@ install_source_packages() {
   #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
   echoinfo " -- This may take several minutes..."
         cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-6.2.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-6.2.0
+        wget http://apache.osuosl.org/lucene/pylucene/pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar -zxvf pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd pylucene-6.5.0
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
 
@@ -406,7 +406,7 @@ install_source_packages() {
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
         # Clean up
-        # rm -rf /tmp/pylucene-6.2.0*
+        # rm -rf /tmp/pylucene-6.5.0*
 
   # Checking postgres setup
   echoinfo "bitcurator-access-webtools: Checking postgres setup"
@@ -449,7 +449,6 @@ install_source_packages() {
         make -s >> $LOG_BASE/bca-install.log 2>&1
         make install >> $LOG_BASE/bca-install.log 2>&1
         ldconfig >> $LOG_BASE/bca-install.log 2>&1
-
         # Now clean up
         rm -rf /tmp/libuna-20150927
 
@@ -463,10 +462,8 @@ install_source_packages() {
         make -s >> $LOG_BASE/bca-install.log 2>&1
         make install >> $LOG_BASE/bca-install.log 2>&1
         ldconfig >> $LOG_BASE/bca-install.log 2>&1
-
         # Now clean up
         rm -rf /tmp/libewf-20140608
-
 
   # Install libqcow (needed for pytsk)
   echoinfo "bitcurator-access-webtools: Building and installing libqcow..."
