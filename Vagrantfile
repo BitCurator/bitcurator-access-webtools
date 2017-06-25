@@ -35,7 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.7.8"
+      vb.name = "bca-webtools-0.7.9"
       vb.memory = 4096
       vb.cpus = 2
     end

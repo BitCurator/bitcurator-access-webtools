@@ -185,6 +185,32 @@ usage() {
     exit 1
 }
 
+install_ubuntu_14.04_deps() {
+
+    echoinfo "Updating your APT Repositories ... "
+    apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Installing Python Software Properies ... "
+    __apt_get_install_noinput software-properties-common >> $LOG_BASE/bca-install.log 2>&1  || return 1
+
+    echoinfo "Enabling Universal Repository ... "
+    __enable_universe_repository >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Enabling openjdk-r PPA for OpenJDK 8 in 14.04LTS ... "
+    add-apt-repository -y ppa:openjdk-r/ppa >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Enabling mc3man PPA for ffmpeg ... "
+    add-apt-repository -y ppa:mc3man/trusty-media >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Updating Repository Package List ..."
+    apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    echoinfo "Upgrading all packages to latest version ..."
+    __apt_get_upgrade_noinput >> $LOG_BASE/bca-install.log 2>&1 || return 1
+
+    return 0
+}
+
 install_ubuntu_16.04_deps() {
 
     echoinfo "Updating your APT Repositories ... "
@@ -211,14 +237,100 @@ install_ubuntu_16.04_deps() {
 
 #
 # Packages below will be installed. Dependencies listed here:
+# Various: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, autmoate
+# Access Git repositories: git
+# libewf specific depends: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
+# pyewf specific depends: python, python-dev, python-pip
+# Postgres: postgresql, pgadmin3, postgresql-server-dev-9.3
+# Text extraction: antiword, poppler-utils
+# Java: openjdk-7-*, ant-*, ivy-*
+#  openjdk-7-jdk
+#  openjdk-7-jre-headless
+#  openjdk-7-jre-lib
+# Bokeh: npm, node
+# textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
+
+install_ubuntu_14.04_packages() {
+    packages="dkms
+ant
+ant-doc
+ant-optional
+antiword
+automake
+autopoint
+bison
+build-essential
+ffmpeg
+flac
+flex
+g++
+gcc
+gfortran
+git
+ivy
+ivy-doc
+python
+python-pip
+python-dev
+python-virtualenv
+nginx
+zlib1g-dev
+lame
+libatlas-base-dev
+libjpeg-dev
+libmad0
+libtalloc2
+libtalloc-dev
+libtool
+libpcre3
+libpcre3-dev
+libsox-fmt-mp3
+libxml2-dev
+libxslt1-dev
+odt2txt
+openjdk-8-jdk
+openjdk-8-jre-headless
+poppler-utils
+postgresql
+pgadmin3
+postgresql-server-dev-9.3
+pstotext
+rabbitmq-server
+redis-server
+sox
+subversion
+tesseract-ocr
+unrtf
+uwsgi
+uwsgi-plugin-python
+zlib1g-dev"
+
+    if [ "$@" = "dev" ]; then
+        packages="$packages"
+    elif [ "$@" = "stable" ]; then
+        packages="$packages"
+    fi
+
+    for PACKAGE in $packages; do
+        __apt_get_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1
+        ERROR=$?
+        if [ $ERROR -ne 0 ]; then
+            echoerror "Install Failure: $PACKAGE (Error Code: $ERROR)"
+        else
+            echoinfo "Installed Package: $PACKAGE"
+        fi
+    done
+
+    return 0
+}
+
+#
+# Packages below will be installed. Dependencies listed here:
 # Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
 # libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
 # pyewf requires: python, python-dev, python-pip
 # postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.3
 # pylucene: openjdk-7-*, ant-*, ivy-*
-# Text extraction: antiword, poppler-utils
-# Bokeh: npm, node
-# textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
 install_ubuntu_16.04_packages() {
     packages="dkms
@@ -292,6 +404,60 @@ zlib1g-dev"
             echoinfo "Installed Package: $PACKAGE"
         fi
     done
+
+    return 0
+}
+
+install_ubuntu_14.04_pip_packages() {
+
+#
+# Packages below will be installed. Dependencies listed here:
+# Flask and postgres support: psycopg2, Flask-SQLAlchemy, flask-wtf
+# Scipy: scipy, numpy, pandas, redis, tornado, greenlet, pyzmq
+# Bokeh: beautifulsoup, colorama, boto, nose, mock, coverage, websocket-client, blaze, bokeh
+# Celery: celery
+#
+
+pip_packages="flask
+psycopg2
+Flask-SQLAlchemy
+flask-wtf
+celery
+nltk
+numpy
+textract"
+
+    pip_pre_packages="bitstring"
+
+    if [ "$@" = "dev" ]; then
+        pip_packages="$pip_packages"
+    elif [ "$@" = "stable" ]; then
+        pip_packages="$pip_packages"
+    fi
+
+    ERROR=0
+    for PACKAGE in $pip_pre_packages; do
+        CURRENT_ERROR=0
+        echoinfo "Installed Python (pre) Package: $PACKAGE"
+        __pip_pre_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
+        if [ $CURRENT_ERROR -eq 1 ]; then
+            echoerror "Python Package Install Failure: $PACKAGE"
+        fi
+    done
+
+    for PACKAGE in $pip_packages; do
+        CURRENT_ERROR=0
+        echoinfo "Installed Python Package: $PACKAGE"
+        __pip_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
+        if [ $CURRENT_ERROR -eq 1 ]; then
+            echoerror "Python Package Install Failure: $PACKAGE"
+        fi
+    done
+
+    if [ $ERROR -ne 0 ]; then
+        echoerror
+        return 1
+    fi
 
     return 0
 }
