@@ -148,9 +148,6 @@ __enable_universe_repository() {
     # Ubuntu versions higher than 12.04 do not live in the old repositories
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
         add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
-    elif [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        # Below Ubuntu 11.10, the -y flag to add-apt-repository is not supported
-        add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
     add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
@@ -185,7 +182,7 @@ usage() {
     exit 1
 }
 
-install_ubuntu_16.04_deps() {
+install_ubuntu_17.04_deps() {
 
     echoinfo "Updating your APT Repositories ... "
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
@@ -220,7 +217,7 @@ install_ubuntu_16.04_deps() {
 # Bokeh: npm, node
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
-install_ubuntu_16.04_packages() {
+install_ubuntu_17.04_packages() {
     packages="dkms
 virtualbox-guest-utils
 ant
@@ -296,7 +293,7 @@ zlib1g-dev"
     return 0
 }
 
-install_ubuntu_16.04_pip_packages() {
+install_ubuntu_17.04_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
@@ -417,10 +414,6 @@ install_source_packages() {
   echoinfo "bitcurator-access-webtools: Starting postgres service and creating DB"
         # Start postgress and setup up postgress user
         # See: http://askubuntu.com/questions/810008/after-upgrade-14-04-to-16-04-1-postgresql-server-does-not-start
-        #rm /lib/systemd/system/postgresql.service
-        #sudo systemctl daemon-reload
-        #sudo systemctl enable postgresql
-        #sudo systemctl start postgresql
         sudo service postgresql start
 
         # Create the database bca_db with owner vagrant
@@ -433,7 +426,6 @@ install_source_packages() {
         sudo -u postgres createdb -O vagrant bca_db
 
         # Restart postgres
-        #sudo systemctl restart postgresql
         sudo service postgresql restart
 
         # Verify
@@ -593,13 +585,7 @@ configure_webstack() {
    systemctl enable bcaw
 
    # Start UWSGI and NGINX
-   if [ $VER == "14.04" ]; then
-       echoinfo "bitcurator=access-webtools: Restarting nginx (via service)";
-       service nginx restart
-       echoinfo "bitcurator-access-webtools: Starting usgi (via service)";
-       service uwsgi start
-   fi
-   if [ $VER == "16.04" ]; then
+   if [ $VER == "17.04" ]; then
        echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
        systemctl restart nginx
        echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
@@ -630,12 +616,12 @@ ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
 
 if [ $OS != "Ubuntu" ]; then
-    echo "bitcurator-access-webtools is only installable on Ubuntu operating systems at this time."
+    echo "bitcurator-access-webtools is only installable on the Ubuntu operating systems at this time."
     exit 1
 fi
 
-if [ $VER != "14.04" ] && [ $VER != "16.04" ]; then
-    echo "bitcurator-access-webtools is only installable on Ubuntu 14.04 and 16.04 at this time."
+if [ $VER != "17.04" ]; then
+    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
     exit 3
 fi
 
