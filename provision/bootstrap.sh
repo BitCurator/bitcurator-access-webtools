@@ -211,15 +211,14 @@ install_ubuntu_17.04_deps() {
 # Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
 # libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
 # pyewf requires: python, python-dev, python-pip
-# postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.3
-# pylucene: openjdk-7-*, ant-*, ivy-*
+# postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.6
+# pylucene: openjdk-8-*, ant-*, ivy-*
 # Text extraction: antiword, poppler-utils
 # Bokeh: npm, node
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 
 install_ubuntu_17.04_packages() {
     packages="dkms
-virtualbox-guest-utils
 ant
 ant-doc
 ant-optional
@@ -232,20 +231,19 @@ ffmpeg
 flac
 flex
 g++
+g++-5
 gcc
+gcc-5
 gfortran
 git
 ivy
 ivy-doc
 jcc
-python
-python-pip
-python-dev
-python-virtualenv
 nginx
 zlib1g-dev
 lame
 libatlas-base-dev
+libffi-dev
 libjpeg-dev
 libmad0
 libtalloc2
@@ -253,22 +251,34 @@ libtalloc-dev
 libtool
 libpcre3
 libpcre3-dev
+libpulse-dev
 libsox-fmt-mp3
 libxml2-dev
 libxslt1-dev
 odt2txt
 openjdk-8-jdk
 openjdk-8-jre-headless
+pgadmin3
 poppler-utils
 postgresql
-pgadmin3
 postgresql-server-dev-9.6
 pstotext
+python
+python-pip
+python-dev
+python3-pip
+python3-dev
+python-virtualenv
 rabbitmq-server
 redis-server
 sox
 subversion
+swig
+swig3.0
 tesseract-ocr
+virtualbox-guest-utils
+virtualenv
+virtualenvwrapper
 unrtf
 uwsgi
 uwsgi-plugin-python
@@ -303,18 +313,18 @@ install_ubuntu_17.04_pip_packages() {
 # Celery: celery
 #
 
-pip_packages="flask
-psycopg2
-Flask-SQLAlchemy
-flask-wtf
-celery
-nltk
-numpy
-textract"
+    pip_packages="flask
+        psycopg2
+        Flask-SQLAlchemy
+        flask-wtf
+        celery
+        nltk
+        numpy
+        textract"
+
+    pip_special_packages="textacy"
 
     source "$BCAW_ROOT/venv/bin/activate"
-
-    pip_pre_packages="bitstring"
 
     if [ "$@" = "dev" ]; then
         pip_packages="$pip_packages"
@@ -323,19 +333,23 @@ textract"
     fi
 
     ERROR=0
-    for PACKAGE in $pip_pre_packages; do
-        CURRENT_ERROR=0
-        echoinfo "Installed Python (pre) Package: $PACKAGE"
-        __pip_pre_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
-        if [ $CURRENT_ERROR -eq 1 ]; then
-            echoerror "Python Package Install Failure: $PACKAGE"
-        fi
-    done
 
     for PACKAGE in $pip_packages; do
         CURRENT_ERROR=0
         echoinfo "Installed Python Package: $PACKAGE"
         __pip_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
+        if [ $CURRENT_ERROR -eq 1 ]; then
+            echoerror "Python Package Install Failure: $PACKAGE"
+        fi
+    done
+
+    # Prep environment for special packages, install cld2-cffi
+    env CC=/usr/bin/gcc-5 pip3 install -U cld2-cffi
+
+    for PACKAGE in $pip_special_packages; do
+        CURRENT_ERROR=0
+        echoinfo "Installed Python (special setup) Package: $PACKAGE"
+        __pip_pre_install_noinput $PACKAGE >> $LOG_BASE/bca-install.log 2>&1 || (let ERROR=ERROR+1 && let CURRENT_ERROR=1)
         if [ $CURRENT_ERROR -eq 1 ]; then
             echoerror "Python Package Install Failure: $PACKAGE"
         fi
@@ -352,16 +366,17 @@ textract"
 
 install_source_packages() {
 
-  source "$BCAW_ROOT/venv/bin/activate"
+    source "$BCAW_ROOT/venv/bin/activate"
 
-  echoinfo "bitcurator-access-webtools: Setting JAVA_HOME and JCC_JDK"
-  export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-  export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+    echoinfo "bitcurator-access-webtools: Setting JAVA_HOME and JCC_JDK"
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
 
-  # Install pylucene (also installs JCC)
-  echoinfo "bitcurator-access-webtools: Building and installing pylucene"
-  #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
-  echoinfo " -- This may take several minutes..."
+    # Install pylucene (also installs JCC)
+    echoinfo "bitcurator-access-webtools: Building and installing pylucene"
+    #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
+    echoinfo " -- This may take several minutes..."
+
         cd /tmp
         wget http://apache.osuosl.org/lucene/pylucene/pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar -zxvf pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
