@@ -262,7 +262,7 @@ openjdk-8-jre-headless
 poppler-utils
 postgresql
 pgadmin3
-postgresql-server-dev-9.5
+postgresql-server-dev-9.6
 pstotext
 rabbitmq-server
 redis-server
