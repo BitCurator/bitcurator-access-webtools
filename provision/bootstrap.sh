@@ -207,15 +207,18 @@ install_ubuntu_17.04_deps() {
 }
 
 #
-# Packages below will be installed. Dependencies listed here:
+# Packages below will be installed. 
+# Packages are listed in alphabetic order for convenience.
+# 
+# Dependencies listed here:
 # Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
 # libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
 # pyewf requires: python, python-dev, python-pip
 # postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.6
 # pylucene: openjdk-8-*, ant-*, ivy-*
 # Text extraction: antiword, poppler-utils
-# Bokeh: npm, node
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
+#
 
 install_ubuntu_17.04_packages() {
     packages="dkms
@@ -239,8 +242,6 @@ git
 ivy
 ivy-doc
 jcc
-nginx
-zlib1g-dev
 lame
 libatlas-base-dev
 libffi-dev
@@ -248,13 +249,14 @@ libjpeg-dev
 libmad0
 libtalloc2
 libtalloc-dev
-libtool
 libpcre3
 libpcre3-dev
 libpulse-dev
 libsox-fmt-mp3
+libtool
 libxml2-dev
 libxslt1-dev
+nginx
 odt2txt
 openjdk-8-jdk
 openjdk-8-jre-headless
