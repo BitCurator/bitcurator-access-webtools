@@ -83,6 +83,10 @@ Some of these dependencies have existing apt or pip packages in Ubuntu. Others d
 
 The latest documentation can be found on the BitCurator Access wiki page at https://wiki.bitcurator.net/index.php?title=BitCurator_Access.
 
+Or, follow this link to a direct download of the quick start guide:
+
+https://wiki.bitcurator.net/downloads/BCA-Quickstart.pdf
+
 ## License(s)
 
 The BitCurator logo, BitCurator project documentation, and other non-software products of the BitCurator team are subject to the the Creative Commons Attribution 4.0 Generic license (CC By 4.0).
