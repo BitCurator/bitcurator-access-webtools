@@ -42,6 +42,9 @@ class Extns(object):
     SUPPORTED = META + RAW
     IGNORED = [XML, XML.upper()]
 
+class MimeTypes(object):
+    BINARY = 'application/octet-stream'
+    HTML = 'text/html'
 
 class FileExtns(object):
     """Extensions for text extraction support (via textract)
