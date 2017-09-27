@@ -207,9 +207,9 @@ install_ubuntu_17.04_deps() {
 }
 
 #
-# Packages below will be installed. 
+# Packages below will be installed.
 # Packages are listed in alphabetic order for convenience.
-# 
+#
 # Dependencies listed here:
 # Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
 # libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
@@ -322,6 +322,7 @@ install_ubuntu_17.04_pip_packages() {
         celery
         nltk
         numpy
+        python-magic
         textract"
 
     pip_special_packages="textacy"
@@ -710,4 +711,3 @@ copy_source
 configure_webstack
 
 complete_message
-
