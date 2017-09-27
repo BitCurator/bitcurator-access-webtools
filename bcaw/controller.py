@@ -14,11 +14,15 @@ import logging
 import os
 import urllib
 from flask import Flask, render_template, send_file, send_from_directory
-from flask import Response, stream_with_context
+from flask import Response, stream_with_context, request
+from textract import process
+from textract.exceptions import ExtensionNotSupported
+
 from bcaw import app
-from bcaw.const import ConfKey
+from bcaw.const import ConfKey, MimeTypes
 from bcaw.disk_utils import ImageDir, ImageFile, FileSysEle
 from bcaw.model import Image, Partition
+from bcaw.utilities import identify_mime_path, sha1_path, map_mime_to_ext
 
 @app.route('/')
 def bcaw_home():
@@ -70,28 +74,48 @@ def file_handler(image_id, part_id, encoded_filepath):
     image = Image.byId(image_id)
     image_part = Partition.byId(part_id)
     fs_ele = FileSysEle.fromImagePath(image.path, image_part, image.bps, file_path)
+    # Check if we have a directory
     if fs_ele.isDirectory():
         # Render the dir listing template
         files = FileSysEle.listFiles(image.path, image_part, image.bps, file_path)
         return render_template('directory.html', image=image,
                                partition=image_part, files=files)
-    # Its a file so return the download
-    temp_file, mime_type = FileSysEle.createTempCopy(image.path,
-                                                     image_part.start,
-                                                     image.bps, fs_ele)
-    return send_file(temp_file, mimetype=mime_type, as_attachment=True, attachment_filename=fs_ele.name)
+    # Its a file, do we want details or binary
+    temp_file = FileSysEle.createTempCopy(image.path,
+                                          image_part.start,
+                                          image.bps, fs_ele)
+    # Is this a blob request
+    if request_wants_binary():
+        return send_file(temp_file, mime_type=FileSysEle.GuessMimeType(fs_ele.name),
+                         as_attachment=True, attachment_filename=fs_ele.name)
 
-@app.route('/analysis/<image_id>/<part_id>/<path:encoded_filepath>')
-def analysis_handler(image_id, part_id, encoded_filepath):
-    """Page that displays analysis results for a file."""
-    file_path = urllib.unquote(encoded_filepath)
-    image = Image.byId(image_id)
-    image_part = Partition.byId(part_id)
-    fs_ele = FileSysEle.fromImagePath(image.path, image_part, image.bps, file_path)
+    mime_type = identify_mime_path(temp_file)
+    sha1 = sha1_path(temp_file)
+    logging.debug("MIME: %s SHA1:%s", mime_type, sha1)
+    extension = map_mime_to_ext(mime_type)
+    full_text = "N/A"
+    if extension is not None:
+        try:
+            logging.debug("Textract for doc %s, extension map val %s", file_path, extension)
+            full_text = process(temp_file, extension=extension, encoding='ascii')
+        except ExtensionNotSupported as _:
+            logging.exception("Textract extension not supported for ext %s", extension)
+            logging.debug("Temp path for file is %s", temp_file)
+            full_text = "N/A"
+        except:
+            logging.exception("Textract unexpectedly failed for temp_file %s", temp_file)
+            raise
 
-    # Do something for directory handling here, not sure what yet
-    return render_template('analysis.html', image=image, partition=image_part, file_path=file_path)
+    return render_template('analysis.html', image=image, partition=image_part,
+                           file_path=file_path, fs_ele=fs_ele, mime_type=mime_type,
+                           sha1=sha1, full_text=full_text)
 
+def request_wants_binary():
+    """Checks the accepts MIME type of the incoming request and returns True
+    if the user has requested a blob, i.e. application/octet-stream."""
+    best = request.accept_mimetypes.best_match([MimeTypes.BINARY, MimeTypes.HTML])
+    return best == MimeTypes.BINARY and request.accept_mimetypes[best] > \
+                                        request.accept_mimetypes[MimeTypes.HTML]
 
 class DbSynch(object):
 # Keep a list of images
