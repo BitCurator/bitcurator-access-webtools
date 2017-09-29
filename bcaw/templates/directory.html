@@ -16,7 +16,7 @@
       <tr>
         <td><span class="glyphicon glyphicon-{{ 'folder-open' if file.is_directory else 'file' }}" aria-hidden="true"></span></td>
         <td><a href="{{ "/image/" + image.id|string + "/" + partition.id|string + file.path }}" >{{ file.name }}</a></td>
-        <td>{{ file.details.size }}</td>
+        <td>{{ file.size }}</td>
         <td>{{ file.details.ctime }}</td>
         <td>{{ file.details.mtime }}</td>
         <td><span class="glyphicon glyphicon-{{ 'trash' if file.is_deleted else 'floppy-disk' }}" aria-hidden="true"></span></td>
