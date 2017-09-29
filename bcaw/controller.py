@@ -14,7 +14,7 @@ import logging
 import os
 import urllib
 from flask import render_template, send_file, send_from_directory
-from flask import request
+from flask import request, abort
 from textract import process
 from textract.exceptions import ExtensionNotSupported
 
@@ -73,6 +73,8 @@ def file_handler(image_id, part_id, encoded_filepath):
     file_path = urllib.unquote(encoded_filepath)
     partition = Partition.by_id(part_id)
     fs_ele = FileSysEle.from_partition(partition, file_path)
+    if not fs_ele:
+        abort(404)
     # Check if we have a directory
     if fs_ele.is_directory:
         # Render the dir listing template
@@ -111,6 +113,10 @@ def _render_directory(partition, path):
     files = FileSysEle.list_files(partition, path)
     return render_template('directory.html', image=partition.image,
                            partition=partition, files=files)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 def request_wants_binary():
     """Checks the accepts MIME type of the incoming request and returns True
