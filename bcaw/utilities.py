@@ -75,6 +75,7 @@ def _hashfile(afile, hasher, blocksize=65536):
     return hasher.hexdigest()
 
 def map_mime_to_ext(mime_type):
+    """Performs MIME type to extension mapping, used to pass file type to Textract."""
     if not mime_type:
         return None
     return MIME_TO_EXT.get(mime_type, None)

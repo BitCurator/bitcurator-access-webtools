@@ -9,12 +9,12 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-
+"""Controller module, handles incoming HTTP requests and routing."""
 import logging
 import os
 import urllib
-from flask import Flask, render_template, send_file, send_from_directory
-from flask import Response, stream_with_context, request
+from flask import render_template, send_file, send_from_directory
+from flask import request
 from textract import process
 from textract.exceptions import ExtensionNotSupported
 
@@ -37,24 +37,24 @@ def bcaw_home():
 @app.route('/image/meta/<image_id>/')
 def image_meta(image_id):
     """Image metadata page, retrieves image info from DB and displays it."""
-    image = Image.byId(image_id)
+    image = Image.by_id(image_id)
     return render_template('image.html', image=image)
 
 @app.route('/image/data/<image_id>/')
 def image_dnld(image_id):
     """Image download request, returns the image binary"""
-    image = Image.byId(image_id)
+    image = Image.by_id(image_id)
     parent = os.path.abspath(os.path.join(image.path, os.pardir))
     return send_from_directory(parent, image.name, as_attachment=True)
 
 @app.route('/image/<image_id>/')
 def image_parts(image_id):
     """Page listing the partition details for on image, retrieved from DB."""
-    image = Image.byId(image_id)
+    image = Image.by_id(image_id)
     logging.debug("Getting parts for image: " + image.name)
     for part in image.partitions.all():
         logging.debug("Part " + str(part.id))
-    return render_template('partitions.html', image=image, partitions=image.getPartitions())
+    return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
 @app.route('/image/<image_id>/<part_id>/')
 def part_root(image_id, part_id):
@@ -71,28 +71,24 @@ def file_handler(image_id, part_id, encoded_filepath):
     the Response.
     """
     file_path = urllib.unquote(encoded_filepath)
-    image = Image.byId(image_id)
-    image_part = Partition.byId(part_id)
-    fs_ele = FileSysEle.fromImagePath(image.path, image_part, image.bps, file_path)
+    partition = Partition.by_id(part_id)
+    fs_ele = FileSysEle.from_partition(partition, file_path)
     # Check if we have a directory
-    if fs_ele.isDirectory():
+    if fs_ele.is_directory:
         # Render the dir listing template
-        files = FileSysEle.listFiles(image.path, image_part, image.bps, file_path)
-        return render_template('directory.html', image=image,
-                               partition=image_part, files=files)
-    # Its a file, do we want details or binary
-    temp_file = FileSysEle.createTempCopy(image.path,
-                                          image_part.start,
-                                          image.bps, fs_ele)
+        return _render_directory(partition, file_path)
+
+    # Its a file, we'll need a temp file to analyse or serve
+    temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
     # Is this a blob request
     if request_wants_binary():
-        return send_file(temp_file, mime_type=FileSysEle.GuessMimeType(fs_ele.name),
+        return send_file(temp_file, mimetype=FileSysEle.guess_mime_type(fs_ele.name),
                          as_attachment=True, attachment_filename=fs_ele.name)
 
     mime_type = identify_mime_path(temp_file)
     sha1 = sha1_path(temp_file)
-    logging.debug("MIME: %s SHA1:%s", mime_type, sha1)
     extension = map_mime_to_ext(mime_type)
+    logging.debug("MIME: %s EXTENSION %s SHA1:%s", mime_type, extension, sha1)
     full_text = "N/A"
     if extension is not None:
         try:
@@ -106,9 +102,15 @@ def file_handler(image_id, part_id, encoded_filepath):
             logging.exception("Textract unexpectedly failed for temp_file %s", temp_file)
             raise
 
-    return render_template('analysis.html', image=image, partition=image_part,
+    return render_template('analysis.html', image=partition.image, partition=partition,
                            file_path=file_path, fs_ele=fs_ele, mime_type=mime_type,
                            sha1=sha1, full_text=full_text)
+
+def _render_directory(partition, path):
+    # Render the dir listing template
+    files = FileSysEle.list_files(partition, path)
+    return render_template('directory.html', image=partition.image,
+                           partition=partition, files=files)
 
 def request_wants_binary():
     """Checks the accepts MIME type of the incoming request and returns True
@@ -121,7 +123,7 @@ class DbSynch(object):
 # Keep a list of images
     """Class that synchs images in the application directory with the DB record.
     """
-    image_dir = ImageDir.fromRootDir(app.config[ConfKey.IMAGE_DIR])
+    image_dir = ImageDir.from_root_dir(app.config[ConfKey.IMAGE_DIR])
     __not_in_db__ = []
     __not_on_disk__ = []
 
@@ -129,12 +131,12 @@ class DbSynch(object):
     def is_synch_db(cls):
         """Returns true if the database needs resynching with file system."""
         cls.disk_synch()
-        return Image.imageCount() != DbSynch.image_dir.imageCount()
+        return Image.image_count() != DbSynch.image_dir.image_count()
 
     @classmethod
     def disk_synch(cls):
         """Updates the list of disk images from the directory listing."""
-        cls.image_dir = ImageDir.fromRootDir(app.config[ConfKey.IMAGE_DIR])
+        cls.image_dir = ImageDir.from_root_dir(app.config[ConfKey.IMAGE_DIR])
 
     @classmethod
     def synch_db(cls):
@@ -144,12 +146,12 @@ class DbSynch(object):
         # Deal with images not in the database first
         cls.images_not_in_db()
         for image in cls.__not_in_db__:
-            logging.info("Adding image: " + image.getPath() + " to database.")
-            model_image = Image(**image.toImageDbMap())
+            logging.info("Adding image: " + image.path + " to database.")
+            model_image = Image(**image.to_image_db_map())
             Image.addImage(model_image)
-            ImageFile.populateParts(image)
-            for part in image.getPartitions():
-                Partition.addPart(Partition(**part.toPartDbMap(model_image.id)))
+            ImageFile.populate_parts(image)
+            for part in image.get_partitions():
+                Partition.addPart(Partition(**part.to_part_db_map(model_image.id)))
 
         for image in cls.__not_on_disk__:
             logging.warn("Image: " + image.path + " appears to have been deleted from disk.")
@@ -161,9 +163,9 @@ class DbSynch(object):
         """
         del cls.__not_in_db__[:]
         for image in cls.image_dir.images:
-            db_image = Image.byPath(image.getPath())
+            db_image = Image.by_path(image.path)
             if db_image is None:
-                logging.debug("Image: " + image.getPath() + " not in database.")
+                logging.debug("Image: " + image.path + " not in database.")
                 cls.__not_in_db__.append(image)
 
     @classmethod
