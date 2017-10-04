@@ -1,8 +1,22 @@
 {% extends "page.html" %}
 {% block title %}{{ image.name }} | files{% endblock %}
 {% block page_content %}
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <h2>File Analysis</h2>
-        Additional information about this file, including checksums and file type identification. If bitcurator-access-webtools was able to extract text from the file, that text is also displayed.
+    <!-- File analysis screen -->
+    <h2>File Analysis for {{ fs_ele.name }}</h2>
+    <div class="panel panel-default">
+      <div class="panel-heading">File Details</div>
+      <ul class="list-group">
+        <li class="list-group-item">Extension: {{ fs_ele.extension }}</li>
+        <li class="list-group-item">Size: {{ fs_ele.size }}</li>
+        <li class="list-group-item">SHA1: {{ sha1 }}</li>
+        <li class="list-group-item">MIME: {{ mime_type }}</li>
+      </ul>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">Full Text</div>
+      <div class="panel-body">
+        {{ full_text }}
+      </div>
+    </div>
 
 {% endblock page_content %}

@@ -24,6 +24,8 @@ import time
 from mimetypes import MimeTypes
 import xml.etree.ElementTree as ET
 import pytsk3
+import textract
+
 from const import Extns, ImgFlds, ExcepMess, EwfTags, EwfTagMap
 from const import PartFlds, Defaults, FileExtns, PathChars
 
@@ -231,10 +233,10 @@ class ImageFile(object):
                 # Open file handle and write to file
                 with os.fdopen(fdesc, 'w') as fout:
                     try:
-                        p = subprocess.check_output(cmd, stderr=subprocess.PIPE, shell=True)
-                        fout.write(p)
-                    except subprocess.CalledProcessError as e:
-                        logging.debug('FAILED: %s for xmlfile: %s', cmd, ewfinfo_xml)
+                        procout = subprocess.check_output(cmd, stderr=subprocess.PIPE, shell=True)
+                        fout.write(procout)
+                    except subprocess.CalledProcessError:
+                        logging.exception('FAILED: %s for xmlfile: %s', cmd, ewfinfo_xml)
             imageFile.ewf_file = ewfinfo_xml
 
     @staticmethod
@@ -320,6 +322,7 @@ class FileSysEle(object):
     def __init__(self, path, size, mode, mtime, atime, ctime, addr, isDir, isDeleted, isCandidate):
         self.path = path
         self.name = ntpath.basename(path)
+        _ , self.extension = os.path.splitext(path)
         self.size = size
         self.mode = mode
         self.mtime = datetime.datetime.fromtimestamp(
@@ -334,6 +337,7 @@ class FileSysEle(object):
         self.isCandidate = isCandidate
 
     def isDirectory(self):
+        """Return true if this is a directory."""
         return self.isDir
 
     @classmethod
@@ -397,16 +401,14 @@ class FileSysEle(object):
     @classmethod
     def createTempCopy(cls, image_path, start, block_size, fsEle):
         """Creates a temp file copy of a file from the specified image."""
-        mime_type = cls.GuessMimeType(fsEle.name)
         generator = cls.payloadGenerator(image_path, start, block_size, fsEle)
-
         # Open with a named temp file
         with tempfile.NamedTemporaryFile(delete=False) as temp:
             for data in generator:
                 temp.write(data)
                 temp.flush()
             # Return an opened temp file
-            return temp.name, mime_type
+            return temp.name
 
     @classmethod
     def payloadGenerator(cls, image_path, start, block_size, fsEle):
@@ -443,6 +445,22 @@ class FileSysEle(object):
         'text/plain'
         """
         return MimeTypes().guess_type(file_name)[0]
+
+class ByteSequence(object):
+    """
+    Class to hold basic details of a ByteSequence, used in file analysis.
+    """
+    def __init__(self, sha1, size, is_candidate):
+        self.sha1 = sha1
+        self.size = size
+        self.is_candidate = is_candidate
+
+    @classmethod
+    def rootElement(cls):
+        rootObj = cls('/', 0, '', 0, 0, 0, -1, True, False, False)
+        return rootObj
+
+
 
 def mapped_dict_from_element(root, parent_tags, tag_dict):
     """
@@ -482,8 +500,7 @@ def is_candidate(info):
     if len(file_ext) > 1:
         return file_ext[1] in FileExtns.ALLEXT
         #logging.debug("End after split:" + fa[1])
-    else:
-        return False
+    return False
 
 
 def is_dir(meta_type):

@@ -29,7 +29,7 @@ class BaseConfig(object):
     IMAGE_DIR = ROOT + 'disk-images'
     SQLALCHEMY_DATABASE_URI = POSTGRES_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DEBUG = False
+    DEBUG = True
     LOG_FORMAT = '[%(filename)-15s:%(lineno)-5d] %(message)s'
     LOG_FILE = LOG_ROOT + 'bcaw.log'
 
