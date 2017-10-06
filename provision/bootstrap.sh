@@ -532,11 +532,14 @@ install_source_packages() {
 
 get_spacy_language_models() {
   echoinfo "bitcurator-access-webtools: Getting language model(s) for spacy..."
+  cd /tmp
+  source "$BCAW_ROOT/venv/bin/activate"
   python -m spacy download en
 }
 
 install_dfvfs() {
   echoinfo "bitcurator-access-webtools: Getting dfvfs requirements and installing dfvfs..."
+  cd /tmp
   curl -O https://raw.githubusercontent.com/log2timeline/dfvfs/master/requirements.txt
   pip install -r requirements.txt
   pip install dfvfs
@@ -728,7 +731,7 @@ install_ubuntu_${VER}_pip_packages $ITYPE
 install_source_packages
 
 # Get langauge model(s) for NLP tasks
-# get_spacy_language_models
+get_spacy_language_models
 
 # Digital Forensics Virtual File System suite install
 # install_dfvfs
