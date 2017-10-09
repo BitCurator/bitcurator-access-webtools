@@ -41,6 +41,13 @@ class Extns(object):
     RAW = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
     SUPPORTED = META + RAW
     IGNORED = [XML, XML.upper()]
+    FORMAT_DETAILS = {
+        DD: "Raw",
+        AFF: "Advanced forensic",
+        RAW: "Raw",
+        E01: "EnCase 6",
+        ISO: "ISO"
+    }
 
 class MimeTypes(object):
     BINARY = 'application/octet-stream'

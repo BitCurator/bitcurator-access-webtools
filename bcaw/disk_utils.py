@@ -180,11 +180,17 @@ class ImageFile(object):
 
     def to_image_db_map(self):
         """Returns the image as a map suitable for database."""
+        # Set up a default
         ret_val = ImgFlds.DEFAULT
         if self.is_ewf():
+            # Expert witness, if there's no metadata file try generating one
             if not self.has_ewf:
                 self.__class__.ewf_file_generator(self)
+            # set up return value from map of metadata XML
             ret_val = ImageFile.ewf_to_image_table_map(self.ewf_file)
+        # TODO: else:
+            # Not an expert witness file, we do what we can
+        # Add the path and the name
         ret_val[ImgFlds.PATH] = self.path
         ret_val[ImgFlds.NAME] = self.name
         return ret_val
