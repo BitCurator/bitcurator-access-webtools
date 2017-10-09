@@ -246,6 +246,7 @@ lame
 libatlas-base-dev
 libffi-dev
 libjpeg-dev
+liblzma-dev
 libmad0
 libtalloc2
 libtalloc-dev
@@ -256,6 +257,7 @@ libsox-fmt-mp3
 libtool
 libxml2-dev
 libxslt1-dev
+lzma
 nginx
 odt2txt
 openjdk-8-jdk
@@ -323,7 +325,8 @@ install_ubuntu_17.04_pip_packages() {
         nltk
         numpy
         python-magic
-        textract"
+        textract
+        spacy"
 
     pip_special_packages="textacy"
 
@@ -406,11 +409,11 @@ install_source_packages() {
 
         # Then we append these lines from temp file to Makefile after the given pattern
         # is found.
-        grep -A 8 "Debian Jessie 64-bit" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
+        grep -A 8 "Debian Jessie 64-bit, Python 2" Makefile | sed -n '4,8p' | sed 's/^#//' > temp
         #sed -i "s/PREFIX_PYTHON=\/usr/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i "s/PREFIX_PYTHON=\/opt\/apache\/pylucene\/_install/PREFIX_PYTHON=\/var\/www\/bcaw\/venv/g" temp
         sed -i "s/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-oracle/ANT=JAVA_HOME=\/usr\/lib\/jvm\/java-8-openjdk-amd64/g" temp
-        sed -i -e '/Debian Jessie 64-bit/r temp' Makefile
+        sed -i -e '/Debian Jessie 64-bit, Python 2/r temp' Makefile
 
         # Finally, remove the shared flag for the time being. See
         # http://lucene.apache.org/pylucene/jcc/install.html for why the shared
@@ -525,6 +528,21 @@ install_source_packages() {
 #        "$BCAW_ROOT/venv/bin/python" setup.py install >> $LOG_BASE/bca-install.log 2>&1
         # Clean up
         rm -rf /tmp/pytsk
+}
+
+get_spacy_language_models() {
+  echoinfo "bitcurator-access-webtools: Getting language model(s) for spacy..."
+  cd /tmp
+  source "$BCAW_ROOT/venv/bin/activate"
+  python -m spacy download en
+}
+
+install_dfvfs() {
+  echoinfo "bitcurator-access-webtools: Getting dfvfs requirements and installing dfvfs..."
+  cd /tmp
+  curl -O https://raw.githubusercontent.com/log2timeline/dfvfs/master/requirements.txt
+  pip install -r requirements.txt
+  pip install dfvfs
 }
 
 create_virtualenv() {
@@ -700,11 +718,25 @@ echoinfo "Version: $VER"
 echoinfo "The current user is: $SUDO_USER"
 
 export DEBIAN_FRONTEND=noninteractive
+
+# Install all dependencies and apt packages
 install_ubuntu_${VER}_deps $ITYPE
 install_ubuntu_${VER}_packages $ITYPE
+
+# Prepare the virtualenv
 create_virtualenv
+
+# Pip packages and source builds
 install_ubuntu_${VER}_pip_packages $ITYPE
 install_source_packages
+
+# Get langauge model(s) for NLP tasks
+get_spacy_language_models
+
+# Digital Forensics Virtual File System suite install
+# install_dfvfs
+
+# Copy over disk images
 copy_disk_images
 
 copy_source
