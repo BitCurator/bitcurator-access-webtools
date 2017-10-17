@@ -628,6 +628,10 @@ configure_webstack() {
        systemctl start uwsgi
    fi
 
+   # Set up the cache directory
+   mkdir /var/www/.cache
+   chown www-data:www-data /var/www/.cache
+
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
 
