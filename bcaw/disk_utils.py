@@ -25,8 +25,8 @@ from mimetypes import MimeTypes
 import xml.etree.ElementTree as ET
 import pytsk3
 
-from bcaw.const import Extns, ImgFlds, ExcepMess, EwfTags, EwfTagMap
-from bcaw.const import PartFlds, Defaults, FileExtns, PathChars
+from .const import Extns, ImgFlds, ExcepMess, EwfTags, EwfTagMap
+from .const import PartFlds, Defaults, FileExtns, PathChars
 
 
 class ImageDir(object):
@@ -131,7 +131,7 @@ class ImageDir(object):
         >>> ImageDir.is_image('name.xml')
         False
         """
-        return os.path.splitext(image)[1] in Extns.RAW
+        return os.path.splitext(image)[1] in Extns.RAW_TYPES
 
 class ImageFile(object):
     """Encapsulates basic properties of an image file."""
@@ -151,6 +151,11 @@ class ImageFile(object):
     def ewf_file(self):
         """Return the Expert Witness File if it exists."""
         return self.__ewf_file
+
+    @ewf_file.setter
+    def ewf_file(self, value):
+        """Set the ewf file property."""
+        self.__ewf_file = value
 
     @property
     def has_ewf(self):
@@ -412,7 +417,7 @@ class FileSysEle(object):
         """Creates a new FileSysEle instance from the supplied params"""
         details = EleDetails(info.meta.mode, info.meta.mtime, info.meta.atime,
                              info.meta.ctime)
-        ele = cls(path + info.name.name, info.meta.size, details, info.meta.addr,
+        ele = cls(os.path.join(path, info.name.name), info.meta.size, details, info.meta.addr,
                   is_dir(info.meta.type), is_ele_deleted(info))
         return ele
 

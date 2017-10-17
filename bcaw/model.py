@@ -12,32 +12,33 @@
 # model.py holds the database model classes and connection utils
 #
 """Database model classes for BitCurator access tools."""
-import logging
-from flask_sqlalchemy import SQLAlchemy
-from bcaw import app
-from bcaw.const import MimeTypes
+from sqlalchemy import Column, BigInteger, Date, Integer, String, ForeignKey
+from sqlalchemy import UniqueConstraint, Boolean
+from sqlalchemy.orm import relationship, backref
 
-DATABASE = SQLAlchemy(app)
+from .database import BASE, DB_SESSION, ENGINE
+from .const import MimeTypes
+from .utilities import check_param_not_none
 
-class Image(DATABASE.Model):
+class Image(BASE):
     """ Class that models basic image information that also handles
         convenience methods for instance creation from file system and
         database tables.
     """
     __tablename__ = 'image'
-    id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    path = DATABASE.Column(DATABASE.String(512), unique=True)
-    name = DATABASE.Column(DATABASE.String(256))
-    acquired = DATABASE.Column(DATABASE.Date)
-    system_date = DATABASE.Column(DATABASE.Date)
-    os = DATABASE.Column(DATABASE.String(256))
-    format = DATABASE.Column(DATABASE.String(30))
-    media_type = DATABASE.Column(DATABASE.String(30))
-    is_physical = DATABASE.Column(DATABASE.Boolean)
-    bps = DATABASE.Column(DATABASE.Integer)
-    sectors = DATABASE.Column(DATABASE.Integer)
-    size = DATABASE.Column(DATABASE.BigInteger)
-    md5 = DATABASE.Column(DATABASE.String(50))
+    id = Column(Integer, primary_key=True)
+    path = Column(String(512), unique=True)
+    name = Column(String(256))
+    acquired = Column(Date)
+    system_date = Column(Date)
+    os = Column(String(256))
+    format = Column(String(30))
+    media_type = Column(String(30))
+    is_physical = Column(Boolean)
+    bps = Column(Integer)
+    sectors = Column(Integer)
+    size = Column(BigInteger)
+    md5 = Column(String(50))
 
     def __init__(self, path, name, acquired=None, system_date=None, os=None,
                  format=None, media_type=None, is_physical=None, bps=None,
@@ -61,12 +62,12 @@ class Image(DATABASE.Model):
 
     @staticmethod
     def image_count():
-        """Find out how many images are in the database."""
+        """Find out how many images are in the """
         return len(Image.query.all())
 
     @staticmethod
     def images():
-        """Get all of the images in the database."""
+        """Get all of the images in the """
         return Image.query.order_by(Image.path).all()
 
     @staticmethod
@@ -75,27 +76,27 @@ class Image(DATABASE.Model):
         return Image.query.filter_by(path=path).first()
 
     @staticmethod
-    def by_id(id):
-        """Get an image by its unique id."""
-        return Image.query.filter_by(id=id).first_or_404()
+    def by_id(id_to_get):
+        """Get an image by its unique id, returns the image or None if no image
+        with that id exists."""
+        return Image.query.filter_by(id=id_to_get).first()
 
     @staticmethod
-    def addImage(image):
+    def add_image(image):
         """Add a new image to the database."""
-        DATABASE.session.add(image)
-        DATABASE.session.commit()
+        _add(image)
 
-class Partition(DATABASE.Model):
+class Partition(BASE):
     """Models a partition from a disk image."""
     __tablename__ = 'partition'
-    id = DATABASE.Column(DATABASE.Integer, primary_key=True)
-    addr = DATABASE.Column(DATABASE.Integer)
-    slot = DATABASE.Column(DATABASE.Integer)
-    start = DATABASE.Column(DATABASE.Integer)
-    description = DATABASE.Column(DATABASE.String(40))
+    id = Column(Integer, primary_key=True)
+    addr = Column(Integer)
+    slot = Column(Integer)
+    start = Column(Integer)
+    description = Column(String(40))
 
-    image_id = DATABASE.Column(DATABASE.Integer, DATABASE.ForeignKey('image.id'))
-    image = DATABASE.relationship('Image', backref=DATABASE.backref('partitions', lazy='dynamic'))
+    image_id = Column(Integer, ForeignKey('image.id'))
+    image = relationship('Image', backref=backref('partitions', lazy='dynamic'))
 
     def __init__(self, addr=None, slot=None, start=None, description=None, image_id=None):
         self._addr = addr
@@ -107,28 +108,57 @@ class Partition(DATABASE.Model):
     @staticmethod
     def partitions():
         """Static method that returns all of the partitions in the table."""
-        return Image.query.order_by(Partition.id).all()
+        return Partition.query.order_by(Partition.id).all()
 
     @staticmethod
-    def by_id(id):
-        """Retrieve a partition by id."""
-        return Partition.query.filter_by(id=id).first_or_404()
+    def by_id(id_to_get):
+        """Retrieve a partition by id, returns the partition or None if no partition
+        with that id exists."""
+        return Partition.query.filter_by(id=id_to_get).first()
 
     @staticmethod
-    def addPart(part):
-        """Add a new partition to the database."""
-        DATABASE.session.add(part)
-        DATABASE.session.commit()
+    def add_part(part):
+        """Add a new partition to the datatbase."""
+        _add(part)
 
-class ByteSequence(object):
+class FileElement(BASE):
+    """
+    Class to hold basic details of a ByteSequence, used in file analysis.
+    """
+    __tablename__ = 'file_element'
+    id = Column(Integer, primary_key=True)# pylint: disable-msg=C0103
+    path = Column(String(4096), nullable=False)
+
+    partition_id = Column(Integer, ForeignKey('partition.id'))
+    partition = relationship('Partition', backref=backref('file_elements', lazy='dynamic'))
+
+    __table_args__ = (UniqueConstraint('partition_id', 'path', name='uix_partition_path'),)
+
+    @staticmethod
+    def file_elements():
+        """Static method that returns all of the FileElements in the table."""
+        return FileElement.query.order_by(FileElement.id).all()
+
+    @staticmethod
+    def by_id(id_to_get):
+        """Retrieve a file element by id, returns the element or None if no element
+        with that id exists."""
+        return FileElement.query.filter_by(id=id_to_get).first()
+
+    @staticmethod
+    def add_element(element):
+        """Add a new FileElement to the datatbase."""
+        _add(element)
+
+class ByteSequence(BASE):
     """
     Class to hold basic details of a ByteSequence, used in file analysis.
     """
     __tablename__ = 'byte_sequence'
-    id = DATABASE.Column(DATABASE.Integer, primary_key=True)# pylint: disable-msg=C0103
-    sha1 = DATABASE.Column(DATABASE.String(40), unique=True, nullable=False)
-    size = DATABASE.Column(DATABASE.Integer, nullable=False)
-    mime_type = DATABASE.Column(DATABASE.String(255))
+    id = Column(Integer, primary_key=True)# pylint: disable-msg=C0103
+    sha1 = Column(String(40), unique=True, nullable=False)
+    size = Column(Integer, nullable=False)
+    mime_type = Column(String(255))
 
     EMPTY_SHA1 = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
 
@@ -141,7 +171,37 @@ class ByteSequence(object):
         self.size = size
         self.mime_type = mime_type
 
-def dbinit():
-    """Initialise the application database, including creating tables if necessary."""
-    DATABASE.create_all()
-    logging.debug("Database initialised")
+    @staticmethod
+    def byte_sequences():
+        """Static method that returns all of the FileElements in the table."""
+        return ByteSequence.query.order_by(ByteSequence.id).all()
+
+    @staticmethod
+    def by_id(id_to_get):
+        """Retrieve a byte sequence by id, returns the sequence or None if no sequence
+        with that id exists."""
+        return ByteSequence.query.filter_by(id=id_to_get).first()
+
+    @staticmethod
+    def add_byte_sequence(sequence):
+        """Add a new ByteSequence to the datatbase."""
+        _add(sequence)
+
+
+def init_db():
+    """Initialise the database."""
+    BASE.metadata.create_all(bind=ENGINE)
+
+def _add(obj):
+    """Add an object instance to the database."""
+    check_param_not_none(obj, "obj")
+    DB_SESSION.add(obj)
+    DB_SESSION.commit()
+
+def _add_all(objects):
+    """Add all objects form an iterable to the database."""
+    check_param_not_none(objects, "objects")
+    for obj in objects:
+        check_param_not_none(obj, "obj")
+        DB_SESSION.add(obj)
+    DB_SESSION.commit()
