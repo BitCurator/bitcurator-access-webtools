@@ -38,8 +38,8 @@ class Extns(object):
     DFXML = '_dfxml' + XML
     # list of image types supporting system metadata
     META = [E01, E01.upper(), AFF, AFF.upper()]
-    RAW = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
-    SUPPORTED = META + RAW
+    RAW_TYPES = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
+    SUPPORTED = META + RAW_TYPES
     IGNORED = [XML, XML.upper()]
     FORMAT_DETAILS = {
         DD: "Raw",

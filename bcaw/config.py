@@ -11,8 +11,8 @@
 #
 # This file contains items that can be configured in BitCurator Access Webtools.
 #
-import os
 """Module for application config goodness."""
+import os
 # TODO: template these values for flexible install
 HOST = 'localhost'
 DB_HOST = 'localhost'

@@ -18,51 +18,53 @@ from flask import request, abort
 from textract import process
 from textract.exceptions import ExtensionNotSupported
 
-from bcaw import app
-from bcaw.const import ConfKey, MimeTypes
-from bcaw.disk_utils import ImageDir, ImageFile, FileSysEle
-from bcaw.model import Image, Partition
-from bcaw.utilities import identify_mime_path, sha1_path, map_mime_to_ext
+from .bcaw import APP
+from .const import ConfKey, MimeTypes
+from .disk_utils import ImageDir, ImageFile, FileSysEle
+from .model import Image, Partition
+from .utilities import identify_mime_path, sha1_path, map_mime_to_ext
+ROUTES = True
 
-@app.route('/')
+@APP.route('/')
 def bcaw_home():
     """BCAW application home page, test DB is synched and display home."""
     # If there's a different number of images on disk than
     # in the DB table it's time to synch
     if DbSynch.is_synch_db():
         DbSynch.synch_db()
-
+    # Render the home page template with a list of images
     return render_template('home.html', db_images=Image.images())
 
-@app.route('/image/meta/<image_id>/')
+@APP.route('/image/meta/<image_id>/')
 def image_meta(image_id):
     """Image metadata page, retrieves image info from DB and displays it."""
-    image = Image.by_id(image_id)
+    # Get and test the image
+    image = _found_or_404(Image.by_id(image_id))
     return render_template('image.html', image=image)
 
-@app.route('/image/data/<image_id>/')
+@APP.route('/image/data/<image_id>/')
 def image_dnld(image_id):
     """Image download request, returns the image binary"""
-    image = Image.by_id(image_id)
+    image = _found_or_404(Image.by_id(image_id))
     parent = os.path.abspath(os.path.join(image.path, os.pardir))
     return send_from_directory(parent, image.name, as_attachment=True)
 
-@app.route('/image/<image_id>/')
+@APP.route('/image/<image_id>/')
 def image_parts(image_id):
     """Page listing the partition details for on image, retrieved from DB."""
-    image = Image.by_id(image_id)
+    image = _found_or_404(Image.by_id(image_id))
     logging.debug("Getting parts for image: " + image.name)
     for part in image.partitions.all():
         logging.debug("Part " + str(part.id))
     return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
-@app.route('/image/<image_id>/<part_id>/')
+@APP.route('/image/<image_id>/<part_id>/')
 def part_root(image_id, part_id):
     """Displays the root directory of a the chosen partition."""
     return file_handler(image_id, part_id, "/")
 
-@app.route('/image/<image_id>/<part_id>/', defaults={'encoded_filepath': '/'})
-@app.route('/image/<image_id>/<part_id>/<path:encoded_filepath>/')
+@APP.route('/image/<image_id>/<part_id>/', defaults={'encoded_filepath': '/'})
+@APP.route('/image/<image_id>/<part_id>/<path:encoded_filepath>/')
 def file_handler(image_id, part_id, encoded_filepath):
     """Display page for a file system element.
     If the element is a directory then the page displays the directory listing
@@ -71,10 +73,8 @@ def file_handler(image_id, part_id, encoded_filepath):
     the Response.
     """
     file_path = urllib.unquote(encoded_filepath)
-    partition = Partition.by_id(part_id)
-    fs_ele = FileSysEle.from_partition(partition, file_path)
-    if not fs_ele:
-        abort(404)
+    partition = _found_or_404(Partition.by_id(part_id))
+    fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))
     # Check if we have a directory
     if fs_ele.is_directory:
         # Render the dir listing template
@@ -114,9 +114,14 @@ def _render_directory(partition, path):
     return render_template('directory.html', image=partition.image,
                            partition=partition, files=files)
 
-@app.errorhandler(404)
+@APP.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+def _found_or_404(test_if_found):
+    if test_if_found is None:
+        abort(404)
+    return test_if_found
 
 def request_wants_binary():
     """Checks the accepts MIME type of the incoming request and returns True
@@ -129,7 +134,7 @@ class DbSynch(object):
 # Keep a list of images
     """Class that synchs images in the application directory with the DB record.
     """
-    image_dir = ImageDir.from_root_dir(app.config[ConfKey.IMAGE_DIR])
+    image_dir = ImageDir.from_root_dir(APP.config[ConfKey.IMAGE_DIR])
     __not_in_db__ = []
     __not_on_disk__ = []
 
@@ -142,7 +147,7 @@ class DbSynch(object):
     @classmethod
     def disk_synch(cls):
         """Updates the list of disk images from the directory listing."""
-        cls.image_dir = ImageDir.from_root_dir(app.config[ConfKey.IMAGE_DIR])
+        cls.image_dir = ImageDir.from_root_dir(APP.config[ConfKey.IMAGE_DIR])
 
     @classmethod
     def synch_db(cls):
@@ -154,10 +159,10 @@ class DbSynch(object):
         for image in cls.__not_in_db__:
             logging.info("Adding image: " + image.path + " to database.")
             model_image = Image(**image.to_image_db_map())
-            Image.addImage(model_image)
+            Image.add_image(model_image)
             ImageFile.populate_parts(image)
             for part in image.get_partitions():
-                Partition.addPart(Partition(**part.to_part_db_map(model_image.id)))
+                Partition.add_part(Partition(**part.to_part_db_map(model_image.id)))
 
         for image in cls.__not_on_disk__:
             logging.warn("Image: " + image.path + " appears to have been deleted from disk.")

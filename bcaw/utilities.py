@@ -79,3 +79,10 @@ def map_mime_to_ext(mime_type):
     if not mime_type:
         return None
     return MIME_TO_EXT.get(mime_type, None)
+
+def check_param_not_none(param, name):
+    """Check that the passed param is not None or an empty string.
+    Raise a ValueError with the param's name if it is None or an empty string"""
+    if not param:
+        message_terminator = ' or an empty string.' if isinstance(param, str) else '.'
+        raise ValueError("Argument {} can not be None{}".format(name, message_terminator))
