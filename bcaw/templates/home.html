@@ -15,28 +15,20 @@
       </div>
     </div>
     <div class="row">
+      <h2>Images</h2>
       <div class="col-md-2"></div>
       <div class="col-md-8">
-        <h2>Images</h2>
-        <table class="table table-striped">
-          <tr>
-            <th>Id</th>
-            <th>Image Name</th>
-            <th>Metadata</th>
-            <th>Browse</th>
-            <th>Download</th>
-          </tr>
+        <div class="list-group">
           {% for image in db_images %}
-          <tr>
-            <td>{{ image.id }}</td>
-            <td>{{ image.name }}</td>
-            <td><a href="{{ "/image/meta/" + image.id|string }}" ><span class="glyphicon glyphicon-hdd" aria-hidden="true"></span></a></td>
-            <td><a href="{{ "/image/" + image.id|string  }}" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></a></td>
-            <td><a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
-          </tr>
+          <a class="list-group-item" href="{{ "/image/" + image.id|string  }}" >
+            <h4 class="list-group-item-heading">{{ image.name }}</h4>
+            <p class="list-group-item-text">Path: {{ image.path }}</p>
+            <p class="list-group-item-text">Sha1: {{ image.byte_sequence.sha1 }}</p>
+            <p class="list-group-item-text">MIME: {{ image.byte_sequence.mime_type }}</p>
+            <p class="list-group-item-text">Size: {{ image.byte_sequence.size }}</p>
+          </a>
           {% endfor %}
-        </table>
-      </div>
+        </div>
       <div class="col-md-2"></div>
     </div>
 {% endblock page_content %}

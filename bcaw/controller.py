@@ -21,8 +21,8 @@ from textract.exceptions import ExtensionNotSupported
 from .bcaw import APP
 from .const import ConfKey, MimeTypes
 from .disk_utils import ImageDir, ImageFile, FileSysEle
-from .model import Image, Partition
-from .utilities import identify_mime_path, sha1_path, map_mime_to_ext
+from .model import Image, Partition, FileElement, ByteSequence
+from .utilities import map_mime_to_ext
 ROUTES = True
 
 @APP.route('/')
@@ -33,7 +33,7 @@ def bcaw_home():
     if DbSynch.is_synch_db():
         DbSynch.synch_db()
     # Render the home page template with a list of images
-    return render_template('home.html', db_images=Image.images())
+    return render_template('home.html', db_images=Image.all())
 
 @APP.route('/image/meta/<image_id>/')
 def image_meta(image_id):
@@ -82,19 +82,25 @@ def file_handler(image_id, part_id, encoded_filepath):
 
     # Its a file, we'll need a temp file to analyse or serve
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
+
+    file_element = FileElement.by_partition_and_path(partition, file_path)
+    if file_element is None:
+        byte_sequence = ByteSequence.from_path(temp_file)
+        file_element = FileElement(file_path, partition, byte_sequence)
+        FileElement.add(file_element)
+
     # Is this a blob request
     if request_wants_binary():
         return send_file(temp_file, mimetype=FileSysEle.guess_mime_type(fs_ele.name),
                          as_attachment=True, attachment_filename=fs_ele.name)
 
-    mime_type = identify_mime_path(temp_file)
-    sha1 = sha1_path(temp_file)
-    extension = map_mime_to_ext(mime_type)
-    logging.debug("MIME: %s EXTENSION %s SHA1:%s", mime_type, extension, sha1)
+    extension = map_mime_to_ext(file_element.byte_sequence.mime_type)
+    logging.debug("MIME: %s EXTENSION %s SHA1:%s", file_element.byte_sequence.mime_type,
+                  extension, file_element.byte_sequence.sha1)
     full_text = "N/A"
     if extension is not None:
         try:
-            logging.debug("Textract for doc %s, extension map val %s", file_path, extension)
+            logging.debug("Textract for doc %s, extension map val %s", file_element.path, extension)
             full_text = process(temp_file, extension=extension, encoding='ascii')
         except ExtensionNotSupported as _:
             logging.exception("Textract extension not supported for ext %s", extension)
@@ -105,8 +111,8 @@ def file_handler(image_id, part_id, encoded_filepath):
             raise
 
     return render_template('analysis.html', image=partition.image, partition=partition,
-                           file_path=file_path, fs_ele=fs_ele, mime_type=mime_type,
-                           sha1=sha1, full_text=full_text)
+                           file_path=file_path, fs_ele=fs_ele, mime_type=byte_sequence.mime_type,
+                           sha1=byte_sequence.sha1, full_text=full_text)
 
 def _render_directory(partition, path):
     # Render the dir listing template
@@ -116,6 +122,7 @@ def _render_directory(partition, path):
 
 @APP.errorhandler(404)
 def page_not_found(e):
+    """Home of the official 404 handler."""
     return render_template('404.html'), 404
 
 def _found_or_404(test_if_found):
@@ -142,7 +149,7 @@ class DbSynch(object):
     def is_synch_db(cls):
         """Returns true if the database needs resynching with file system."""
         cls.disk_synch()
-        return Image.image_count() != DbSynch.image_dir.image_count()
+        return Image.count() != DbSynch.image_dir.count()
 
     @classmethod
     def disk_synch(cls):
@@ -156,13 +163,13 @@ class DbSynch(object):
             return
         # Deal with images not in the database first
         cls.images_not_in_db()
-        for image in cls.__not_in_db__:
-            logging.info("Adding image: " + image.path + " to database.")
-            model_image = Image(**image.to_image_db_map())
-            Image.add_image(model_image)
-            ImageFile.populate_parts(image)
-            for part in image.get_partitions():
-                Partition.add_part(Partition(**part.to_part_db_map(model_image.id)))
+        for image_file in cls.__not_in_db__:
+            logging.info("Adding image: " + image_file.path + " to database.")
+            image = image_file.to_model_image()
+            Image.add(image)
+            ImageFile.populate_parts(image, image_file)
+            for part in image_file.get_partitions():
+                Partition.add(part)
 
         for image in cls.__not_on_disk__:
             logging.warn("Image: " + image.path + " appears to have been deleted from disk.")
@@ -185,7 +192,7 @@ class DbSynch(object):
         Missing images are added to a member list,
         """
         del cls.__not_on_disk__[:]
-        for image in Image.images():
+        for image in Image.all():
             if not os.path.isfile(image.path):
                 logging.debug("Image: " + image.path + " is no longer on disk.")
                 cls.__not_on_disk__.append(image)

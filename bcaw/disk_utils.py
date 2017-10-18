@@ -25,9 +25,10 @@ from mimetypes import MimeTypes
 import xml.etree.ElementTree as ET
 import pytsk3
 
-from .const import Extns, ImgFlds, ExcepMess, EwfTags, EwfTagMap
-from .const import PartFlds, Defaults, FileExtns, PathChars
-
+from .const import Extns, ImgDetsFlds, ImgPropsFlds, ExcepMess
+from .const import EwfTags, EwfDetailsTagMap, EwfPropertiesTagMap
+from .const import Defaults, FileExtns, PathChars
+from .model import Image, ImageDetails, ImageProperties, Partition, ByteSequence
 
 class ImageDir(object):
     """Class that encapsulates a root directory containing disk images."""
@@ -39,7 +40,7 @@ class ImageDir(object):
         """Returns a list of all of the images in the image directory."""
         return self.images
 
-    def image_count(self):
+    def count(self):
         """Returns the number of images in the directory."""
         return len(self.images)
 
@@ -137,7 +138,6 @@ class ImageFile(object):
     """Encapsulates basic properties of an image file."""
     def __init__(self, path, ewf_file=None, dfxml_file=None):
         self.__path = path
-        self.name = ntpath.basename(path)
         self.__ewf_file = ewf_file if ewf_file is not None else ''
         self.dfxml_file = dfxml_file if dfxml_file is not None else ''
         self.__partitions__ = []
@@ -173,7 +173,7 @@ class ImageFile(object):
 
     def is_ewf(self):
         """Returns true if this image is in the Expert Witness Format."""
-        return self.name.endswith(Extns.E01) or self.name.endswith(Extns.E01.upper())
+        return self.path.endswith(Extns.E01) or self.path.endswith(Extns.E01.upper())
 
     def get_num_partitions(self):
         """Returns the number of partitions for this image."""
@@ -183,22 +183,25 @@ class ImageFile(object):
         """Returns the set of partitions for this image."""
         return self.__partitions__
 
-    def to_image_db_map(self):
+    def to_model_image(self):
         """Returns the image as a map suitable for database."""
         # Set up a default
-        ret_val = ImgFlds.DEFAULT
+        details_fields = ImgDetsFlds.DEFAULT
+        properties_fields = ImgPropsFlds.DEFAULT
         if self.is_ewf():
             # Expert witness, if there's no metadata file try generating one
             if not self.has_ewf:
                 self.__class__.ewf_file_generator(self)
             # set up return value from map of metadata XML
-            ret_val = ImageFile.ewf_to_image_table_map(self.ewf_file)
+            details_fields = ImageFile.ewf_to_image_details_map(self.ewf_file)
+            properties_fields = ImageFile.ewf_to_image_properties_map(self.ewf_file)
         # TODO: else:
             # Not an expert witness file, we do what we can
         # Add the path and the name
-        ret_val[ImgFlds.PATH] = self.path
-        ret_val[ImgFlds.NAME] = self.name
-        return ret_val
+        details = ImageDetails(**details_fields)
+        properties = ImageProperties(**properties_fields)
+        byte_sequence = ByteSequence.from_path(self.path)
+        return Image(self.path, byte_sequence, details, properties)
 
     @classmethod
     def from_file(cls, source_file):
@@ -212,14 +215,14 @@ class ImageFile(object):
         return image_file
 
     @staticmethod
-    def ewf_to_image_table_map(xml_file):
+    def ewf_to_image_details_map(xml_file):
         """Converts and Expert Witness format XML file to a map suitable for the DB."""
         logging.debug("Parsing XML File: " + xml_file)
         if xml_file is None or os.stat(xml_file).st_size == 0:
             # It could be a raw image which has no metadata. Still we need to
             # create the image table for indexing purpose. Create a table with
             # dummy info.
-            return ImgFlds.DEFAULT
+            return ImgDetsFlds.DEFAULT
         try:
             tree = ET.parse(xml_file)
         except IOError, _e:
@@ -228,12 +231,32 @@ class ImageFile(object):
 
         root = tree.getroot()  # root node
         ret_val = mapped_dict_from_element(
-            root, EwfTags.PARENTS, EwfTagMap.LOOKUP)
-        ret_val[ImgFlds.ACQUIRED] = date_string_to_date(
-            ret_val[ImgFlds.ACQUIRED])
-        ret_val[ImgFlds.SYS_DATE] = date_string_to_date(
-            ret_val[ImgFlds.SYS_DATE])
+            root, EwfTags.PARENTS, EwfDetailsTagMap.LOOKUP)
+        ret_val[ImgDetsFlds.ACQUIRED] = date_string_to_date(
+            ret_val[ImgDetsFlds.ACQUIRED])
+        ret_val[ImgDetsFlds.SYS_DATE] = date_string_to_date(
+            ret_val[ImgDetsFlds.SYS_DATE])
         return ret_val
+
+
+    @staticmethod
+    def ewf_to_image_properties_map(xml_file):
+        """Converts and Expert Witness format XML file to a map suitable for the DB."""
+        logging.debug("Parsing XML File: " + xml_file)
+        if xml_file is None or os.stat(xml_file).st_size == 0:
+            # It could be a raw image which has no metadata. Still we need to
+            # create the image table for indexing purpose. Create a table with
+            # dummy info.
+            return ImgPropsFlds.DEFAULT
+        try:
+            tree = ET.parse(xml_file)
+        except IOError, _e:
+            logging.error(ExcepMess.PARSING, xml_file, _e)
+            return
+
+        root = tree.getroot()  # root node
+        return mapped_dict_from_element(
+            root, EwfTags.PARENTS, EwfPropertiesTagMap.LOOKUP)
 
     @staticmethod
     def ewf_file_generator(image_file):
@@ -268,7 +291,7 @@ class ImageFile(object):
             image_file.ewf_file = ewfinfo_xml
 
     @staticmethod
-    def populate_parts(image_file):
+    def populate_parts(image, image_file):
         """Populate partition information for an image from the image file."""
         logging.debug("Getting image info for: " + image_file.path)
         image_info = pytsk3.Img_Info(image_file.path)
@@ -284,7 +307,7 @@ class ImageFile(object):
             except:
                 # Botch by populating with file system details
                 image_file.__partitions__.append(
-                    ImagePart(-1, -1, -1, "Error Parsing"))
+                    Partition(image, -1, -1, -1, "Error Parsing"))
                 return
 
             if fs_info.info.ftype == pytsk3.TSK_FS_TYPE_FAT12:
@@ -294,7 +317,7 @@ class ImageFile(object):
             else:
                 fs_desc = "Unknown file system"
             # Botch by populating with file system details
-            image_file.__partitions__.append(ImagePart(0, 0, 0, fs_desc))
+            image_file.__partitions__.append(Partition(image, 0, 0, 0, fs_desc))
             return
 
         # Loop through the partition info found
@@ -323,47 +346,7 @@ class ImageFile(object):
                 logging.info("Adding partition: " + part.desc +
                              " for image: " + image_file.path)
                 image_file.__partitions__.append(
-                    ImagePart(part.addr, part.slot_num, part.start, part.desc))
-
-
-class ImagePart(object):
-    """Encapsulates a disk image partition."""
-    def __init__(self, addr, slot, start, desc):
-        self.__addr = addr
-        self.__slot = slot
-        self.__start = start
-        self.__desc = desc
-
-    @property
-    def addr(self):
-        """Return the partitions address."""
-        return self.__addr
-
-    @property
-    def slot(self):
-        """Return the partitions slot."""
-        return self.__slot
-
-    @property
-    def start(self):
-        """Return the partitions start."""
-        return self.__start
-
-    @property
-    def desc(self):
-        """Return the partitions description."""
-        return self.__desc
-
-    def to_part_db_map(self, image_id):
-        """Returns a database partition object friendly map."""
-        return {
-            PartFlds.ADDR: self.addr,
-            PartFlds.SLOT: self.slot,
-            PartFlds.START: self.start,
-            PartFlds.DESC: self.desc,
-            PartFlds.IMAGE: image_id
-        }
-
+                    Partition(image, part.addr, part.slot_num, part.start, part.desc))
 
 class FileSysEle(object):
     """Class to wrap image methods to handle files and directories."""
@@ -403,7 +386,7 @@ class FileSysEle(object):
                           file_name):
         """Return a file system element created from the passed information."""
         file_sys_info = cls.get_file_system_info(partition.image.path, partition.start,
-                                                 partition.image.bps)
+                                                 partition.image.properties.bps)
         parent_dir = file_sys_info.open_dir(path=parent_path)
         for child_file in parent_dir:
             if (child_file.info.meta != None) and (child_file.info.name.name == file_name):
@@ -438,7 +421,7 @@ class FileSysEle(object):
         """List all of the files in a directory."""
         file_list = []
         file_sys_info = cls.get_file_system_info(
-            partition.image.path, partition.start, partition.image.bps)
+            partition.image.path, partition.start, partition.image.properties.bps)
         directory = file_sys_info.open_dir(path=path)
         for listed_file in directory:
             if listed_file.info.meta != None:
@@ -450,7 +433,7 @@ class FileSysEle(object):
     def create_temp_copy(cls, partition, fs_ele):
         """Creates a temp file copy of a file from the specified image."""
         generator = cls.payload_generator(partition.image.path, partition.start,
-                                          partition.image.bps, fs_ele)
+                                          partition.image.properties.bps, fs_ele)
         # Open with a named temp file
         with tempfile.NamedTemporaryFile(delete=False) as temp:
             for data in generator:
@@ -558,7 +541,6 @@ def is_ele_deleted(info):
     """Returns true if the info metadata flag is set."""
     return int(info.meta.flags) & 0x01 == 0
 
-
 def is_candidate(info):
     """Check if this is a candidate for text extraction
     Get just the extension (this is dirty, also gets dotfile names now)
@@ -568,7 +550,6 @@ def is_candidate(info):
         return file_ext[1] in FileExtns.ALLEXT
         #logging.debug("End after split:" + fa[1])
     return False
-
 
 def is_dir(meta_type):
     """Checks the meta_type from image info to see if the element is a directory
