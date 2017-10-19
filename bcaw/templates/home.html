@@ -25,7 +25,7 @@
             <p class="list-group-item-text">Path: {{ image.path }}</p>
             <p class="list-group-item-text">Sha1: {{ image.byte_sequence.sha1 }}</p>
             <p class="list-group-item-text">MIME: {{ image.byte_sequence.mime_type }}</p>
-            <p class="list-group-item-text">Size: {{ image.byte_sequence.size }}</p>
+            <p class="list-group-item-text">Size: {{ sizeof_fmt(image.byte_sequence.size) }}</p>
           </a>
           {% endfor %}
         </div>

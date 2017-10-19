@@ -111,8 +111,8 @@ def file_handler(image_id, part_id, encoded_filepath):
             raise
 
     return render_template('analysis.html', image=partition.image, partition=partition,
-                           file_path=file_path, fs_ele=fs_ele, mime_type=byte_sequence.mime_type,
-                           sha1=byte_sequence.sha1, full_text=full_text)
+                           file_path=file_path, fs_ele=fs_ele, file_element=file_element,
+                           full_text=full_text)
 
 def _render_directory(partition, path):
     # Render the dir listing template
