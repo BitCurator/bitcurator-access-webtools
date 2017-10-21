@@ -22,6 +22,7 @@ from .bcaw import APP
 from .const import ConfKey, MimeTypes
 from .disk_utils import ImageDir, ImageFile, FileSysEle
 from .model import Image, Partition, FileElement, ByteSequence
+from .text_indexer import ImageIndexer
 from .utilities import map_mime_to_ext
 ROUTES = True
 
@@ -34,6 +35,13 @@ def bcaw_home():
         DbSynch.synch_db()
     # Render the home page template with a list of images
     return render_template('home.html', db_images=Image.all())
+
+@APP.route('/search')
+def full_text_search():
+    """Perform full text search and return results."""
+    search_text = request.args.get('search_text', '')
+    with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
+        return indexer.retrieve(search_text)
 
 @APP.route('/image/meta/<image_id>/')
 def image_meta(image_id):
@@ -102,6 +110,8 @@ def file_handler(image_id, part_id, encoded_filepath):
         try:
             logging.debug("Textract for doc %s, extension map val %s", file_element.path, extension)
             full_text = process(temp_file, extension=extension, encoding='ascii')
+            with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
+                indexer.index_text(file_element.byte_sequence.sha1, full_text)
         except ExtensionNotSupported as _:
             logging.exception("Textract extension not supported for ext %s", extension)
             logging.debug("Temp path for file is %s", temp_file)
@@ -121,7 +131,7 @@ def _render_directory(partition, path):
                            partition=partition, files=files)
 
 @APP.errorhandler(404)
-def page_not_found(e):
+def page_not_found(_e):
     """Home of the official 404 handler."""
     return render_template('404.html'), 404
 
