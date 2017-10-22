@@ -22,7 +22,7 @@ from .bcaw import APP
 from .const import ConfKey, MimeTypes
 from .disk_utils import ImageDir, ImageFile, FileSysEle
 from .model import Image, Partition, FileElement, ByteSequence
-from .text_indexer import ImageIndexer
+from .text_indexer import ImageIndexer, FullTextSearcher
 from .utilities import map_mime_to_ext
 ROUTES = True
 
@@ -40,8 +40,14 @@ def bcaw_home():
 def full_text_search():
     """Perform full text search and return results."""
     search_text = request.args.get('search_text', '')
-    with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
-        return indexer.retrieve(search_text)
+    with FullTextSearcher(APP.config['LUCENE_INDEX_DIR']) as searcher:
+        results = searcher.retrieve(search_text)
+    byte_sequences = ByteSequence.in_sha1_set(results.keys())
+    logging.info("Lucene returns %d results.", len(results))
+    return render_template('search_results.html', search_text=search_text,
+                           byte_sequences=byte_sequences, hit_counts=results)
+
+
 
 @APP.route('/image/meta/<image_id>/')
 def image_meta(image_id):
@@ -80,6 +86,7 @@ def file_handler(image_id, part_id, encoded_filepath):
     If a file is selected they files contents as a binary payload is sent in
     the Response.
     """
+    # TODO: Clean up this method
     file_path = urllib.unquote(encoded_filepath)
     partition = _found_or_404(Partition.by_id(part_id))
     fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))

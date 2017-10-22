@@ -12,6 +12,7 @@
 # model.py holds the database model classes and connection utils
 #
 """Database model classes for BitCurator access tools."""
+import logging
 import ntpath
 import os
 
@@ -280,6 +281,14 @@ class ByteSequence(BASE):
         """Retrieve a byte sequence by sha1, returns the sequence or None if no sequence
         with that sha1 exists."""
         return ByteSequence.query.filter_by(sha1=sha1_to_get).first()
+
+    @staticmethod
+    def in_sha1_set(sha1s):
+        """Returns all of the ByteSequences contained in the table whose SHA1s are
+        contained in the list of ids."""
+        for sha1 in sha1s:
+            logging.info("SHA1 found: %s", sha1)
+        return ByteSequence.query.filter(ByteSequence.sha1.in_(sha1s)).all()
 
     @staticmethod
     def from_path(path):

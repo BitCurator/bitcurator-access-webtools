@@ -13,6 +13,8 @@
 import os
 import logging
 
+from .utilities import check_param_not_none
+
 import lucene
 
 from java.nio.file import Paths
@@ -67,20 +69,43 @@ class ImageIndexer(object):
         else:
             logging.info("No text for sha1 %s", sha1)
 
-    def retrieve(self, text):
-        """Search the Lucene index for a text term."""
+class FullTextSearcher(object):
+    """Performs Lucene searches."""
+    max_results = 1000
+    def __init__(self, store_dir):
+        self.store_dir = store_dir
+        if not os.path.exists(store_dir):
+            os.mkdir(store_dir, 0777)
+        self.store = SimpleFSDirectory(Paths.get(store_dir))
+        self.searcher = None
+        self.analyzer = StandardAnalyzer()
+        self.analyzer = LimitTokenCountAnalyzer(self.analyzer, 1048576)
+
+    def __enter__(self):
         try:
-            searcher = IndexSearcher(DirectoryReader.open(self.store))
+            if self.searcher is None:
+                self.searcher = IndexSearcher(DirectoryReader.open(self.store))
         except lucene.JavaError, _je:
             logging.exception("No Lucene index found at %s", self.store)
-            return "No docs found"
-        query = QueryParser("full_text", self.analyzer).parse(text)
+        return self
 
-        max_results = 1000
-        hits = searcher.search(query, max_results)
-        result_tuples = []
-        for hit in hits.scoreDocs:
-            doc = searcher.doc(hit.doc)
-            result_tuples.append((doc.get('sha1'), hit.score))
-        del searcher
-        return result_tuples
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.searcher is not None:
+            del self.searcher
+            self.searcher = None
+
+    def retrieve(self, text):
+        """Search the Lucene index for a text term."""
+        result_dict = {}
+        if not text:
+            return result_dict
+
+        text = text.strip()
+        if text:
+            query = QueryParser("full_text", self.analyzer).parse(text)
+            hits = self.searcher.search(query, FullTextSearcher.max_results)
+            result_dict = {}
+            for hit in hits.scoreDocs:
+                doc = self.searcher.doc(hit.doc)
+                result_dict[doc.get('sha1')] = hit.score
+        return result_dict

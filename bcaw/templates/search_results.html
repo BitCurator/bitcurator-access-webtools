@@ -1,0 +1,35 @@
+{% extends "page.html" %}
+{% block title %} Search Results | {{ search_text }}{% endblock %}
+{% block scripts %}
+{% with table_id='results' %}
+{% include "table_sort.html" %}
+{% endwith %}
+{% endblock scripts %}
+{% block page_content %}
+    <!-- Search results screen -->
+    <h2>Search results for: {{ search_text }}</h2>
+    <table id="results" class="table table-striped">
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>SHA1</th>
+          <th>MIME Type</th>
+          <th>Size</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for byte_sequence in byte_sequences %}
+        {% for file_ele in byte_sequence.file_elements %}
+        <tr>
+          <td><a href="{{ "/image/" + file_ele.partition.image.id|string + "/" + file_ele.partition.id|string +"/" + file_ele.path }}" >{{ file_ele.path }}</a></td>
+          <td>{{ byte_sequence.sha1 }}</td>
+          <td>{{ byte_sequence.mime_type }}</td>
+          <td>{{ sizeof_fmt(byte_sequence.size) }}</td>
+          <td>{{ hit_counts[byte_sequence.sha1] }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+{% endblock page_content %}
