@@ -13,6 +13,8 @@
 import os
 import logging
 import lucene
+from textract import process
+from textract.exceptions import ExtensionNotSupported
 
 from java.nio.file import Paths
 from org.apache.lucene.analysis.miscellaneous import LimitTokenCountAnalyzer
@@ -24,6 +26,9 @@ from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.queryparser.classic import QueryParser
 
+from .bcaw import APP
+from .model import ByteSequence
+from .utilities import map_mime_to_ext
 
 lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 
@@ -65,6 +70,30 @@ class ImageIndexer(object):
             self.writer.updateDocument(Term("sha1", sha1), document)
         else:
             logging.info("No text for sha1 %s", sha1)
+
+    def index_path(self, path):
+        """Index the full text of the file and map it to the file's sha1 and return
+        the derived ByteStream object and derived full text as a tuple."""
+        byte_sequence = ByteSequence.from_path(path)
+        extension = map_mime_to_ext(byte_sequence.mime_type)
+        logging.debug("Assessing MIME: %s EXTENSION %s SHA1:%s", byte_sequence.mime_type,
+                      extension, byte_sequence.sha1)
+        full_text = "N/A"
+        if extension is not None:
+            try:
+                logging.debug("Textract for SHA1 %s, extension map val %s",
+                              byte_sequence.sha1, extension)
+                full_text = process(path, extension=extension, encoding='ascii',
+                                    preserveLineBreaks=True)
+                self.index_text(byte_sequence.sha1, full_text)
+            except ExtensionNotSupported as _:
+                logging.exception("Textract extension not supported for ext %s", extension)
+                logging.debug("Temp path for file is %s", path)
+                full_text = "N/A"
+            except:
+                logging.exception("Textract unexpectedly failed for temp_file %s", path)
+                raise
+        return byte_sequence, full_text
 
 class FullTextSearcher(object):
     """Performs Lucene searches."""

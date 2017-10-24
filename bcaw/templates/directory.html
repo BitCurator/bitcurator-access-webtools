@@ -16,7 +16,7 @@
           <th>Bytes</th>
           <th>Created</th>
           <th>Modified</th>
-          <th>Deleted</th>
+          <th>Download</th>
         </tr>
       </thead>
       <tbody>
@@ -27,7 +27,13 @@
           <td>{{ sizeof_fmt(file.size) }}</td>
           <td>{{ file.details.ctime }}</td>
           <td>{{ file.details.mtime }}</td>
-          <td><span class="glyphicon glyphicon-{{ 'trash' if file.is_deleted else 'floppy-disk' }}" aria-hidden="true"></span></td>
+          {% if file.is_deleted %}
+          <td><div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></div></td>
+          {% elif file.is_directory %}
+          <td></td>
+          {% else %}
+          <td><a href="{{ "/image/" + image.id|string + "/" + partition.id|string + file.path }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
+          {% endif %}
         </tr>
         {% endfor %}
       </tbody>

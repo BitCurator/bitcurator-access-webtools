@@ -8,7 +8,7 @@
 {% block page_content %}
     <h1>{{ image.name }}</h1>
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-2">
         <ul class="list-group">
           <li class="list-group-item">
             <span class="label label-primary">Format:</span>
@@ -16,31 +16,38 @@
           </li>
           <li class="list-group-item">
             <span class="label label-primary">Size:</span>
-            <span class="badge">{{ image.properties.size }}</span>
+            <span class="badge">{{ sizeof_fmt(image.properties.size) }}</span>
           </li>
         </ul>
       </div>
-      <div class="col-md-4">
-        <ul class="list-group">
-          <li class="list-group-item">
-            <span class="label label-primary">MD5:</span>
-            <span class="badge">{{ image.details.md5 }}</span>
-          </li>
-          <li class="list-group-item">
-            <span class="label label-primary">SHA1:</span>
-            <span class="badge">{{ image.byte_sequence.sha1 }}</span>
-          </li>
-        </ul>
-      </div>
-      <div class="col-md-4">
+      <div class="col-md-2">
         <li class="list-group-item">
           <span class="label label-primary">Sectors:</span>
           <span class="badge">{{ image.properties.sectors }}</span>
         </li>
         <ul class="list-group">
           <li class="list-group-item">
-            <span class="label label-primary">Blocks per Sector:</span>
+            <span class="label label-primary">Blocks/Sector:</span>
             <span class="badge">{{ image.properties.bps }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-5">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">MD5:</span>
+            <span class="badge">{{ image.details.md5 }}</span>
+          </li>
+          <li class="list-group-item">
+            <span class="label label-primary">SHA-1:</span>
+            <span class="badge">{{ image.byte_sequence.sha1 }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <h4 class="list-group-item-heading"><span class="label label-primary">Download:</span> <a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></h4>
           </li>
         </ul>
       </div>

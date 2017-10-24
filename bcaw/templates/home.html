@@ -1,5 +1,10 @@
 {% extends "page.html" %}
 {% block title %}Home{% endblock %}
+{% block scripts %}
+{% with table_id='images' %}
+{% include "table_sort.html" %}
+{% endwith %}
+{% endblock scripts %}
 {% block page_content %}
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron media">
@@ -15,20 +20,30 @@
       </div>
     </div>
     <div class="row">
-      <h2>Images</h2>
-      <div class="col-md-2"></div>
-      <div class="col-md-8">
-        <div class="list-group">
-          {% for image in db_images %}
-          <a class="list-group-item" href="{{ "/image/" + image.id|string  }}" >
-            <h4 class="list-group-item-heading">{{ image.name }}</h4>
-            <p class="list-group-item-text">Path: {{ image.path }}</p>
-            <p class="list-group-item-text">Sha1: {{ image.byte_sequence.sha1 }}</p>
-            <p class="list-group-item-text">MIME: {{ image.byte_sequence.mime_type }}</p>
-            <p class="list-group-item-text">Size: {{ sizeof_fmt(image.byte_sequence.size) }}</p>
-          </a>
-          {% endfor %}
-        </div>
-      <div class="col-md-2"></div>
+      <div class="col-md-12">
+        <h2>Images</h2>
+        <table id="images" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Size</th>
+              <th>MIME</th>
+              <th>SHA-1</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for image in db_images %}
+            <tr>
+              <td><a href="{{ "/image/" + image.id|string  }}">{{ image.name }}</a></td>
+              <td>{{ sizeof_fmt(image.byte_sequence.size) }}</td>
+              <td>{{ image.byte_sequence.mime_type }}</td>
+              <td>{{ image.byte_sequence.mime_type }}</td>
+              <td><a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 {% endblock page_content %}

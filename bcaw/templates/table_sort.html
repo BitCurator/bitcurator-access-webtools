@@ -4,7 +4,8 @@
     <script type="text/javascript" class="init">
       $(document).ready(function() {
          $('#{{ table_id }}').DataTable({
-           "pageLength": 50
+           pageLength: 50,
+           stateSave: true
          });
        } );
     </script>

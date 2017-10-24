@@ -15,15 +15,13 @@ import os
 import urllib
 from flask import render_template, send_file, send_from_directory
 from flask import request, abort
-from textract import process
-from textract.exceptions import ExtensionNotSupported
 
 from .bcaw import APP
 from .const import ConfKey, MimeTypes
 from .disk_utils import ImageDir, ImageFile, FileSysEle
 from .model import Image, Partition, FileElement, ByteSequence
 from .text_indexer import ImageIndexer, FullTextSearcher
-from .utilities import map_mime_to_ext
+
 ROUTES = True
 
 @APP.route('/')
@@ -97,40 +95,52 @@ def file_handler(image_id, part_id, encoded_filepath):
 
     # Its a file, we'll need a temp file to analyse or serve
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
+    # Get the byte stream object and index it.
+    with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
+        byte_sequence, full_text = indexer.index_path(temp_file)
 
+    # Check whether we've seen this path before
     file_element = FileElement.by_partition_and_path(partition, file_path)
     if file_element is None:
-        byte_sequence = ByteSequence.from_path(temp_file)
+        # If not then add the path and p
         file_element = FileElement(file_path, partition, byte_sequence)
         FileElement.add(file_element)
 
     # Is this a blob request
     if request_wants_binary():
-        return send_file(temp_file, mimetype=FileSysEle.guess_mime_type(fs_ele.name),
+        return send_file(temp_file, mimetype=byte_sequence.mime_type,
                          as_attachment=True, attachment_filename=fs_ele.name)
-
-    extension = map_mime_to_ext(file_element.byte_sequence.mime_type)
-    logging.debug("MIME: %s EXTENSION %s SHA1:%s", file_element.byte_sequence.mime_type,
-                  extension, file_element.byte_sequence.sha1)
-    full_text = "N/A"
-    if extension is not None:
-        try:
-            logging.debug("Textract for doc %s, extension map val %s", file_element.path, extension)
-            full_text = process(temp_file, extension=extension, encoding='ascii',
-                                preserveLineBreaks=True)
-            with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
-                indexer.index_text(file_element.byte_sequence.sha1, full_text)
-        except ExtensionNotSupported as _:
-            logging.exception("Textract extension not supported for ext %s", extension)
-            logging.debug("Temp path for file is %s", temp_file)
-            full_text = "N/A"
-        except:
-            logging.exception("Textract unexpectedly failed for temp_file %s", temp_file)
-            raise
 
     return render_template('analysis.html', image=partition.image, partition=partition,
                            file_path=file_path, fs_ele=fs_ele, file_element=file_element,
                            full_text=full_text)
+
+@APP.route('/raw/<image_id>/<part_id>/', defaults={'encoded_filepath': '/'})
+@APP.route('/raw/<image_id>/<part_id>/<path:encoded_filepath>/')
+def download_file(image_id, part_id, encoded_filepath):
+    """Download the raw bytes for a given file."""
+
+    file_path = urllib.unquote(encoded_filepath)
+    partition = _found_or_404(Partition.by_id(part_id))
+    fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))
+    # Check if we have a directory
+    if fs_ele.is_directory:
+        # If so raise 404
+        abort(404)
+
+    # Its a file then send the bytes
+    temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
+    byte_sequence = ByteSequence.from_path(temp_file)
+
+    # Check whether we've seen this path before
+    file_element = FileElement.by_partition_and_path(partition, file_path)
+    if file_element is None:
+        # If not then add the path and p
+        file_element = FileElement(file_path, partition, byte_sequence)
+        FileElement.add(file_element)
+
+    return send_file(temp_file, mimetype=byte_sequence.mime_type,
+                     as_attachment=True, attachment_filename=fs_ele.name)
 
 def _render_directory(partition, path):
     # Render the dir listing template
