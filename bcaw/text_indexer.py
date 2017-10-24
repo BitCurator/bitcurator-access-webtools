@@ -12,9 +12,6 @@
 
 import os
 import logging
-
-from .utilities import check_param_not_none
-
 import lucene
 
 from java.nio.file import Paths
@@ -31,6 +28,8 @@ from org.apache.lucene.queryparser.classic import QueryParser
 lucene.initVM(vmargs=['-Djava.awt.headless=true'])
 
 class ImageIndexer(object):
+    """Given an image details the indexer will get all text files, lucene them
+    for search and retrieval."""
     hash_field = FieldType()
     hash_field.setStored(True)
     hash_field.setTokenized(False)
@@ -41,8 +40,6 @@ class ImageIndexer(object):
     text_field.setTokenized(True)
     text_field.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
 
-    """Given an image details the indexer will get all text files, lucene them
-    for search and retrieval."""
     def __init__(self, store_dir):
         self.store_dir = store_dir
         if not os.path.exists(store_dir):

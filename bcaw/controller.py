@@ -116,7 +116,8 @@ def file_handler(image_id, part_id, encoded_filepath):
     if extension is not None:
         try:
             logging.debug("Textract for doc %s, extension map val %s", file_element.path, extension)
-            full_text = process(temp_file, extension=extension, encoding='ascii')
+            full_text = process(temp_file, extension=extension, encoding='ascii',
+                                preserveLineBreaks=True)
             with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
                 indexer.index_text(file_element.byte_sequence.sha1, full_text)
         except ExtensionNotSupported as _:

@@ -16,3 +16,7 @@ body {
 .jumbotron img {
   float: left;
 }
+
+#full-text {
+  overflow-x: auto;
+}

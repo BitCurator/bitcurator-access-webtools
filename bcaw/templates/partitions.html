@@ -1,92 +1,73 @@
 {% extends "page.html" %}
 {% block title %}{{ image.name }} | partitions {% endblock %}
+{% block scripts %}
+{% with table_id='partitions' %}
+{% include "table_sort.html" %}
+{% endwith %}
+{% endblock scripts %}
 {% block page_content %}
-    <h1>Image: {{ image.name }}</h1>
-    <label for="format">Details</label>
+    <h1>{{ image.name }}</h1>
     <div class="row">
       <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="format-addon">Format:</span>
-          <input type="text" class="form-control" id="format" aria-describedby="format-addon" value="{{ image.details.format }}" disabled >
-        </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">Format:</span>
+            <span class="badge">{{ image.details.format }}</span>
+          </li>
+          <li class="list-group-item">
+            <span class="label label-primary">Size:</span>
+            <span class="badge">{{ image.properties.size }}</span>
+          </li>
+        </ul>
       </div>
       <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="acquired-addon">Acquired:</span>
-          <input type="text" class="form-control" id="acquired" aria-describedby="acquired-addon" value="{{ image.details.acquired }}" disabled >
-        </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">MD5:</span>
+            <span class="badge">{{ image.details.md5 }}</span>
+          </li>
+          <li class="list-group-item">
+            <span class="label label-primary">SHA1:</span>
+            <span class="badge">{{ image.byte_sequence.sha1 }}</span>
+          </li>
+        </ul>
       </div>
       <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="os-addon">OS:</span>
-          <input type="text" class="form-control" id="os" aria-describedby="os-addon" value="{{ image.details.operating_system }}" disabled >
-        </div>
+        <li class="list-group-item">
+          <span class="label label-primary">Sectors:</span>
+          <span class="badge">{{ image.properties.sectors }}</span>
+        </li>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">Blocks per Sector:</span>
+            <span class="badge">{{ image.properties.bps }}</span>
+          </li>
+        </ul>
       </div>
     </div>
     <div class="row">
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="media-addon">Media Type:</span>
-          <input type="text" class="form-control" id="media" aria-describedby="media-addon" value="{{ image.details.media_type }}" disabled >
-        </div>
+      <div class="col-md-12">
+        <h2>Partitons</h2>
+        <table id="partitions" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>File System</th>
+              <th>Start</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for part in partitions %}
+            <tr>
+              <td>{{ part.id }}</td>
+              <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" >{{ image.name }}</a></td>
+              <td>{{ part.description }}</td>
+              <td>{{ part.start }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="physical-addon">Physical:</span>
-          <input type="text" class="form-control" id="physical" aria-describedby="physical-addon" value="{{ image.details.is_physical }}" disabled >
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="md5-addon">MD5:</span>
-          <input type="text" class="form-control" id="md5" aria-describedby="md5-addon" value="{{ image.details.md5 }}" disabled >
-        </div>
-      </div>
-    </div>
-    <label for="format">Properties</label>
-    <div class="row">
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="sectors-addon">Sectors:</span>
-          <input type="text" class="form-control" id="sectors" aria-describedby="sectors-addon" value="{{ image.properties.sectors }}" disabled >
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="bps-addon">Blocks per Sector:</span>
-          <input type="text" class="form-control" id="bps" aria-describedby="bps-addon" value="{{ image.properties.bps }}" disabled >
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-addon" id="size-addon">Size:</span>
-          <input type="text" class="form-control" id="size" aria-describedby="-addon" value="{{ image.properties.size }}" disabled >
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <h2>Partions</h2>
-      <table class="table">
-        <tr>
-          <th>Id</th>
-          <th>Image Name</th>
-          <th>File System</th>
-          <th>Start</th>
-          <th>Browse</th>
-        </tr>
-        {% for part in partitions %}
-        <tr>
-          <td>{{ part.id }}</td>
-          <td>{{ image.name }}</td>
-          <td>{{ part.description }}</td>
-          <td>{{ part.start }}</td>
-          {% if part.description is equalto 'Error Parsing' %}
-          <td><span class="glyphicon glyphicon-warning-sign alert-danger" aria-hidden="true"></span></a></td>
-          {% else %}
-          <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></a></td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </table>
     </div>
 {% endblock page_content %}
