@@ -9,7 +9,7 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-
+"""Classes for full text indexing, search and retrieval using Lucene."""
 import os
 import logging
 import lucene
