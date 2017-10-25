@@ -1,30 +1,18 @@
 {% extends "page.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Images{% endblock %}
 {% block scripts %}
 {% with table_id='images' %}
 {% include "table_sort.html" %}
 {% endwith %}
 {% endblock scripts %}
 {% block page_content %}
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron media">
-      <div class="media-left">
-        <img alt="BitCurator Access logo." title="BCA WebTools logo" src="{{ url_for('static', filename='img/bc2-icon.png') }}" />
-      </div>
-      <div class="media-body">
-        <p>
-          Explore raw and forensically-packaged (.E01 and .AFF) disk images in a web browser.
-          Supported file systems include FAT, ExFAT, NTFS, HFS+, EXT2/3/4, ISO 9660 (CD-ROM), and YAFFS2 (Android).
-          Click on 'Browse' to examine partitions and file systems, or 'Download' to download the complete disk image.
-        </p>
-      </div>
-    </div>
     <div class="row">
       <div class="col-md-12">
         <h2>Images</h2>
         <table id="images" class="table table-striped">
           <thead>
             <tr>
+              <th>Collection</th>
               <th>Name</th>
               <th>Size</th>
               <th>MIME</th>
@@ -35,6 +23,7 @@
           <tbody>
             {% for image in db_images %}
             <tr>
+              <td>{{ image.collection.name }}</td>
               <td><a href="{{ "/image/" + image.id|string  }}">{{ image.name }}</a></td>
               <td>{{ sizeof_fmt(image.byte_sequence.size) }}</td>
               <td>{{ image.byte_sequence.mime_type }}</td>

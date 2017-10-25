@@ -24,6 +24,55 @@ from .database import BASE, DB_SESSION, ENGINE
 from .const import MimeTypes
 from .utilities import check_param_not_none, sha1_path, identify_mime_path
 
+class Collection(BASE):
+    """Encapsulation of collections of images. Effectively a root directory, name
+    and description."""
+    __tablename__ = 'collection'
+    id = Column(Integer, primary_key=True)
+    path = Column(String(4096), unique=True)
+    name = Column(String(256))
+    description = Column(String(1024))
+
+    def __init__(self, path, name, description):
+        self.path = path
+        self.name = name
+        self.description = description
+
+    def get_images(self):
+        """Returns a list of all images in this collection."""
+        return self.images.all()
+
+    @staticmethod
+    def add(collection):
+        """Add a new collection to the database."""
+        _add(collection)
+
+    @staticmethod
+    def count():
+        """Find out how many collections are in the DB"""
+        return len(Collection.query.all())
+
+    @staticmethod
+    def all():
+        """Get all of the Collections in the DB"""
+        return Collection.query.order_by(Collection.path).all()
+
+    @staticmethod
+    def by_id(id_to_get):
+        """Get an image by its unique id, returns the image or None if no image
+        with that id exists."""
+        return Collection.query.filter_by(id=id_to_get).first()
+
+    @staticmethod
+    def by_path(path):
+        """Retrieve a particular Collection by path."""
+        return Collection.query.filter_by(path=path).first()
+
+    @staticmethod
+    def by_name(name):
+        """Retrieve all Collections with a particular name."""
+        return Collection.query.filter_by(name=name)
+
 class Image(BASE):
     """ Class that models basic image information that also handles
         convenience methods for instance creation from file system and
@@ -37,13 +86,17 @@ class Image(BASE):
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('images', lazy='dynamic'))
 
+    collection_id = Column(Integer, ForeignKey('collection.id'))
+    collection = relationship('Collection', backref=backref('images', lazy='dynamic'))
+
     image_details_id = Column(Integer, ForeignKey('image_details.id'))
     details = relationship('ImageDetails', backref=backref('image', lazy='dynamic'))
 
     image_properties_id = Column(Integer, ForeignKey('image_properties.id'), nullable=False)
     properties = relationship('ImageProperties', backref=backref('image', lazy='dynamic'))
 
-    def __init__(self, path, byte_sequence, details=None, properties=None):
+    def __init__(self, collection, path, byte_sequence, details=None, properties=None):
+        self.collection = collection
         self.path = path
         self.name = ntpath.basename(path)
         self.byte_sequence = byte_sequence
@@ -209,7 +262,7 @@ class FileElement(BASE):
     __table_args__ = (UniqueConstraint('partition_id', 'path', name='uix_partition_path'),)
 
     def __init__(self, path, partition, byte_sequence):
-        self.path = path
+        self.path = os.path.abspath(path)
         self.partition = partition
         self.byte_sequence = byte_sequence
 

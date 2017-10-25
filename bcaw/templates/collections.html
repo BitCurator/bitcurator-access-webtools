@@ -1,0 +1,28 @@
+{% extends "page.html" %}
+{% block title %}Home{% endblock %}
+{% block page_content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron media">
+      <div class="media-left">
+        <img alt="BitCurator Access logo." title="BCA WebTools logo" src="{{ url_for('static', filename='img/bc2-icon.png') }}" />
+      </div>
+      <div class="media-body">
+        <p>
+          To change.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Image Collections</h2>
+        <div class="list-group">
+          {% for collection in collections %}
+          <a class="list-group-item" href="{{ "/collection/" + collection.id|string  }}" >
+            <h4 class="list-group-item-heading">{{ collection.name }}</h4>
+            <p class="list-group-item-text">{{ collection.description }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+{% endblock page_content %}

@@ -17,22 +17,18 @@ from flask import render_template, send_file, send_from_directory
 from flask import request, abort
 
 from .bcaw import APP
-from .const import ConfKey, MimeTypes
-from .disk_utils import ImageDir, ImageFile, FileSysEle
-from .model import Image, Partition, FileElement, ByteSequence
+from .const import MimeTypes
+from .disk_utils import FileSysEle
+from .model import Image, Partition, FileElement, ByteSequence, Collection
 from .text_indexer import ImageIndexer, FullTextSearcher
 
 ROUTES = True
 
 @APP.route('/')
 def bcaw_home():
-    """BCAW application home page, test DB is synched and display home."""
-    # If there's a different number of images on disk than
-    # in the DB table it's time to synch
-    if DbSynch.is_synch_db():
-        DbSynch.synch_db()
+    """BCAW application home page."""
     # Render the home page template with a list of images
-    return render_template('home.html', db_images=Image.all())
+    return render_template('collections.html', collections=Collection.all())
 
 @APP.route('/search')
 def full_text_search():
@@ -45,7 +41,18 @@ def full_text_search():
     return render_template('search_results.html', search_text=search_text,
                            byte_sequences=byte_sequences, hit_counts=results)
 
+@APP.route('/collection/<collection_id>/')
+def collection_images(collection_id):
+    """BCAW application home page."""
+    collection = Collection.by_id(collection_id)
+    # Render the home page template with a list of images
+    return render_template('images.html', collection=collection, db_images=collection.images)
 
+@APP.route('/image')
+def bcaw_images():
+    """List all images in the database."""
+    # Render the home page template with a list of images
+    return render_template('images.html', db_images=Image.all())
 
 @APP.route('/image/meta/<image_id>/')
 def image_meta(image_id):
@@ -84,7 +91,6 @@ def file_handler(image_id, part_id, encoded_filepath):
     If a file is selected they files contents as a binary payload is sent in
     the Response.
     """
-    # TODO: Clean up this method
     file_path = urllib.unquote(encoded_filepath)
     partition = _found_or_404(Partition.by_id(part_id))
     fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))
@@ -96,15 +102,13 @@ def file_handler(image_id, part_id, encoded_filepath):
     # Its a file, we'll need a temp file to analyse or serve
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
     # Get the byte stream object and index it.
-    with ImageIndexer(APP.config['LUCENE_INDEX_DIR']) as indexer:
-        byte_sequence, full_text = indexer.index_path(temp_file)
+    byte_sequence, full_text = ImageIndexer.get_path_details(temp_file)
 
     # Check whether we've seen this path before
     file_element = FileElement.by_partition_and_path(partition, file_path)
     if file_element is None:
         # If not then add the path and p
         file_element = FileElement(file_path, partition, byte_sequence)
-        FileElement.add(file_element)
 
     # Is this a blob request
     if request_wants_binary():
@@ -164,63 +168,3 @@ def request_wants_binary():
     best = request.accept_mimetypes.best_match([MimeTypes.BINARY, MimeTypes.HTML])
     return best == MimeTypes.BINARY and request.accept_mimetypes[best] > \
                                         request.accept_mimetypes[MimeTypes.HTML]
-
-class DbSynch(object):
-# Keep a list of images
-    """Class that synchs images in the application directory with the DB record.
-    """
-    image_dir = ImageDir.from_root_dir(APP.config[ConfKey.IMAGE_DIR])
-    __not_in_db__ = []
-    __not_on_disk__ = []
-
-    @classmethod
-    def is_synch_db(cls):
-        """Returns true if the database needs resynching with file system."""
-        cls.disk_synch()
-        return Image.count() != DbSynch.image_dir.count()
-
-    @classmethod
-    def disk_synch(cls):
-        """Updates the list of disk images from the directory listing."""
-        cls.image_dir = ImageDir.from_root_dir(APP.config[ConfKey.IMAGE_DIR])
-
-    @classmethod
-    def synch_db(cls):
-        """Updates the database with images found in the image directory."""
-        if not cls.is_synch_db():
-            return
-        # Deal with images not in the database first
-        cls.images_not_in_db()
-        for image_file in cls.__not_in_db__:
-            logging.info("Adding image: " + image_file.path + " to database.")
-            image = image_file.to_model_image()
-            Image.add(image)
-            ImageFile.populate_parts(image, image_file)
-            for part in image_file.get_partitions():
-                Partition.add(part)
-
-        for image in cls.__not_on_disk__:
-            logging.warn("Image: " + image.path + " appears to have been deleted from disk.")
-
-    @classmethod
-    def images_not_in_db(cls):
-        """Checks that images on the disk are also on database.
-        Missing images are added to a member list,
-        """
-        del cls.__not_in_db__[:]
-        for image in cls.image_dir.images:
-            db_image = Image.by_path(image.path)
-            if db_image is None:
-                logging.debug("Image: " + image.path + " not in database.")
-                cls.__not_in_db__.append(image)
-
-    @classmethod
-    def images_not_on_disk(cls):
-        """Checks that images in the database are also on disk.
-        Missing images are added to a member list,
-        """
-        del cls.__not_on_disk__[:]
-        for image in Image.all():
-            if not os.path.isfile(image.path):
-                logging.debug("Image: " + image.path + " is no longer on disk.")
-                cls.__not_on_disk__.append(image)

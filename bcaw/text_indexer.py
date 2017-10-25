@@ -71,21 +71,20 @@ class ImageIndexer(object):
         else:
             logging.info("No text for sha1 %s", sha1)
 
-    def index_path(self, path):
-        """Index the full text of the file and map it to the file's sha1 and return
-        the derived ByteStream object and derived full text as a tuple."""
+    @classmethod
+    def get_path_details(cls, path):
+        """Return the byte sequence and the full text for a given path."""
         byte_sequence = ByteSequence.from_path(path)
         extension = map_mime_to_ext(byte_sequence.mime_type)
         logging.debug("Assessing MIME: %s EXTENSION %s SHA1:%s", byte_sequence.mime_type,
                       extension, byte_sequence.sha1)
-        full_text = "N/A"
+        full_text = ""
         if extension is not None:
             try:
                 logging.debug("Textract for SHA1 %s, extension map val %s",
                               byte_sequence.sha1, extension)
                 full_text = process(path, extension=extension, encoding='ascii',
                                     preserveLineBreaks=True)
-                self.index_text(byte_sequence.sha1, full_text)
             except ExtensionNotSupported as _:
                 logging.exception("Textract extension not supported for ext %s", extension)
                 logging.debug("Temp path for file is %s", path)
@@ -93,6 +92,14 @@ class ImageIndexer(object):
             except:
                 logging.exception("Textract unexpectedly failed for temp_file %s", path)
                 raise
+        return byte_sequence, full_text
+
+    def index_path(self, path):
+        """Index the full text of the file and map it to the file's sha1 and return
+        the derived ByteStream object and derived full text as a tuple."""
+        byte_sequence, full_text = self.get_path_details(path)
+        if full_text:
+            self.index_text(byte_sequence.sha1, full_text)
         return byte_sequence, full_text
 
 class FullTextSearcher(object):
@@ -127,7 +134,7 @@ class FullTextSearcher(object):
             return result_dict
 
         text = text.strip()
-        if text:
+        if text and self.searcher:
             query = QueryParser("full_text", self.analyzer).parse(text)
             hits = self.searcher.search(query, FullTextSearcher.max_results)
             result_dict = {}
