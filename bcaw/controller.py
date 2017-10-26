@@ -30,6 +30,16 @@ def bcaw_home():
     # Render the home page template with a list of images
     return render_template('groups.html', groups=Group.all())
 
+@APP.route('/status')
+def bcaw_status():
+    """BCAW staus page."""
+    # Render the home page template with a list of images
+    total_size = 0
+    for image in Image.all():
+        total_size += image.byte_sequence.size
+    return render_template('status.html', group_count=Group.count(), image_count=Image.count(),
+                           total_size=total_size)
+
 @APP.route('/search')
 def full_text_search():
     """Perform full text search and return results."""

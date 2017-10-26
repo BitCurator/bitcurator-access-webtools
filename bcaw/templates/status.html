@@ -1,0 +1,33 @@
+{% extends "page.html" %}
+{% block title %} Status{% endblock %}
+{% block page_content %}
+    <!-- Status dashboard screen -->
+    <div class="row">
+      <div class="col-md-12">
+        <h1>System Status</h1>
+      </div>
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Totals</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="list-group">
+              <li class="list-group-item">
+                <span class="badge">{{ group_count }}</span>
+                Image Groups
+              </li>
+              <li class="list-group-item">
+                <span class="badge">{{ image_count }}</span>
+                Images
+              </li>
+              <li class="list-group-item">
+                <span class="badge">{{ sizeof_fmt(total_size) }}</span>
+                Total Size
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock page_content %}
