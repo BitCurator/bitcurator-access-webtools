@@ -9,14 +9,14 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
-"""Service that analyses new image collections for the BitCurator app."""
+"""Service that analyses new image groups for the BitCurator app."""
 import json
 import logging
 import os
 
-from .config import COLLECTIONS, LUCENE_ROOT
+from .config import GROUPS, LUCENE_ROOT
 from .disk_utils import ImageDir, ImageFile, FileSysEle
-from .model import Image, Partition, FileElement, Collection
+from .model import Image, Partition, FileElement, Group
 from .text_indexer import ImageIndexer
 
 class ImageAnalyser(object):
@@ -72,19 +72,19 @@ class ImageAnalyser(object):
 
 
 class DbSynch(object):
-    """Class that synchs images in a collection with the DB record.
+    """Class that synchs images in a group with the DB record.
     """
-    def __init__(self, collection):
-        self.collection = collection
-        self.__image_dir__ = ImageDir.from_root_dir(self.collection.path)
+    def __init__(self, group):
+        self.group = group
+        self.__image_dir__ = ImageDir.from_root_dir(self.group.path)
         self.__not_in_db__ = []
         self.__not_on_disk__ = []
 
     def is_synch_db(self):
         """Returns true if the database needs resynching with file system."""
         # First synch the image directory with the file system
-        self.__image_dir__ = ImageDir.from_root_dir(self.collection.path)
-        return len(self.collection.get_images()) != self.__image_dir__.count()
+        self.__image_dir__ = ImageDir.from_root_dir(self.group.path)
+        return len(self.group.get_images()) != self.__image_dir__.count()
 
     def synch_db(self):
         """Updates the database with images found in the image directory."""
@@ -94,7 +94,7 @@ class DbSynch(object):
         self.images_not_in_db()
         for image_file in self.__not_in_db__:
             logging.info("Adding image: " + image_file.path + " to database.")
-            image = image_file.to_model_image(self.collection)
+            image = image_file.to_model_image(self.group)
             Image.add(image)
             ImageFile.populate_parts(image, image_file)
             for part in image_file.get_partitions():
@@ -126,16 +126,16 @@ class DbSynch(object):
 
 def main():
     """Main method to drive image analyser."""
-    # Parse the collection dictionaries from the JSON file
-    collections = json.loads(COLLECTIONS)
-    # Loop through the collections in the list
-    for collection in collections:
-        # Check to see if the collection is in the database, if not add it.
-        db_coll = Collection.by_path(collection['path'])
+    # Parse the group dictionaries from the JSON file
+    groups = json.loads(GROUPS)
+    # Loop through the groups in the list
+    for group in groups:
+        # Check to see if the group is in the database, if not add it.
+        db_coll = Group.by_path(group['path'])
         if  db_coll is None:
-            db_coll = Collection(collection['path'], collection['name'],
-                                 collection['description'])
-            Collection.add(db_coll)
+            db_coll = Group(group['path'], group['name'],
+                                 group['description'])
+            Group.add(db_coll)
         db_synch = DbSynch(db_coll)
         db_synch.synch_db()
         for image in db_coll.images:

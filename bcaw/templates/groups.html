@@ -1,0 +1,34 @@
+{% extends "page.html" %}
+{% block title %}Home{% endblock %}
+{% block page_content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron media">
+      <div class="media-body">
+        <p>
+          Welcome to BitCurator Web Access Tools. Explore raw and forensically-packaged (.E01 and .AFF) disk images in a web browser.
+          Supported file systems include FAT, ExFAT, NTFS, HFS+, EXT2/3/4, ISO 9660 (CD-ROM), and YAFFS2 (Android).
+          This page shows the groups of images registered with the system.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Image Groups</h2>
+        <div class="list-group">
+          {% if (groups is defined) and groups %}
+          {% for group in groups %}
+          <a class="list-group-item" href="{{ "/group/" + group.id|string  }}" >
+            <h4 class="list-group-item-heading">{{ group.name }}</h4>
+            <p class="list-group-item-text">{{ group.description }}</p>
+          </a>
+          {% endfor %}
+          {% else %}
+          <div class="list-group-item alert alert-danger" role="alert">
+            <h4 class="list-group-item-heading alert">There appears to be a problem</h4>
+            <p class="list-group-item-text">It looks like there's no image collections in the database, perhaps the indexer hasn't run yet.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+{% endblock page_content %}

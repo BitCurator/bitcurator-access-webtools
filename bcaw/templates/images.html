@@ -12,7 +12,7 @@
         <table id="images" class="table table-striped">
           <thead>
             <tr>
-              <th>Collection</th>
+              <th>Group</th>
               <th>Name</th>
               <th>Size</th>
               <th>MIME</th>
@@ -23,7 +23,7 @@
           <tbody>
             {% for image in db_images %}
             <tr>
-              <td>{{ image.collection.name }}</td>
+              <td>{{ image.group.name }}</td>
               <td><a href="{{ "/image/" + image.id|string  }}">{{ image.name }}</a></td>
               <td>{{ sizeof_fmt(image.byte_sequence.size) }}</td>
               <td>{{ image.byte_sequence.mime_type }}</td>

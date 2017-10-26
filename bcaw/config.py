@@ -23,7 +23,7 @@ DB_PASS = 'vagrant'
 DB_NAME = 'bca_db'
 POSTGRES_URI = 'postgresql://' + DB_USER + ':' + DB_PASS + '@' + DB_HOST + '/' + DB_NAME
 LUCENE_ROOT = '/var/www/.index'
-COLLECTIONS = '[{"name": "BitCurator Test Images", ' \
+GROUPS = '[{"name": "Test Images", ' \
               '"path": "/var/www/bcaw/disk-images", ' \
               '"description": "The set of test disk images supplied with BitCurator"}]'
 class BaseConfig(object):

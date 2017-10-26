@@ -19,7 +19,7 @@ from flask import request, abort
 from .bcaw import APP
 from .const import MimeTypes
 from .disk_utils import FileSysEle
-from .model import Image, Partition, FileElement, ByteSequence, Collection
+from .model import Image, Partition, FileElement, ByteSequence, Group
 from .text_indexer import ImageIndexer, FullTextSearcher
 
 ROUTES = True
@@ -28,7 +28,7 @@ ROUTES = True
 def bcaw_home():
     """BCAW application home page."""
     # Render the home page template with a list of images
-    return render_template('collections.html', collections=Collection.all())
+    return render_template('groups.html', groups=Group.all())
 
 @APP.route('/search')
 def full_text_search():
@@ -41,12 +41,12 @@ def full_text_search():
     return render_template('search_results.html', search_text=search_text,
                            byte_sequences=byte_sequences, hit_counts=results)
 
-@APP.route('/collection/<collection_id>/')
-def collection_images(collection_id):
+@APP.route('/group/<group_id>/')
+def group_images(group_id):
     """BCAW application home page."""
-    collection = Collection.by_id(collection_id)
+    group = Group.by_id(group_id)
     # Render the home page template with a list of images
-    return render_template('images.html', collection=collection, db_images=collection.images)
+    return render_template('images.html', group=group, db_images=group.images)
 
 @APP.route('/image')
 def bcaw_images():
@@ -135,13 +135,6 @@ def download_file(image_id, part_id, encoded_filepath):
     # Its a file then send the bytes
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
     byte_sequence = ByteSequence.from_path(temp_file)
-
-    # Check whether we've seen this path before
-    file_element = FileElement.by_partition_and_path(partition, file_path)
-    if file_element is None:
-        # If not then add the path and p
-        file_element = FileElement(file_path, partition, byte_sequence)
-        FileElement.add(file_element)
 
     return send_file(temp_file, mimetype=byte_sequence.mime_type,
                      as_attachment=True, attachment_filename=fs_ele.name)

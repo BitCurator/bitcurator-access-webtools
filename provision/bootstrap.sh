@@ -32,6 +32,8 @@ DISK_IMAGE_TARGET="$BCAW_ROOT/disk-images"
 SOURCE_ROOT="/vagrant"
 BCAW_SOURCE="$SOURCE_ROOT/bcaw"
 DISK_IMAGE_SOURCE="$SOURCE_ROOT/disk-images"
+LUCENE_INDEX="$WWW_ROOT/.index"
+CACHE_DIR="$WWW_ROOT/.cache"
 #--- FUNCTION ----------------------------------------------------------------
 # NAME: __function_defined
 # DESCRIPTION: Checks if a function is defined within this scripts scope
@@ -628,11 +630,20 @@ configure_webstack() {
        systemctl start uwsgi
    fi
 
+
    # Set up the cache + index directory
-   mkdir /var/www/.cache
-   chown www-data:www-data /var/www/.cache
-   mkdir /var/www/.index
-   chown www-data:www-data /var/www/.index
+   mkdir "$CACHE_DIR"
+   chown www-data:www-data "$CACHE_DIR"
+   mkdir "$LUCENE_INDEX"
+   chmod 775 "$LUCENE_INDEX"
+   chown www-data:www-data "$LUCENE_INDEX"
+
+   # Add the image indexing script to the chrontab
+   sudo -u vagrant crontab -l > /tmp/cron
+   sudo -u vagrant echo "00 * * * * /vagrant/scripts/index_collections.sh" >> /tmp/cron
+   sudo -u vagrant crontab /tmp/cron
+   rm /tmp/cron
+   sudo -u vagrant -H nohup /vagrant/scripts/index_collections.sh &>/dev/null &
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant

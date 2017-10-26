@@ -24,10 +24,10 @@ from .database import BASE, DB_SESSION, ENGINE
 from .const import MimeTypes
 from .utilities import check_param_not_none, sha1_path, identify_mime_path
 
-class Collection(BASE):
-    """Encapsulation of collections of images. Effectively a root directory, name
+class Group(BASE):
+    """Encapsulation of groups of images. Effectively a root directory, name
     and description."""
-    __tablename__ = 'collection'
+    __tablename__ = 'group'
     id = Column(Integer, primary_key=True)
     path = Column(String(4096), unique=True)
     name = Column(String(256))
@@ -39,39 +39,39 @@ class Collection(BASE):
         self.description = description
 
     def get_images(self):
-        """Returns a list of all images in this collection."""
+        """Returns a list of all images in this group."""
         return self.images.all()
 
     @staticmethod
-    def add(collection):
-        """Add a new collection to the database."""
-        _add(collection)
+    def add(group):
+        """Add a new group to the database."""
+        _add(group)
 
     @staticmethod
     def count():
-        """Find out how many collections are in the DB"""
-        return len(Collection.query.all())
+        """Find out how many groups are in the DB"""
+        return len(Group.query.all())
 
     @staticmethod
     def all():
-        """Get all of the Collections in the DB"""
-        return Collection.query.order_by(Collection.path).all()
+        """Get all of the Groups in the DB"""
+        return Group.query.order_by(Group.path).all()
 
     @staticmethod
     def by_id(id_to_get):
         """Get an image by its unique id, returns the image or None if no image
         with that id exists."""
-        return Collection.query.filter_by(id=id_to_get).first()
+        return Group.query.filter_by(id=id_to_get).first()
 
     @staticmethod
     def by_path(path):
-        """Retrieve a particular Collection by path."""
-        return Collection.query.filter_by(path=path).first()
+        """Retrieve a particular Group by path."""
+        return Group.query.filter_by(path=path).first()
 
     @staticmethod
     def by_name(name):
-        """Retrieve all Collections with a particular name."""
-        return Collection.query.filter_by(name=name)
+        """Retrieve all Groups with a particular name."""
+        return Group.query.filter_by(name=name)
 
 class Image(BASE):
     """ Class that models basic image information that also handles
@@ -86,8 +86,8 @@ class Image(BASE):
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('images', lazy='dynamic'))
 
-    collection_id = Column(Integer, ForeignKey('collection.id'))
-    collection = relationship('Collection', backref=backref('images', lazy='dynamic'))
+    group_id = Column(Integer, ForeignKey('group.id'))
+    group = relationship('Group', backref=backref('images', lazy='dynamic'))
 
     image_details_id = Column(Integer, ForeignKey('image_details.id'))
     details = relationship('ImageDetails', backref=backref('image', lazy='dynamic'))
@@ -95,8 +95,8 @@ class Image(BASE):
     image_properties_id = Column(Integer, ForeignKey('image_properties.id'), nullable=False)
     properties = relationship('ImageProperties', backref=backref('image', lazy='dynamic'))
 
-    def __init__(self, collection, path, byte_sequence, details=None, properties=None):
-        self.collection = collection
+    def __init__(self, group, path, byte_sequence, details=None, properties=None):
+        self.group = group
         self.path = path
         self.name = ntpath.basename(path)
         self.byte_sequence = byte_sequence
@@ -265,6 +265,11 @@ class FileElement(BASE):
         self.path = os.path.abspath(path)
         self.partition = partition
         self.byte_sequence = byte_sequence
+
+    @property
+    def name(self):
+        """Returns just the name part of the path."""
+        return ntpath.basename(self.path)
 
     @staticmethod
     def count():

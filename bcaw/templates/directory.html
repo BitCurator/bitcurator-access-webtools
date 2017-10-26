@@ -28,11 +28,11 @@
           <td>{{ file.details.ctime }}</td>
           <td>{{ file.details.mtime }}</td>
           {% if file.is_deleted %}
-          <td><div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></div></td>
+          <td><span class="glyphicon glyphicon-trash text-danger" aria-hidden="true"></span></td>
           {% elif file.is_directory %}
           <td></td>
           {% else %}
-          <td><a href="{{ "/image/" + image.id|string + "/" + partition.id|string + file.path }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
+          <td><a href="{{ "/raw/" + image.id|string + "/" + partition.id|string + file.path }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
           {% endif %}
         </tr>
         {% endfor %}

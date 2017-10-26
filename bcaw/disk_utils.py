@@ -183,7 +183,7 @@ class ImageFile(object):
         """Returns the set of partitions for this image."""
         return self.__partitions__
 
-    def to_model_image(self, collection):
+    def to_model_image(self, group):
         """Returns the image as a map suitable for database."""
         # Set up a default
         details_fields = ImgDetsFlds.DEFAULT
@@ -201,7 +201,7 @@ class ImageFile(object):
         details = ImageDetails(**details_fields)
         properties = ImageProperties(**properties_fields)
         byte_sequence = ByteSequence.from_path(self.path)
-        return Image(collection, self.path, byte_sequence, details, properties)
+        return Image(group, self.path, byte_sequence, details, properties)
 
     @classmethod
     def from_file(cls, source_file):
