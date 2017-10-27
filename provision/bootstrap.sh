@@ -326,7 +326,8 @@ install_ubuntu_17.04_pip_packages() {
         celery
         nltk
         numpy
-        python-magic
+        pdfminer
+	python-magic
         textract
         spacy"
 
