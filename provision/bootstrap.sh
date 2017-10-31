@@ -184,7 +184,7 @@ usage() {
     exit 1
 }
 
-install_ubuntu_17.04_deps() {
+install_ubuntu_deps() {
 
     echoinfo "Updating your APT Repositories ... "
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
@@ -222,7 +222,7 @@ install_ubuntu_17.04_deps() {
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 #
 
-install_ubuntu_17.04_packages() {
+install_ubuntu_packages() {
     packages="dkms
 ant
 ant-doc
@@ -309,7 +309,7 @@ zlib1g-dev"
     return 0
 }
 
-install_ubuntu_17.04_pip_packages() {
+install_ubuntu_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
@@ -624,12 +624,12 @@ configure_webstack() {
    systemctl enable bcaw
 
    # Start UWSGI and NGINX
-   if [ $VER == "17.04" ]; then
-       echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
-       systemctl restart nginx
-       echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
-       systemctl start uwsgi
-   fi
+   #if [ $VER == "17.04" ]; then
+   echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
+   systemctl restart nginx
+   echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
+   systemctl start uwsgi
+   #fi
 
 
    # Set up the cache + index directory
@@ -670,14 +670,14 @@ ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
 
 if [ $OS != "Ubuntu" ]; then
-    echo "bitcurator-access-webtools is only installable on the Ubuntu operating systems at this time."
+    echo "bitcurator-access-webtools is only installable on the Ubuntu operating system at this time."
     exit 1
 fi
 
-if [ $VER != "17.04" ]; then
-    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
-    exit 3
-fi
+#if [ $VER != "17.04" ]; then
+#    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
+#    exit 3
+#fi
 
 if [ "`whoami`" != "root" ]; then
     echoerror "The bitcurator-access-webtools bootstrap script must run as root."
@@ -738,14 +738,17 @@ echoinfo "The current user is: $SUDO_USER"
 export DEBIAN_FRONTEND=noninteractive
 
 # Install all dependencies and apt packages
-install_ubuntu_${VER}_deps $ITYPE
-install_ubuntu_${VER}_packages $ITYPE
+#install_ubuntu_${VER}_deps $ITYPE
+#install_ubuntu_${VER}_packages $ITYPE
+install_ubuntu_deps $ITYPE
+install_ubuntu_packages $ITYPE
 
 # Prepare the virtualenv
 create_virtualenv
 
 # Pip packages and source builds
-install_ubuntu_${VER}_pip_packages $ITYPE
+#install_ubuntu_${VER}_pip_packages $ITYPE
+install_ubuntu_pip_packages $ITYPE
 install_source_packages
 
 # Get langauge model(s) for NLP tasks
