@@ -15,7 +15,9 @@
     <div class="panel panel-default">
       <div class="panel-heading">Full Text</div>
       <div id="full-text" class="panel-body">
-        {{ full_text }}
+        {% for line in full_text.splitlines() %}
+          {{line}}<br>
+        {% endfor %}
       </div>
     </div>
 
