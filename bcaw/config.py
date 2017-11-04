@@ -13,6 +13,9 @@
 #
 """Module for application config goodness."""
 import os
+
+from .const import ENV_CONF_PROFILE, ENV_CONF_FILE
+
 # TODO: template these values for flexible install
 HOST = 'localhost'
 DB_HOST = 'localhost'
@@ -23,9 +26,6 @@ DB_PASS = 'vagrant'
 DB_NAME = 'bca_db'
 POSTGRES_URI = 'postgresql://' + DB_USER + ':' + DB_PASS + '@' + DB_HOST + '/' + DB_NAME
 LUCENE_ROOT = '/var/www/.index'
-GROUPS = '[{"name": "Test Images", ' \
-              '"path": "/var/www/bcaw/disk-images", ' \
-              '"description": "The set of test disk images supplied with BitCurator"}]'
 class BaseConfig(object):
     """The basic default configuration."""
     HOST = HOST
@@ -35,6 +35,14 @@ class BaseConfig(object):
     LOG_FORMAT = '[%(filename)-15s:%(lineno)-5d] %(message)s'
     LOG_FILE = LOG_ROOT + 'bcaw.log'
     LUCENE_INDEX_DIR = LUCENE_ROOT
+    GROUPS = [
+        {
+            'name' : 'Test Images',
+            'path' : '/var/www/bcaw/disk-images',
+            'description' : 'The set of test disk images supplied with BitCurator.'
+        }
+    ]
+
 
 class DevConfig(BaseConfig):
     """Development config extras."""
@@ -48,5 +56,7 @@ CONFIGS = {
 
 def configure_app(app):
     """Configure the application using the config env var."""
-    config_name = os.getenv('BCAW_CONFIG', 'dev')
+    config_name = os.getenv(ENV_CONF_PROFILE, 'dev')
     app.config.from_object(CONFIGS[config_name])
+    if os.getenv(ENV_CONF_FILE):
+        app.config.from_envvar(ENV_CONF_FILE)

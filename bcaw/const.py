@@ -13,8 +13,10 @@
 These need to map to the names used in the default config file, but better
 than multiple hardcoded strings in code.
 """
-
 import datetime
+
+ENV_CONF_PROFILE = 'BCAW_CONFIG'
+ENV_CONF_FILE = 'BCAW_CONF_FILE'
 
 class ConfKey(object):
     """Config key string constatnts"""

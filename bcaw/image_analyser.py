@@ -14,7 +14,7 @@ import json
 import logging
 import os
 
-from .config import GROUPS, LUCENE_ROOT
+from .config import LUCENE_ROOT
 from .disk_utils import ImageDir, ImageFile, FileSysEle
 from .model import Image, Partition, FileElement, Group
 from .text_indexer import ImageIndexer
@@ -127,14 +127,25 @@ class DbSynch(object):
 def main():
     """Main method to drive image analyser."""
     # Parse the group dictionaries from the JSON file
-    groups = json.loads(GROUPS)
+    # groups = json.loads(GROUPS)
     # Loop through the groups in the list
-    for group in groups:
+    groups = type('test', (object,), {"GROUPS" : []})()
+    try:
+        with open('/var/www/bcaw/conf/groups.conf', mode='rb') as config_file:
+            exec(compile(config_file.read(), '/var/www/bcaw/conf/groups.conf', 'exec'),
+                 groups.__dict__)
+    except IOError as _e:
+        # if silent and e.errno in (errno.ENOENT, errno.EISDIR):
+        #     return False
+        _e.strerror = 'Unable to load configuration file (%s)' % _e.strerror
+        raise
+
+    for group in groups.GROUPS:
         # Check to see if the group is in the database, if not add it.
         db_coll = Group.by_path(group['path'])
         if  db_coll is None:
             db_coll = Group(group['path'], group['name'],
-                                 group['description'])
+                            group['description'])
             Group.add(db_coll)
         db_synch = DbSynch(db_coll)
         db_synch.synch_db()

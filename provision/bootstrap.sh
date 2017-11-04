@@ -29,9 +29,11 @@ WWW_ROOT=/var/www
 BCAW_ROOT="$WWW_ROOT/bcaw"
 BCAW_TARGET="$BCAW_ROOT/bcaw"
 DISK_IMAGE_TARGET="$BCAW_ROOT/disk-images"
+CONF_TARGET="$BCAW_ROOT/conf"
 SOURCE_ROOT="/vagrant"
 BCAW_SOURCE="$SOURCE_ROOT/bcaw"
 DISK_IMAGE_SOURCE="$SOURCE_ROOT/disk-images"
+CONF_SOURCE="$SOURCE_ROOT/conf"
 LUCENE_INDEX="$WWW_ROOT/.index"
 CACHE_DIR="$WWW_ROOT/.cache"
 #--- FUNCTION ----------------------------------------------------------------
@@ -576,14 +578,16 @@ copy_source() {
 
   chown www-data:www-data "$BCAW_ROOT/"*.py
   chown -R www-data:www-data "$BCAW_TARGET"
+  cp -r "$CONF_SOURCE" "$BCAW_ROOT"
+  chown -R www-data:www-data "$CONF_TARGET"
 }
 
 copy_disk_images() {
   echoinfo "bitcurator-access-webtools: Copying disk images from source..."
-   cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
-   chown -R www-data:www-data "$DISK_IMAGE_TARGET"
-   chmod 777 "$DISK_IMAGE_TARGET"
-   chmod 666 "$DISK_IMAGE_TARGET/"*
+  cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
+  chown -R www-data:www-data "$DISK_IMAGE_TARGET"
+  chmod 777 "$DISK_IMAGE_TARGET"
+  chmod 666 "$DISK_IMAGE_TARGET/"*
 }
 
 configure_webstack() {
