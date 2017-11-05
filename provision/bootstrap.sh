@@ -584,11 +584,21 @@ copy_source() {
 
 copy_disk_images() {
   echoinfo "bitcurator-access-webtools: Copying disk images from source..."
+
+  # App should be architected to avoid copying. Should set up shared folder(s)
+  # with host and point there. Performance issues?
+  # For now, this...
   cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
   chown -R www-data:www-data "$DISK_IMAGE_TARGET"
-  chmod 777 "$DISK_IMAGE_TARGET"
-  chmod 666 "$DISK_IMAGE_TARGET/"*
+  # Updated to properly handle subdirectories and files, be less permissive
+  find "$DISK_IMAGE_TARGET" -type d -exec chmod 775 {} \;
+  find "$DISK_IMAGE_TARGET" -type f -exec chmod 664 {} \;
+
+  # Previously did this:
+  #chmod 777 "$DISK_IMAGE_TARGET"
+  #chmod 666 "$DISK_IMAGE_TARGET/"*
 }
+
 
 configure_webstack() {
   echoinfo "bitcurator-access-webtools: Configuring BCA Webtools web stack..."
