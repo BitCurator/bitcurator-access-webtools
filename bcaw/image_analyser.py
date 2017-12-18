@@ -10,7 +10,6 @@
 # about the terms of this license.
 #
 """Service that analyses new image groups for the BitCurator app."""
-import json
 import logging
 import os
 
@@ -28,7 +27,7 @@ class ImageAnalyser(object):
     def analyse(self):
         """Analyse all of the files in a disk image, populate the database record,
         and carry out full text indexing if possible / appropriate."""
-        print "Analysing image {}".format(self.image.path)
+        logging.info("Analysing image %s", self.image.path)
         with ImageIndexer(self.index_dir) as indexer:
             for partition in self.image.partitions:
                 self.analyse_partition(partition, indexer)
@@ -40,7 +39,7 @@ class ImageAnalyser(object):
 
     def analyse_directory(self, partition, directory, indexer):
         """Analyse a particular directory from a partition."""
-        print "Analysing directory {}".format(directory.path)
+        logging.debug("Analysing directory %s", directory.path)
         if not directory.is_directory:
             raise ValueError("Argument {} must be a directory path on the image.".format(directory))
 
@@ -51,7 +50,8 @@ class ImageAnalyser(object):
             if fs_ele.is_directory:
                 self.analyse_directory(partition, fs_ele, indexer)
             # Check whether we've seen this path before
-            file_element = FileElement.by_partition_and_path(partition, os.path.abspath(fs_ele.path))
+            file_element = FileElement.by_partition_and_path(partition,
+                                                             os.path.abspath(fs_ele.path))
             if file_element is None:
                 self.analyse_file(partition, fs_ele, indexer)
 
@@ -59,11 +59,11 @@ class ImageAnalyser(object):
     def analyse_file(cls, partition, fs_ele, indexer):
         """For a given file system element and partition this method adds the
         file element to the db, and the byte sequence then indexes the file."""
-        print "Analysing file {}".format(os.path.abspath(fs_ele.path))
+        logging.debug("Analysing file %s", os.path.abspath(fs_ele.path))
         try:
             temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
         except IOError as _:
-            print "IO/Error processing file {}".format(fs_ele.path)
+            logging.exception("IO/Error processing file %s", fs_ele.path)
             return
         byte_sequence, _ = indexer.index_path(temp_file)
         file_element = FileElement(os.path.abspath(fs_ele.path), partition, byte_sequence)
@@ -127,8 +127,6 @@ class DbSynch(object):
 def main():
     """Main method to drive image analyser."""
     # Parse the group dictionaries from the JSON file
-    # groups = json.loads(GROUPS)
-    # Loop through the groups in the list
     groups = type('test', (object,), {"GROUPS" : []})()
     try:
         with open('/var/www/bcaw/conf/groups.conf', mode='rb') as config_file:
@@ -140,18 +138,27 @@ def main():
         _e.strerror = 'Unable to load configuration file (%s)' % _e.strerror
         raise
 
+    # First loop to register groups in DB and allow user to browse
     for group in groups.GROUPS:
         # Check to see if the group is in the database, if not add it.
         db_coll = Group.by_path(group['path'])
         if  db_coll is None:
+            # Add the group to the DB if not already there
             db_coll = Group(group['path'], group['name'],
                             group['description'])
             Group.add(db_coll)
+        # Synch the group images
         db_synch = DbSynch(db_coll)
         db_synch.synch_db()
+
+    # Now the heavyweight image analysis loop
+    for group in groups.GROUPS:
+        db_coll = Group.by_path(group['path'])
+        # Loop through the images in the group
         for image in db_coll.images:
             analyser = ImageAnalyser(image, LUCENE_ROOT)
             analyser.analyse()
+
 
 if __name__ == "__main__":
     from .model import init_db # pylint: disable-msg=C0413

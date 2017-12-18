@@ -26,7 +26,6 @@ from org.apache.lucene.store import SimpleFSDirectory
 from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.queryparser.classic import QueryParser
 
-from .bcaw import APP
 from .model import ByteSequence
 from .utilities import map_mime_to_ext
 
@@ -87,6 +86,14 @@ class ImageIndexer(object):
                                     preserveLineBreaks=True)
             except ExtensionNotSupported as _:
                 logging.exception("Textract extension not supported for ext %s", extension)
+                logging.debug("Temp path for file is %s", path)
+                full_text = "N/A"
+            except LookupError as _:
+                logging.exception("Lookup error for encoding.")
+                logging.debug("Temp path for file is %s", path)
+                full_text = "N/A"
+            except UnicodeDecodeError as _:
+                logging.exception("UnicodeDecodeError, problem with file encoding")
                 logging.debug("Temp path for file is %s", path)
                 full_text = "N/A"
             except:
