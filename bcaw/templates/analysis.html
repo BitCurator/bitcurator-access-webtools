@@ -7,15 +7,17 @@
       <div class="panel-heading">File Details</div>
       <ul class="list-group">
         <li class="list-group-item">Extension: {{ fs_ele.extension }}</li>
-        <li class="list-group-item">Size: {{ fs_ele.size }}</li>
-        <li class="list-group-item">SHA1: {{ sha1 }}</li>
-        <li class="list-group-item">MIME: {{ mime_type }}</li>
+        <li class="list-group-item">Size: {{ file_element.byte_sequence.size }}</li>
+        <li class="list-group-item">SHA1: {{ file_element.byte_sequence.sha1 }}</li>
+        <li class="list-group-item">MIME: {{ file_element.byte_sequence.mime_type }}</li>
       </ul>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">Full Text</div>
-      <div class="panel-body">
-        {{ full_text }}
+      <div id="full-text" class="panel-body">
+        {% for line in full_text.splitlines() %}
+          {{line}}<br>
+        {% endfor %}
       </div>
     </div>
 

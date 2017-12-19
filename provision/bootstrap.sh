@@ -29,9 +29,13 @@ WWW_ROOT=/var/www
 BCAW_ROOT="$WWW_ROOT/bcaw"
 BCAW_TARGET="$BCAW_ROOT/bcaw"
 DISK_IMAGE_TARGET="$BCAW_ROOT/disk-images"
+CONF_TARGET="$BCAW_ROOT/conf"
 SOURCE_ROOT="/vagrant"
 BCAW_SOURCE="$SOURCE_ROOT/bcaw"
 DISK_IMAGE_SOURCE="$SOURCE_ROOT/disk-images"
+CONF_SOURCE="$SOURCE_ROOT/conf"
+LUCENE_INDEX="$WWW_ROOT/.index"
+CACHE_DIR="$WWW_ROOT/.cache"
 #--- FUNCTION ----------------------------------------------------------------
 # NAME: __function_defined
 # DESCRIPTION: Checks if a function is defined within this scripts scope
@@ -182,7 +186,7 @@ usage() {
     exit 1
 }
 
-install_ubuntu_17.04_deps() {
+install_ubuntu_deps() {
 
     echoinfo "Updating your APT Repositories ... "
     apt-get update >> $LOG_BASE/bca-install.log 2>&1 || return 1
@@ -220,7 +224,7 @@ install_ubuntu_17.04_deps() {
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
 #
 
-install_ubuntu_17.04_packages() {
+install_ubuntu_packages() {
     packages="dkms
 ant
 ant-doc
@@ -307,7 +311,7 @@ zlib1g-dev"
     return 0
 }
 
-install_ubuntu_17.04_pip_packages() {
+install_ubuntu_pip_packages() {
 
 #
 # Packages below will be installed. Dependencies listed here:
@@ -324,9 +328,10 @@ install_ubuntu_17.04_pip_packages() {
         celery
         nltk
         numpy
-        python-magic
+        pdfminer
+	python-magic
         textract
-        spacy"
+        spacy-nightly"
 
     pip_special_packages="textacy"
 
@@ -573,15 +578,27 @@ copy_source() {
 
   chown www-data:www-data "$BCAW_ROOT/"*.py
   chown -R www-data:www-data "$BCAW_TARGET"
+  cp -r "$CONF_SOURCE" "$BCAW_ROOT"
+  chown -R www-data:www-data "$CONF_TARGET"
 }
 
 copy_disk_images() {
   echoinfo "bitcurator-access-webtools: Copying disk images from source..."
-   cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
-   chown -R www-data:www-data "$DISK_IMAGE_TARGET"
-   chmod 777 "$DISK_IMAGE_TARGET"
-   chmod 666 "$DISK_IMAGE_TARGET/"*
+
+  # App should be architected to avoid copying. Should set up shared folder(s)
+  # with host and point there. Performance issues?
+  # For now, this...
+  cp -r "$DISK_IMAGE_SOURCE" "$BCAW_ROOT"
+  chown -R www-data:www-data "$DISK_IMAGE_TARGET"
+  # Updated to properly handle subdirectories and files, be less permissive
+  find "$DISK_IMAGE_TARGET" -type d -exec chmod 775 {} \;
+  find "$DISK_IMAGE_TARGET" -type f -exec chmod 664 {} \;
+
+  # Previously did this:
+  #chmod 777 "$DISK_IMAGE_TARGET"
+  #chmod 666 "$DISK_IMAGE_TARGET/"*
 }
+
 
 configure_webstack() {
   echoinfo "bitcurator-access-webtools: Configuring BCA Webtools web stack..."
@@ -621,12 +638,27 @@ configure_webstack() {
    systemctl enable bcaw
 
    # Start UWSGI and NGINX
-   if [ $VER == "17.04" ]; then
-       echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
-       systemctl restart nginx
-       echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
-       systemctl start uwsgi
-   fi
+   #if [ $VER == "17.04" ]; then
+   echoinfo "bitcurator=access-webtools: Restarting nginx (via systemctl)";
+   systemctl restart nginx
+   echoinfo "bitcurator-access-webtools: Starting usgi (via systemctl)";
+   systemctl start uwsgi
+   #fi
+
+
+   # Set up the cache + index directory
+   mkdir "$CACHE_DIR"
+   chown www-data:www-data "$CACHE_DIR"
+   mkdir "$LUCENE_INDEX"
+   chmod 775 "$LUCENE_INDEX"
+   chown www-data:www-data "$LUCENE_INDEX"
+
+   # Add the image indexing script to the chrontab
+   sudo -u vagrant crontab -l > /tmp/cron
+   sudo -u vagrant echo "00 * * * * /vagrant/scripts/index_collections.sh" >> /tmp/cron
+   sudo -u vagrant crontab /tmp/cron
+   rm /tmp/cron
+   sudo -u vagrant -H nohup /vagrant/scripts/index_collections.sh &>/dev/null &
 
    # Give vagrant user access to www-data
    usermod -a -G www-data vagrant
@@ -652,14 +684,14 @@ ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
 
 if [ $OS != "Ubuntu" ]; then
-    echo "bitcurator-access-webtools is only installable on the Ubuntu operating systems at this time."
+    echo "bitcurator-access-webtools is only installable on the Ubuntu operating system at this time."
     exit 1
 fi
 
-if [ $VER != "17.04" ]; then
-    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
-    exit 3
-fi
+#if [ $VER != "17.04" ]; then
+#    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
+#    exit 3
+#fi
 
 if [ "`whoami`" != "root" ]; then
     echoerror "The bitcurator-access-webtools bootstrap script must run as root."
@@ -720,14 +752,17 @@ echoinfo "The current user is: $SUDO_USER"
 export DEBIAN_FRONTEND=noninteractive
 
 # Install all dependencies and apt packages
-install_ubuntu_${VER}_deps $ITYPE
-install_ubuntu_${VER}_packages $ITYPE
+#install_ubuntu_${VER}_deps $ITYPE
+#install_ubuntu_${VER}_packages $ITYPE
+install_ubuntu_deps $ITYPE
+install_ubuntu_packages $ITYPE
 
 # Prepare the virtualenv
 create_virtualenv
 
 # Pip packages and source builds
-install_ubuntu_${VER}_pip_packages $ITYPE
+#install_ubuntu_${VER}_pip_packages $ITYPE
+install_ubuntu_pip_packages $ITYPE
 install_source_packages
 
 # Get langauge model(s) for NLP tasks

@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Note: The current build requires Ubuntu 17.04.
-    config.vm.box = "bento/ubuntu-17.04"
+    config.vm.box = "bento/ubuntu-17.10"
 
     # Optional "official" cloud xenial box (currently broken):
     #config.vm.box = "https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"

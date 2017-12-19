@@ -13,8 +13,10 @@
 These need to map to the names used in the default config file, but better
 than multiple hardcoded strings in code.
 """
-
 import datetime
+
+ENV_CONF_PROFILE = 'BCAW_CONFIG'
+ENV_CONF_FILE = 'BCAW_CONF_FILE'
 
 class ConfKey(object):
     """Config key string constatnts"""
@@ -38,9 +40,16 @@ class Extns(object):
     DFXML = '_dfxml' + XML
     # list of image types supporting system metadata
     META = [E01, E01.upper(), AFF, AFF.upper()]
-    RAW = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
-    SUPPORTED = META + RAW
+    RAW_TYPES = [RAW, RAW.upper(), DD, DD.upper(), ISO, ISO.upper()]
+    SUPPORTED = META + RAW_TYPES
     IGNORED = [XML, XML.upper()]
+    FORMAT_DETAILS = {
+        DD: "Raw",
+        AFF: "Advanced forensic",
+        RAW: "Raw",
+        E01: "EnCase 6",
+        ISO: "ISO"
+    }
 
 class MimeTypes(object):
     BINARY = 'application/octet-stream'
@@ -57,19 +66,14 @@ class FileExtns(object):
     # Lower and upper case list
     ALLEXT = BASEEXT + [x.upper() for x in BASEEXT]
 
-class ImgFlds(object):
+class ImgDetsFlds(object):
     """Field names for mappings from EWF tags"""
-    PATH = 'path'
-    NAME = 'name'
     ACQUIRED = 'acquired'
     SYS_DATE = 'system_date'
-    OS = 'os'
-    FORMAT = 'format'
+    OS = 'operating_system'
+    FORMAT = 'image_format'
     MEDIA_TYPE = 'media_type'
     IS_PHYSICAL = 'is_physical'
-    BPS = 'bps'
-    SECTORS = 'sectors'
-    SIZE = 'size'
     MD5 = 'md5'
     DEFAULT = {
         ACQUIRED    : datetime.date.today(),
@@ -78,24 +82,18 @@ class ImgFlds(object):
         FORMAT      : Defaults.NA,
         MEDIA_TYPE  : Defaults.NA,
         IS_PHYSICAL : False,
-        BPS         : 0,
-        SECTORS     : 0,
-        SIZE        : 0,
         MD5         : Defaults.NULL_MD5
     }
 
-class PartFlds(object):
-    """Database fields and defaults for DB partition table"""
-    ADDR = 'addr'
-    SLOT = 'slot'
-    START = 'start'
-    DESC = 'description'
-    IMAGE = 'image_id'
+class ImgPropsFlds(object):
+    """Field names for mappings from EWF tags"""
+    BPS = 'bps'
+    SECTORS = 'sectors'
+    SIZE = 'size'
     DEFAULT = {
-        ADDR  : 0,
-        SLOT  : 0,
-        START : 0,
-        DESC  : Defaults.NA
+        BPS         : 0,
+        SECTORS     : 0,
+        SIZE        : 0,
     }
 
 class PathChars(object):
@@ -122,26 +120,31 @@ class EwfTags(object):
     # EWF Info
     FILE_FORMAT = 'file_format'
     # Media Info
-    MEDIA_TYPE = ImgFlds.MEDIA_TYPE
-    IS_PHYSICAL = ImgFlds.IS_PHYSICAL
+    MEDIA_TYPE = ImgDetsFlds.MEDIA_TYPE
+    IS_PHYSICAL = ImgDetsFlds.IS_PHYSICAL
     BPS = 'bytes_per_sector'
     SECTORS = 'number_of_sectors'
     MEDIA_SIZE = 'media_size'
     HASH_DIGEST = 'hashdigest'
 
-class EwfTagMap(object):
+class EwfDetailsTagMap(object):
     """Maps Expert Witness Format tags to DB Image table fields"""
     LOOKUP = {
-        EwfTags.ACQ_DATE    : ImgFlds.ACQUIRED,
-        EwfTags.SYS_DATE    : ImgFlds.SYS_DATE,
-        EwfTags.ACQ_SYS     : ImgFlds.OS,
-        EwfTags.FILE_FORMAT : ImgFlds.FORMAT,
-        EwfTags.MEDIA_TYPE  : ImgFlds.MEDIA_TYPE,
-        EwfTags.IS_PHYSICAL : ImgFlds.IS_PHYSICAL,
-        EwfTags.BPS         : ImgFlds.BPS,
-        EwfTags.SECTORS     : ImgFlds.SECTORS,
-        EwfTags.MEDIA_SIZE  : ImgFlds.SIZE,
-        EwfTags.HASH_DIGEST : ImgFlds.MD5
+        EwfTags.ACQ_DATE    : ImgDetsFlds.ACQUIRED,
+        EwfTags.SYS_DATE    : ImgDetsFlds.SYS_DATE,
+        EwfTags.ACQ_SYS     : ImgDetsFlds.OS,
+        EwfTags.FILE_FORMAT : ImgDetsFlds.FORMAT,
+        EwfTags.MEDIA_TYPE  : ImgDetsFlds.MEDIA_TYPE,
+        EwfTags.IS_PHYSICAL : ImgDetsFlds.IS_PHYSICAL,
+        EwfTags.HASH_DIGEST : ImgDetsFlds.MD5
+    }
+
+class EwfPropertiesTagMap(object):
+    """Maps Expert Witness Format tags to DB Image table fields"""
+    LOOKUP = {
+        EwfTags.BPS         : ImgPropsFlds.BPS,
+        EwfTags.SECTORS     : ImgPropsFlds.SECTORS,
+        EwfTags.MEDIA_SIZE  : ImgPropsFlds.SIZE
     }
 
 # Exceptions

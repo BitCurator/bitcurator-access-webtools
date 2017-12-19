@@ -1,27 +1,82 @@
 {% extends "page.html" %}
 {% block title %}{{ image.name }} | partitions {% endblock %}
+{% block scripts %}
+{% with table_id='partitions' %}
+{% include "table_sort.html" %}
+{% endwith %}
+{% endblock scripts %}
 {% block page_content %}
-    <h1>Images Partitions</h1>
-    <table class="table">
-      <tr>
-        <th>Id</th>
-        <th>Image Name</th>
-        <th>File System</th>
-        <th>Start</th>
-        <th>Browse</th>
-      </tr>
-      {% for part in partitions %}
-      <tr>
-        <td>{{ part.id }}</td>
-        <td>{{ image.name }}</td>
-        <td>{{ part.description }}</td>
-        <td>{{ part.start }}</td>
-        {% if part.description is equalto 'Error Parsing' %}
-        <td><span class="glyphicon glyphicon-warning-sign alert-danger" aria-hidden="true"></span></a></td>
-        {% else %}
-        <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" ><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></a></td>
-        {% endif %}
-      </tr>
-      {% endfor %}
-    </table>
+    <h1>{{ image.name }}</h1>
+    <div class="row">
+      <div class="col-md-3">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">Format:</span>
+            <span class="badge">{{ image.details.format }}</span>
+          </li>
+          <li class="list-group-item">
+            <span class="label label-primary">Size:</span>
+            <span class="badge">{{ sizeof_fmt(image.properties.size) }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <li class="list-group-item">
+          <span class="label label-primary">Sectors:</span>
+          <span class="badge">{{ image.properties.sectors }}</span>
+        </li>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">Blocks/Sector:</span>
+            <span class="badge">{{ image.properties.bps }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-5">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-primary">MD5:</span>
+            <span class="badge">{{ image.details.md5 }}</span>
+          </li>
+          <li class="list-group-item">
+            <span class="label label-primary">SHA-1:</span>
+            <span class="badge">{{ image.byte_sequence.sha1 }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <h4 class="list-group-item-heading"><span class="label label-primary">Download:</span> <a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></h4>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Partitons</h2>
+        <table id="partitions" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>File System</th>
+              <th>Start</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for part in partitions %}
+            <tr>
+              <td>{{ part.id }}</td>
+              <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" >{{ image.name }}</a></td>
+              <td>{{ part.description }}</td>
+              <td>{{ part.start }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 {% endblock page_content %}

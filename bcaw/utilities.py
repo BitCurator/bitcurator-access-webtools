@@ -75,6 +75,25 @@ def _hashfile(afile, hasher, blocksize=65536):
     return hasher.hexdigest()
 
 def map_mime_to_ext(mime_type):
+    """Performs MIME type to extension mapping, used to pass file type to Textract."""
     if not mime_type:
         return None
     return MIME_TO_EXT.get(mime_type, None)
+
+def check_param_not_none(param, name):
+    """Check that the passed param is not None or an empty string.
+    Raise a ValueError with the param's name if it is None or an empty string"""
+    if not param:
+        message_terminator = ' or an empty string.' if isinstance(param, str) else '.'
+        raise ValueError("Argument {} can not be None{}".format(name, message_terminator))
+
+def sizeof_fmt(num, suffix='B'):
+    """Format byte size in human readable form.
+    from: http://stackoverflow.com/questions/1094841/reusable
+    -library-to-get-human-readable-version-of-file-size
+    """
+    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Y', suffix)
