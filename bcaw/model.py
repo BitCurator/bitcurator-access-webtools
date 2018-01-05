@@ -17,7 +17,7 @@ import ntpath
 import os
 
 from sqlalchemy import Column, BigInteger, Date, Integer, String, ForeignKey
-from sqlalchemy import UniqueConstraint, Boolean
+from sqlalchemy import UniqueConstraint, Boolean, func
 from sqlalchemy.orm import relationship, backref
 
 from .database import BASE, DB_SESSION, ENGINE
@@ -56,6 +56,14 @@ class Group(BASE):
     def all():
         """Get all of the Groups in the DB"""
         return Group.query.order_by(Group.path).all()
+
+    @staticmethod
+    def group_details():
+        """Returns all groups in the DB with summary details."""
+        return DB_SESSION.query(Group.id, Group.name, Group.description,
+                         func.count(Image.id).label('image_count')).\
+                         group_by(Group.id).\
+                         join(Image).all()
 
     @staticmethod
     def by_id(id_to_get):

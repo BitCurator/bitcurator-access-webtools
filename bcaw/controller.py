@@ -28,7 +28,7 @@ ROUTES = True
 def bcaw_home():
     """BCAW application home page."""
     # Render the home page template with a list of images
-    return render_template('groups.html', groups=Group.all())
+    return render_template('groups.html', groups=Group.group_details())
 
 @APP.route('/status')
 def bcaw_status():
