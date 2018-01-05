@@ -236,6 +236,7 @@ class ImageFile(object):
             ret_val[ImgDetsFlds.ACQUIRED])
         ret_val[ImgDetsFlds.SYS_DATE] = date_string_to_date(
             ret_val[ImgDetsFlds.SYS_DATE])
+        ret_val[ImgDetsFlds.IS_PHYSICAL] = (ret_val[ImgDetsFlds.IS_PHYSICAL].lower() == "yes")
         return ret_val
 
 
