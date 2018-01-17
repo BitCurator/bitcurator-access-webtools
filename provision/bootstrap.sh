@@ -645,6 +645,8 @@ configure_webstack() {
    systemctl start uwsgi
    #fi
 
+   # Give vagrant user access to www-data
+   usermod -a -G www-data vagrant
 
    # Set up the cache + index directory
    mkdir "$CACHE_DIR"
@@ -659,9 +661,6 @@ configure_webstack() {
    sudo -u vagrant crontab /tmp/cron
    rm /tmp/cron
    sudo -u vagrant -H nohup /vagrant/scripts/index_collections.sh &>/dev/null &
-
-   # Give vagrant user access to www-data
-   usermod -a -G www-data vagrant
 
 }
 
