@@ -25,7 +25,7 @@
           <td><a href="{{ "/image/" + file_ele.partition.image.id|string + "/" + file_ele.partition.id|string +"/" + file_ele.path }}" >{{ file_ele.name }}</a></td>
           <td>{{ byte_sequence.sha1 }}</td>
           <td>{{ byte_sequence.mime_type }}</td>
-          <td>{{ sizeof_fmt(byte_sequence.size) }}</td>
+          <td>{{ byte_sequence.size|sizeof_fmt }}</td>
           <td>{{ hit_counts[byte_sequence.sha1] }}</td>
         </tr>
         {% endfor %}

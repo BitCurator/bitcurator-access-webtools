@@ -45,17 +45,29 @@ class ImageDir(object):
         return len(self.images)
 
     @classmethod
-    def from_root_dir(cls, root):
+    def from_root_dir(cls, root, recurse=True):
         """Returns a new ImageDir instance initialised from the passed directory."""
         root = root if root.endswith(os.path.sep) else root + os.path.sep
-        images = []
-        logging.info("Scanning " + root + " for disk images.")
-        for file_found in os.listdir(root):
-            if cls.is_image(file_found):
-                logging.info("Found image file: " + file_found)
-                images.append(ImageFile.from_file(root + file_found))
+        images = ImageDir.list_dir_images(root, recurse)
         image_dir = cls(root, images)
         return image_dir
+
+    @classmethod
+    def list_dir_images(cls, directory, recurse=True):
+        """Returns the list of images in a directory, and subdirectories if
+        recures is set True."""
+        directory = directory if directory.endswith(os.path.sep) else directory + os.path.sep
+        images = []
+        logging.info("Scanning %s for disk images.", directory)
+        for file_found in os.listdir(directory):
+            path_found = os.path.join(directory, file_found)
+            logging.info("Path found for: %s.", path_found)
+            if os.path.isdir(path_found) and recurse:
+                images.extend(ImageDir.list_dir_images(path_found))
+            elif cls.is_image(file_found):
+                logging.info("Found image file: %s", file_found)
+                images.append(ImageFile.from_file(path_found))
+        return images
 
     @staticmethod
     def is_image(to_check):
@@ -183,7 +195,7 @@ class ImageFile(object):
         """Returns the set of partitions for this image."""
         return self.__partitions__
 
-    def to_model_image(self, group):
+    def to_model_image(self):
         """Returns the image as a map suitable for database."""
         # Set up a default
         details_fields = ImgDetsFlds.DEFAULT
@@ -201,7 +213,7 @@ class ImageFile(object):
         details = ImageDetails(**details_fields)
         properties = ImageProperties(**properties_fields)
         byte_sequence = ByteSequence.from_path(self.path)
-        return Image(group, self.path, byte_sequence, details, properties)
+        return Image(self.path, byte_sequence, details, properties)
 
     @classmethod
     def from_file(cls, source_file):
@@ -236,6 +248,7 @@ class ImageFile(object):
             ret_val[ImgDetsFlds.ACQUIRED])
         ret_val[ImgDetsFlds.SYS_DATE] = date_string_to_date(
             ret_val[ImgDetsFlds.SYS_DATE])
+        ret_val[ImgDetsFlds.IS_PHYSICAL] = (ret_val[ImgDetsFlds.IS_PHYSICAL].lower() == "yes")
         return ret_val
 
 

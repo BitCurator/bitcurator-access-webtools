@@ -114,7 +114,7 @@ def file_handler(image_id, part_id, encoded_filepath):
     # Get the byte stream object and index it.
     byte_sequence, full_text = ImageIndexer.get_path_details(temp_file)
 
-    # Check whether we've seen this path before
+    # Check whether this path has been indexed and the results are in the DB
     file_element = FileElement.by_partition_and_path(partition, file_path)
     if file_element is None:
         # If not then add the path and p

@@ -12,35 +12,39 @@
 # model.py holds the database model classes and connection utils
 #
 """Database model classes for BitCurator access tools."""
+import datetime
 import logging
 import ntpath
 import os
 
-from sqlalchemy import Column, BigInteger, Date, Integer, String, ForeignKey
-from sqlalchemy import UniqueConstraint, Boolean
+from sqlalchemy import Boolean, BigInteger, Date, DateTime, Integer, String
+from sqlalchemy import Column, ForeignKey, func, Table, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 
 from .database import BASE, DB_SESSION, ENGINE
 from .const import MimeTypes
 from .utilities import check_param_not_none, sha1_path, identify_mime_path
 
+# Link entity that records image occurence in a group.
+GROUP_IMAGES = Table('group_images', BASE.metadata,
+                     Column('group_id', Integer, ForeignKey('group.id')),
+                     Column('image_id', Integer, ForeignKey('image.id'))
+                    )
+
 class Group(BASE):
     """Encapsulation of groups of images. Effectively a root directory, name
     and description."""
     __tablename__ = 'group'
     id = Column(Integer, primary_key=True)
-    path = Column(String(4096), unique=True)
-    name = Column(String(256))
+    name = Column(String(256), unique=True)
     description = Column(String(1024))
+    images = relationship("Image",
+                          secondary=GROUP_IMAGES,
+                          backref="groups")
 
-    def __init__(self, path, name, description):
-        self.path = path
+    def __init__(self, name, description):
         self.name = name
         self.description = description
-
-    def get_images(self):
-        """Returns a list of all images in this group."""
-        return self.images.all()
 
     @staticmethod
     def add(group):
@@ -55,7 +59,7 @@ class Group(BASE):
     @staticmethod
     def all():
         """Get all of the Groups in the DB"""
-        return Group.query.order_by(Group.path).all()
+        return Group.query.order_by(Group.name).all()
 
     @staticmethod
     def by_id(id_to_get):
@@ -64,14 +68,9 @@ class Group(BASE):
         return Group.query.filter_by(id=id_to_get).first()
 
     @staticmethod
-    def by_path(path):
-        """Retrieve a particular Group by path."""
-        return Group.query.filter_by(path=path).first()
-
-    @staticmethod
     def by_name(name):
         """Retrieve all Groups with a particular name."""
-        return Group.query.filter_by(name=name)
+        return Group.query.filter_by(name=name).first()
 
 class Image(BASE):
     """ Class that models basic image information that also handles
@@ -82,12 +81,11 @@ class Image(BASE):
     id = Column(Integer, primary_key=True)
     path = Column(String(4096), unique=True)
     name = Column(String(256))
+    added = Column(DateTime(timezone=True), server_default=func.now())
+    indexed = Column(DateTime)
 
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('images', lazy='dynamic'))
-
-    group_id = Column(Integer, ForeignKey('group.id'))
-    group = relationship('Group', backref=backref('images', lazy='dynamic'))
 
     image_details_id = Column(Integer, ForeignKey('image_details.id'))
     details = relationship('ImageDetails', backref=backref('image', lazy='dynamic'))
@@ -95,8 +93,7 @@ class Image(BASE):
     image_properties_id = Column(Integer, ForeignKey('image_properties.id'), nullable=False)
     properties = relationship('ImageProperties', backref=backref('image', lazy='dynamic'))
 
-    def __init__(self, group, path, byte_sequence, details=None, properties=None):
-        self.group = group
+    def __init__(self, path, byte_sequence, details=None, properties=None):
         self.path = path
         self.name = ntpath.basename(path)
         self.byte_sequence = byte_sequence
@@ -106,6 +103,15 @@ class Image(BASE):
     def get_partitions(self):
         """Returns all of the image's partitions."""
         return self.partitions.all()
+
+    def indexed_image(self):
+        """
+        Update the indexed datetime stamp to indicate that the image has
+        been indexed.
+        """
+        self.indexed = datetime.datetime.utcnow()
+        DB_SESSION.commit()
+
 
     @staticmethod
     def add(image):
@@ -132,6 +138,11 @@ class Image(BASE):
     def by_path(path):
         """Retrieve a particular image by path."""
         return Image.query.filter_by(path=path).first()
+
+    @staticmethod
+    def by_sha1(sha1):
+        """Retrieve all Images with a particular sha1."""
+        return Image.query.join(ByteSequence).filter_by(sha1=sha1).all()
 
 class ImageDetails(BASE):
     """Models the image details metadata."""
@@ -364,8 +375,6 @@ class ByteSequence(BASE):
 def init_db():
     """Initialise the database."""
     BASE.metadata.create_all(bind=ENGINE)
-
-
 
 def _add(obj):
     """Add an object instance to the database."""

@@ -18,8 +18,16 @@
           {% if (groups is defined) and groups %}
           {% for group in groups %}
           <a class="list-group-item" href="{{ "/group/" + group.id|string  }}" >
-            <h4 class="list-group-item-heading">{{ group.name }}</h4>
-            <p class="list-group-item-text">{{ group.description }}</p>
+            <div class="row">
+              <div class="col-md-8">
+                <h4 class="list-group-item-heading">{{ group.name }}</h4>
+                <p class="list-group-item-text">{{ group.description }}</p>
+              </div>
+              <div class="col-md-4">
+                <span class="label label-primary">Images:</span>
+                <span class="badge">{{ group.images|length }}</span>
+              </div>
+            </div>
           </a>
           {% endfor %}
           {% else %}
