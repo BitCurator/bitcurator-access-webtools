@@ -329,7 +329,7 @@ install_ubuntu_pip_packages() {
         nltk
         numpy
         pdfminer
-	python-magic
+        python-magic
         textract
         spacy-nightly"
 
