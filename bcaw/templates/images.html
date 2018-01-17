@@ -12,22 +12,22 @@
         <table id="images" class="table table-striped">
           <thead>
             <tr>
-              <th>Group</th>
               <th>Name</th>
               <th>Size</th>
               <th>MIME</th>
               <th>SHA-1</th>
+              <th>Indexed</th>
               <th>Download</th>
             </tr>
           </thead>
           <tbody>
             {% for image in db_images %}
             <tr>
-              <td>{{ image.group.name }}</td>
               <td><a href="{{ "/image/" + image.id|string  }}">{{ image.name }}</a></td>
-              <td>{{ sizeof_fmt(image.byte_sequence.size) }}</td>
+              <td>{{ image.byte_sequence.size|sizeof_fmt }}</td>
               <td>{{ image.byte_sequence.mime_type }}</td>
               <td>{{ image.byte_sequence.sha1 }}</td>
+              <td>{% if image.indexed %}{{ image.indexed|timestamp_fmt }}{% else %}Queued{% endif %}</td>
               <td><a href="{{ "/image/data/" + image.id|string  }}" ><span class="glyphicon glyphicon-save" aria-hidden="true"></span></a></td>
             </tr>
             {% endfor %}

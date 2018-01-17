@@ -16,7 +16,7 @@
           </li>
           <li class="list-group-item">
             <span class="label label-primary">Size:</span>
-            <span class="badge">{{ sizeof_fmt(image.properties.size) }}</span>
+            <span class="badge">{{ image.properties.size|sizeof_fmt }}</span>
           </li>
         </ul>
       </div>
