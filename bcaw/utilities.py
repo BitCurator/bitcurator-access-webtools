@@ -87,6 +87,11 @@ def check_param_not_none(param, name):
         message_terminator = ' or an empty string.' if isinstance(param, str) else '.'
         raise ValueError("Argument {} can not be None{}".format(name, message_terminator))
 
+def timestamp_fmt(timestamp, show_millis=False):
+    """ISO format for timestamps."""
+    format_str = "%Y-%m-%d %H:%M:%S.%f" if show_millis else "%Y-%m-%d %H:%M:%S"
+    return timestamp.strftime(format_str)
+
 def sizeof_fmt(num, suffix='B'):
     """Format byte size in human readable form.
     from: http://stackoverflow.com/questions/1094841/reusable
