@@ -20,16 +20,17 @@ import logging
 # Load the application
 from flask import Flask
 
-from .utilities import sizeof_fmt
+from .utilities import sizeof_fmt, timestamp_fmt
 APP = Flask(__name__)
 
 # Get the appropriate config
 from .config import configure_app # pylint: disable-msg=C0413
 configure_app(APP)
-APP.jinja_env.globals.update(sizeof_fmt=sizeof_fmt)
+APP.jinja_env.filters['sizeof_fmt'] = sizeof_fmt
+APP.jinja_env.filters['timestamp_fmt'] = timestamp_fmt
 
 # Configure logging across all modules
-logging.basicConfig(filename=APP.config['LOG_FILE'], level=logging.DEBUG,
+logging.basicConfig(filename=APP.config['LOG_FILE'], level=APP.config['LOG_LEVEL'],
                     format=APP.config['LOG_FORMAT'])
 logging.info("Starting BitCurator Web Access tools server.")
 
