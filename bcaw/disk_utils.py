@@ -275,7 +275,12 @@ class ImageFile(object):
     def ewf_file_generator(image_file):
         """Generates an expert witness format XML file for an image."""
         if image_file.is_ewf():
-            ewfinfo_xml = image_file.path + Extns.XML
+
+            # Use /tmp directory for ewffiles; these should never be written to
+            # the source directory (avoid altering data store).
+            # TOFIX: Should probably use a unique ID rather than filename.
+            ewfinfo_xml = "/tmp/" + os.path.basename(image_file.path) + Extns.XML
+
             if not os.path.exists(ewfinfo_xml):
                 logging.info("Generating EWF for image: " +
                              image_file.path)
