@@ -26,13 +26,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      run: "always"
 
     # Configure synced folder
-    # config.vm.synced_folder "", "/vagrant"
+    # In the example below, the first folder would be located on the host
+    # at "/mnt/data", and the shared folder in the VM woud appear at "/vagrant/data"
+    # config.vm.synced_folder "/mnt/data", "/vagrant/data"
 
     # Port forward HTTP (80) to host 2020
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.7.11"
+      vb.name = "bca-webtools-0.8.0"
       vb.memory = 4096
       vb.cpus = 2
     end
