@@ -657,7 +657,7 @@ configure_webstack() {
 
    # Add the image indexing script to the chrontab
    sudo -u vagrant crontab -l > /tmp/cron
-   sudo -u vagrant echo "00 * * * * /vagrant/scripts/index_collections.sh" >> /tmp/cron
+   sudo -u vagrant echo "0 17 * * sun /vagrant/scripts/index_collections.sh" >> /tmp/cron
    sudo -u vagrant crontab /tmp/cron
    rm /tmp/cron
    sudo -u vagrant -H nohup /vagrant/scripts/index_collections.sh &>/dev/null &
