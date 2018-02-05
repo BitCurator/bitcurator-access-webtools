@@ -68,7 +68,7 @@ class ImageAnalyser(object):
         except IOError as _:
             logging.exception("IO/Error processing file %s", fs_ele.path)
             return
-        byte_sequence, _ = indexer.index_path(temp_file)
+        byte_sequence, _ = indexer.index_path(temp_file, fs_ele.path)
         file_element = FileElement(os.path.abspath(fs_ele.path), partition, byte_sequence)
         FileElement.add(file_element)
         os.remove(temp_file)
