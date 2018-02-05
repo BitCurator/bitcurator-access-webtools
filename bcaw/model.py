@@ -82,7 +82,7 @@ class Image(BASE):
     path = Column(String(4096), unique=True, nullable=False)
     name = Column(String(256))
     added = Column(DateTime(timezone=True), server_default=func.now())
-    indexed = Column(DateTime)
+    indexed = Column(DateTime(timezone=True))
 
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('images', lazy='dynamic'))
