@@ -79,10 +79,10 @@ class Image(BASE):
     """
     __tablename__ = 'image'
     id = Column(Integer, primary_key=True)
-    path = Column(String(4096), unique=True)
+    path = Column(String(4096), unique=True, nullable=False)
     name = Column(String(256))
     added = Column(DateTime(timezone=True), server_default=func.now())
-    indexed = Column(DateTime)
+    indexed = Column(DateTime(timezone=True))
 
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('images', lazy='dynamic'))

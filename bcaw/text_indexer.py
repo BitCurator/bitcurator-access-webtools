@@ -71,9 +71,9 @@ class ImageIndexer(object):
             logging.info("No text for sha1 %s", sha1)
 
     @classmethod
-    def get_path_details(cls, path):
+    def get_path_details(cls, temp_path, image_path):
         """Return the byte sequence and the full text for a given path."""
-        byte_sequence = ByteSequence.from_path(path)
+        byte_sequence = ByteSequence.from_path(temp_path)
         extension = map_mime_to_ext(byte_sequence.mime_type)
         logging.debug("Assessing MIME: %s EXTENSION %s SHA1:%s", byte_sequence.mime_type,
                       extension, byte_sequence.sha1)
@@ -82,29 +82,30 @@ class ImageIndexer(object):
             try:
                 logging.debug("Textract for SHA1 %s, extension map val %s",
                               byte_sequence.sha1, extension)
-                full_text = process(path, extension=extension, encoding='ascii',
+                full_text = process(temp_path, extension=extension, encoding='ascii',
                                     preserveLineBreaks=True)
             except ExtensionNotSupported as _:
                 logging.exception("Textract extension not supported for ext %s", extension)
-                logging.debug("Temp path for file is %s", path)
+                logging.debug("Image path for file is %s, temp file at %s", image_path, temp_path)
                 full_text = "N/A"
             except LookupError as _:
                 logging.exception("Lookup error for encoding.")
-                logging.debug("Temp path for file is %s", path)
+                logging.debug("Image path for file is %s, temp file at %s", image_path, temp_path)
                 full_text = "N/A"
             except UnicodeDecodeError as _:
                 logging.exception("UnicodeDecodeError, problem with file encoding")
-                logging.debug("Temp path for file is %s", path)
+                logging.debug("Image path for file is %s, temp file at %s", image_path, temp_path)
                 full_text = "N/A"
             except:
-                logging.exception("Textract unexpectedly failed for temp_file %s", path)
-                raise
+                logging.exception("Textract UNEXPECTEDLY failed for temp_file.")
+                logging.debug("Image path for file is %s, temp file at %s", image_path, temp_path)
+                full_text = "N/A"
         return byte_sequence, full_text
 
-    def index_path(self, path):
+    def index_path(self, temp_path, image_path):
         """Index the full text of the file and map it to the file's sha1 and return
         the derived ByteStream object and derived full text as a tuple."""
-        byte_sequence, full_text = self.get_path_details(path)
+        byte_sequence, full_text = self.get_path_details(temp_path, image_path)
         if full_text:
             self.index_text(byte_sequence.sha1, full_text)
         return byte_sequence, full_text

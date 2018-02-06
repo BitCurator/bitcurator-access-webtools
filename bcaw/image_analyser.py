@@ -68,7 +68,7 @@ class ImageAnalyser(object):
         except IOError as _:
             logging.exception("IO/Error processing file %s", fs_ele.path)
             return
-        byte_sequence, _ = indexer.index_path(temp_file)
+        byte_sequence, _ = indexer.index_path(temp_file, fs_ele.path)
         file_element = FileElement(os.path.abspath(fs_ele.path), partition, byte_sequence)
         FileElement.add(file_element)
         os.remove(temp_file)
@@ -101,6 +101,9 @@ class DbSynch(object):
             logging.info("Adding image: " + image_file.path + " to database.")
             image = image_file.to_model_image()
             Image.add(image)
+            if not self.is_image_in_group(image.path):
+                logging.info("Adding image: %s to group %s.", image_file.path, self.group.name)
+                self.group.images.append(image)
             ImageFile.populate_parts(image, image_file)
             for part in image_file.get_partitions():
                 Partition.add(part)
@@ -109,7 +112,6 @@ class DbSynch(object):
         for image_file in self.__not_in_group__:
             logging.info("Adding image: %s to group %s.", image_file.path, self.group.name)
             image = Image.by_path(image_file.path)
-            self.group.images.append(image)
 
         for image in self.__not_on_disk__:
             logging.warn("Image: " + image.path + " appears to have been deleted from disk.")
@@ -129,13 +131,16 @@ class DbSynch(object):
         """Checks that images on the disk are in the group."""
         del self.__not_in_group__[:]
         for image in self.__image_dir__.images:
-            in_group = False
-            for group_image in self.group.images:
-                if group_image.path == image.path:
-                    in_group = True
-                    break
-            if not in_group:
+            if not self.is_image_in_group(image.path):
                 self.__not_in_group__.append(image)
+
+    def is_image_in_group(self, image_path):
+        in_group = False
+        for group_image in self.group.images:
+            if group_image.path == image_path:
+                in_group = True
+                break
+        return in_group
 
     def images_not_on_disk(self):
         """Checks that images in the database are also on disk.
