@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014 - 2016
+# Copyright (C) 2014 - 2018
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -18,9 +18,7 @@ from celery import Celery
 import bcaw
 from bcaw import *
 
-# FIXME: The following are already defined in bcaw_default_Settings.py.
-# Need to figure out how to include that file here so the following 2 lines
-# can be removed.
+# Originally defined in bcaw_default_settings.py. May need to be moved.
 app.config['CELERY_BROKER_URL'] = 'amqp://guest@localhost//'
 app.config['CELERY_RESULT_BACKEND'] = 'amqp://guest@localhost//'
 
@@ -29,11 +27,10 @@ celery.conf.update(app.config)
 
 @celery.task(bind=True)
 def bcawIndexAsynchronously(self):
-    """ This is the Celery worker task which is run in parallel with the
-        bcaw app. When user chooses to generate Lucene indexes for the disk
-        images, the mail app (bcaw) calls this worker thread which in turn,
-        invokes the indexing routine.
-        This task is invoked by the following command:
+    """ The Celery worker task. Run in parallel with the bcaw app. When Lucene 
+        indexes for disk images are generated, the main app (bcaw) calls this 
+        worker thread which in turn, invokes the indexing routine.
+        Invoked by the following command:
         $ celery -A bcaw_celery_task.celery  worker --loglevel=INFO
     """
 

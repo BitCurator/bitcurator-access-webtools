@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI instance to serve minimal. This file goes in /etc/systemd/system
+Description=uWSGI instance to serve bca-webtools. This file goes in /etc/systemd/system
 After=network.target
 
 [Service]

@@ -6,7 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-    # Note: The current build requires Ubuntu 17.04.
+    # Note: The current build is tested only with Ubuntu 17.10.
     config.vm.box = "bento/ubuntu-17.10"
 
     # Optional "official" cloud xenial box (currently broken):
@@ -14,14 +14,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Set the box host-name
     # config.vm.hostname = "ubuntu-xenial"
 
-    # Run the provisioning script
+    # Run the provisioning script. This installs packages and builds sources.
+    # Runs only on the first instance of "vagrant up".
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
 
-    # Run the server start script
-    # config.vm.provision :shell, :path => "./provision/servstart.sh",
-    # run: "always"
-
-    # Run the Celery daemon start script
+    # Run the Celery daemon start script. This starts the server.
+    # Runs on each execution of "vagrant up".
     config.vm.provision :shell, :path => "./provision/taskserv.sh",
      run: "always"
 
