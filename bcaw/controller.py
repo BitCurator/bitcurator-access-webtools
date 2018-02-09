@@ -112,7 +112,7 @@ def file_handler(image_id, part_id, encoded_filepath):
     # Its a file, we'll need a temp file to analyse or serve
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
     # Get the byte stream object and index it.
-    byte_sequence, full_text = ImageIndexer.get_path_details(temp_file)
+    byte_sequence, full_text = ImageIndexer.get_path_details(temp_file, os.path.abspath(fs_ele.path))
 
     # Check whether this path has been indexed and the results are in the DB
     file_element = FileElement.by_partition_and_path(partition, file_path)
