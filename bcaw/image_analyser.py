@@ -85,47 +85,27 @@ class DbSynch(object):
         self.__not_on_disk__ = []
         self.__not_in_group__ = []
 
-    def is_synch_db(self):
-        """Returns true if the database needs resynching with file system."""
-        # First synch the image directory with the file system
-        self.__image_dir__ = ImageDir.from_root_dir(self.path)
-        return len(self.group.images) != self.__image_dir__.count()
-
     def synch_db(self):
         """Updates the database with images found in the image directory."""
-        if not self.is_synch_db():
-            return
-        # Deal with images not in the database first
-        self.images_not_in_db()
-        for image_file in self.__not_in_db__:
-            logging.info("Adding image: " + image_file.path + " to database.")
-            image = image_file.to_model_image()
-            Image.add(image)
-            if not self.is_image_in_group(image.path):
-                logging.info("Adding image: %s to group %s.", image_file.path, self.group.name)
-                self.group.images.append(image)
-            ImageFile.populate_parts(image, image_file)
-            for part in image_file.get_partitions():
-                Partition.add(part)
-
-        self.images_not_in_goup()
-        for image_file in self.__not_in_group__:
-            logging.info("Adding image: %s to group %s.", image_file.path, self.group.name)
-            image = Image.by_path(image_file.path)
-
-        for image in self.__not_on_disk__:
-            logging.warn("Image: " + image.path + " appears to have been deleted from disk.")
-
-    def images_not_in_db(self):
-        """Checks that images on the disk are also on database.
-        Missing images are added to a member list,
-        """
-        del self.__not_in_db__[:]
-        for image in self.__image_dir__.images:
-            db_image = Image.by_path(image.path)
+        # Loop through the disk images in the image directory
+        for image_file in self.__image_dir__.images:
+            # Check to see if the image is in the database
+            db_image = Image.by_path(image_file.path)
             if db_image is None:
-                logging.debug("Image: " + image.path + " not in database.")
-                self.__not_in_db__.append(image)
+                logging.info("Adding new image at: %s to database.", image_file.path)
+                image = image_file.to_model_image()
+                Image.add(image)
+
+                # Add the partitions for the image
+                ImageFile.populate_parts(image, image_file)
+                for part in image_file.get_partitions():
+                    Partition.add(part)
+
+            db_image = Image.by_path(image_file.path)
+            # Now check that the image belongs to this group
+            if not self.is_image_in_group(db_image):
+                logging.info("Adding image: %s to group %s.", image_file.path, self.group.name)
+                self.group.add_image(db_image)
 
     def images_not_in_goup(self):
         """Checks that images on the disk are in the group."""
@@ -134,13 +114,12 @@ class DbSynch(object):
             if not self.is_image_in_group(image.path):
                 self.__not_in_group__.append(image)
 
-    def is_image_in_group(self, image_path):
-        in_group = False
+    def is_image_in_group(self, image):
+        """Return true if the image and image_path is in this group."""
         for group_image in self.group.images:
-            if group_image.path == image_path:
-                in_group = True
-                break
-        return in_group
+            if group_image.id == image.id:
+                return True
+        return False
 
     def images_not_on_disk(self):
         """Checks that images in the database are also on disk.
@@ -149,7 +128,7 @@ class DbSynch(object):
         del self.__not_on_disk__[:]
         for image in Image.all():
             if not os.path.isfile(image.path):
-                logging.debug("Image: " + image.path + " is no longer on disk.")
+                logging.debug("Image: %s is no longer on disk.", image.path)
                 self.__not_on_disk__.append(image)
 
 class GroupFileParser(object):
@@ -163,7 +142,7 @@ class GroupFileParser(object):
         """Parse the group dictionaries from the JSON file."""
         check_param_not_none(config_path, "config_path")
         self.groups = type('test', (object,), {"GROUPS" : []})()
-        logging.info("Parsing group file: " + config_path)
+        logging.info("Parsing group file: %s", config_path)
         try:
             with open(config_path, mode='rb') as config_file:
                 exec(compile(config_file.read(), config_path, 'exec'),
@@ -180,30 +159,37 @@ class GroupFileParser(object):
 
 def main():
     """Main method to drive image analyser."""
-    group_parser = GroupFileParser('/var/www/bcaw/conf/groups.conf')
-    parsed_groups = group_parser.get_groups()
+    # Parse the group config file
+    group_conf_path = '/var/www/bcaw/conf/groups.conf'
+    try:
+        group_parser = GroupFileParser(group_conf_path)
+    except IOError as _io_excep:
+        logging.exception("IO/Exception reading group config file %s", group_conf_path)
+        raise
+
     # First loop to register groups in DB and allow user to browse
+    parsed_groups = group_parser.get_groups()
     for group in parsed_groups:
         # Check to see if the group is in the database, if not add it.
         logging.info("Checking whether group name: %s is in database.", group['name'])
-        db_coll = Group.by_name(group['name'])
+        db_group = Group.by_name(group['name'])
         path = group['path']
-        if  db_coll is None:
+        if  db_group is None:
             logging.info("Group name: %s NOT found in database so adding.", group['name'])
             # Add the group to the DB if not already there
-            db_coll = Group(group['name'], group['description'])
-            Group.add(db_coll)
+            db_group = Group(group['name'], group['description'])
+            Group.add(db_group)
         # Synch the group images
-        db_synch = DbSynch(db_coll, path)
+        db_synch = DbSynch(db_group, path)
         db_synch.synch_db()
 
     # Now the heavyweight image analysis loop
     for group in parsed_groups:
-        db_coll = Group.by_name(group['name'])
+        db_group = Group.by_name(group['name'])
         # Loop through the images in the group
-        logging.info("Checking group records for %s.", db_coll.name)
-        for image in db_coll.images:
-            logging.info("Image %s found in group %s.", image.path, db_coll.name)
+        logging.info("Checking group records for %s.", db_group.name)
+        for image in db_group.images:
+            logging.info("Image %s found in group %s.", image.path, db_group.name)
             if not image.indexed:
                 logging.info("Image %s will be indexed now.", image.name)
                 analyser = ImageAnalyser(image, LUCENE_ROOT)
