@@ -46,6 +46,11 @@ class Group(BASE):
         self.name = name
         self.description = description
 
+    def add_image(self, image):
+        """Add a new image to the group."""
+        self.images.append(image)
+        DB_SESSION.commit()
+
     @staticmethod
     def add(group):
         """Add a new group to the database."""

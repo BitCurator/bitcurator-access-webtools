@@ -58,10 +58,9 @@ class ImageDir(object):
         recures is set True."""
         directory = directory if directory.endswith(os.path.sep) else directory + os.path.sep
         images = []
-        logging.info("Scanning %s for disk images.", directory)
+        logging.info("Scanning directory %s for disk images.", directory)
         for file_found in os.listdir(directory):
             path_found = os.path.join(directory, file_found)
-            logging.info("Path found for: %s.", path_found)
             if os.path.isdir(path_found) and recurse:
                 images.extend(ImageDir.list_dir_images(path_found))
             elif cls.is_image(file_found):
