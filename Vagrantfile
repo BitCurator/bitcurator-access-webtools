@@ -6,8 +6,8 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-    # Note: The current build is tested only with Ubuntu 17.10.
-    config.vm.box = "bento/ubuntu-17.10"
+    # Note: The current build is tested only with Ubuntu 18.04.
+    config.vm.box = "bento/ubuntu-18.04"
 
     # Optional "official" cloud xenial box (currently broken):
     #config.vm.box = "https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
@@ -32,7 +32,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.8.2"
+      vb.name = "bca-webtools-0.9.0"
       vb.memory = 4096
       vb.cpus = 2
     end

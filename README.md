@@ -27,16 +27,16 @@ You can download the latest release of the bca-webtools application here:
 git clone https://github.com/bitcurator/bitcurator-access-webtools
 ```
 
-Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-17.10) is added:
+Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
 
 ```shell
 cd bitcurator-access-webtools
-vagrant box add bento/ubuntu-17.10
+vagrant box add bento/ubuntu-18.04
 ```
 
 You will be prompted for a provider. Select **2) virtualbox** by typing '2' and hitting enter.
 
-The first time you run **vagrant box add bento/ubuntu-17.10** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
+The first time you run **vagrant box add bento/ubuntu-18.04** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
 
 The bitcurator-access-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the **bitcurator-access-webtools/disk-images** directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
 
@@ -74,7 +74,7 @@ If you wish to build a new VM with updated sources, simply delete the bitcurator
 
 ## Dependencies
 
-This is a Flask application that is deployed automatically into an appropriately configured Ubuntu 17.10 virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
+This is a Flask application that is deployed automatically into an appropriately configured Ubuntu 18.04 virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
 Several other libraries and tools are required, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the **vagrant up** command.
