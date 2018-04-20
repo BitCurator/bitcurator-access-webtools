@@ -17,11 +17,31 @@ This software uses Vagrant to provision a virtual machine in which **bitcurator-
   * http://www.virtualbox.org/
   * https://vagrantup.com
 
-You can download the latest release of the bca-webtools application here:
+To clone out this repository from git, you'll also need git installed.
 
-  * https://github.com/BitCurator/bitcurator-access-webtools/releases
+On **Windows**, download and install git from:
 
-(or, if you'd like to test the development branch, you can check the current commit out directly):
+  * https://git-scm.com/downloads
+
+On **MacOS**, run the following command in a terminal and click through the prompts:
+
+```shell
+xcode-select --install
+```
+
+On Debian-based variants of Linux (including Ubuntu), run the following from a terminal:
+
+```shell
+sudo apt-get install git
+```
+
+**IMPORTANT**: On Windows, you **must** make Git check out files with Unix-style line endings in order for the VM to run properly. After installing git, run the following in a console (cmd prompt):
+
+```shell
+git config --global core.autocrlf false
+```
+
+Check out the bitcurator-access-webtools software from git:
 
 ```shell
 git clone https://github.com/bitcurator/bitcurator-access-webtools
