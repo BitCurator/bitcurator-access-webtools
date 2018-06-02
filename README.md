@@ -1,3 +1,5 @@
+![logo](https://github.com/BitCurator/bitcurator.github.io/blob/master/logos/BitCurator-Basic-400px.png)
+
 # BitCurator Access Webtools: Browse disk images and file system metadata in a web service
 
 [![GitHub issues](https://img.shields.io/github/issues/bitcurator/bitcurator-access-webtools.svg)](https://github.com/bitcurator/bitcurator-access-webtools/issues)
@@ -9,7 +11,7 @@ The service uses open source libraries and toolkits including The Sleuth Kit, Py
 
 This repository includes a simple build script that deploys the web service as in a VirtualBox VM using Vagrant. It includes several sample images (in the "disk-images" directory) to get you started.
 
-Find out more at <http://wiki.bitcurator.net/>
+Find out more at https://github.com/BitCurator/bitcurator-access/wiki
 
 ## Getting started
 This software uses Vagrant to provision a virtual machine in which **bitcurator-access-webtools** runs. To start, make sure you have VirtualBox and Vagrant installed on your Windows, Mac, or Linux host:
@@ -17,26 +19,46 @@ This software uses Vagrant to provision a virtual machine in which **bitcurator-
   * http://www.virtualbox.org/
   * https://vagrantup.com
 
-You can download the latest release of the bca-webtools application here:
+To clone out this repository from git, you'll also need git installed.
 
-  * https://github.com/BitCurator/bitcurator-access-webtools/releases
+On **Windows**, download and install git from:
 
-(or, if you'd like to test the development branch, you can check the current commit out directly):
+  * https://git-scm.com/downloads
+
+On **MacOS**, run the following command in a terminal and click through the prompts:
+
+```shell
+xcode-select --install
+```
+
+On Debian-based variants of Linux (including Ubuntu), run the following from a terminal:
+
+```shell
+sudo apt-get install git
+```
+
+**IMPORTANT**: On Windows, you **must** make Git check out files with Unix-style line endings in order for the VM to run properly. After installing git, run the following in a console (cmd prompt):
+
+```shell
+git config --global core.autocrlf false
+```
+
+Check out the bitcurator-access-webtools software from git:
 
 ```shell
 git clone https://github.com/bitcurator/bitcurator-access-webtools
 ```
 
-Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-17.10) is added:
+Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
 
 ```shell
 cd bitcurator-access-webtools
-vagrant box add bento/ubuntu-17.10
+vagrant box add bento/ubuntu-18.04
 ```
 
 You will be prompted for a provider. Select **2) virtualbox** by typing '2' and hitting enter.
 
-The first time you run **vagrant box add bento/ubuntu-17.10** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
+The first time you run **vagrant box add bento/ubuntu-18.04** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
 
 The bitcurator-access-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the **bitcurator-access-webtools/disk-images** directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
 
@@ -74,18 +96,18 @@ If you wish to build a new VM with updated sources, simply delete the bitcurator
 
 ## Dependencies
 
-This is a Flask application that is deployed automatically into an appropriately configured Ubuntu 17.10 virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
+This is a Flask application that is deployed automatically into an appropriately configured Ubuntu 18.04 virtual machine. It has been tested with Python 2.7.3, Flask 0.11, Jinja2, and Postgres 9.3 (but will likely work with other versions). Python 3 should also work.
 Several other libraries and tools are required, including AFFLIB (v3.7.4 or later), libewf (20140427 or later), The Sleuth Kit (4.1.3 or later), and PyTSK.
 
 Some of these dependencies have existing apt or pip packages in Ubuntu. Others do not. To simplify the process, we've written a bootstrap script that updates and upgrades all the necessary packages, compiles and installs the necessary source packages, and sets up the database. This script is located in the provision directory, and is only run the first time you execute the **vagrant up** command.
 
 ## Documentation
 
-The latest documentation can be found on the BitCurator Access wiki page at https://wiki.bitcurator.net/index.php?title=BitCurator_Access.
+The latest documentation can be found on the BitCurator Access wiki page at https://github.com/BitCurator/bitcurator-access/wiki.
 
 Or, follow this link to a direct download of the quick start guide:
 
-https://wiki.bitcurator.net/downloads/BCA-Quickstart.pdf
+http://distro.ibiblio.org/bitcurator/docs/BCA-Quickstart.pdf
 
 ## License(s)
 

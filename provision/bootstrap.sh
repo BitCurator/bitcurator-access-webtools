@@ -218,7 +218,7 @@ install_ubuntu_deps() {
 # Core: subversion, libatlass-base-dev, gcc, gfortran, g++, build-essential, libtool, automate
 # libewf requires: bison, flex, zlib1g-dev, libtalloc2, libtalloc-dev
 # pyewf requires: python, python-dev, python-pip
-# postgres requires: postgresql, pgadmin3, postgresql-server-dev-9.6
+# postgres requires: postgresql, pgadmin3, postgresql-server-dev-10
 # pylucene: openjdk-8-*, ant-*, ivy-*
 # Text extraction: antiword, poppler-utils
 # textract: python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev zlib1g-dev
@@ -269,7 +269,7 @@ openjdk-8-jre-headless
 pgadmin3
 poppler-utils
 postgresql
-postgresql-server-dev-9.6
+postgresql-server-dev-10
 pstotext
 python
 python-pip
