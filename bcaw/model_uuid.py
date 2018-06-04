@@ -11,31 +11,18 @@
 #
 """Short UUID and SQLAlchemy combined to offer keys for DB tables."""
 import shortuuid
-from sqlalchemy.types import TypeDecorator, CHAR
 
 shortuuid.set_alphabet("ABCDE0123456789")
 
-class SqlUuid(TypeDecorator): # pylint: disable-msg=W0223
-    """Encodes and decodes shortuuid types for SQLAlchemy."""
-    impl = CHAR
-
-    def load_dialect_impl(self, dialect):
-        return dialect.type_descriptor(CHAR(22))
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return value
-        elif not isinstance(value, shortuuid.uuid):
-            # hex string
-            return shortuuid.encode(shortuuid.uuid(value))
-        return shortuuid.encode(value)
-
-    def process_result_value(self, value, dialect):
-        if value is None:
-            return value
-        return shortuuid.uuid(value)
-
-def new_id():
-    """Generate a new id that's truncated to 10 characters."""
+def _new_id():
     full = shortuuid.uuid()
     return full[:10]
+
+def unique_id(select_by_id_method):
+    """Generate a new unique id that's truncated to 10 characters."""
+    id_check = False
+    while id_check is False:
+        generated_id = _new_id()
+        dupe_check = select_by_id_method(generated_id)
+        id_check = dupe_check is None
+    return generated_id

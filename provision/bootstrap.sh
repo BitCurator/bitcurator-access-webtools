@@ -331,7 +331,8 @@ install_ubuntu_pip_packages() {
         pdfminer
         python-magic
         textract
-        spacy-nightly"
+        spacy-nightly
+        shortuuid"
 
     pip_special_packages="textacy"
 
