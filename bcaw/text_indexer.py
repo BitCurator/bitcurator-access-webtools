@@ -27,9 +27,11 @@ from org.apache.lucene.search import IndexSearcher
 from org.apache.lucene.queryparser.classic import QueryParser
 
 from .model import ByteSequence
-from .utilities import map_mime_to_ext
+from .utilities import MimeMapper, map_mime_to_ext
 
 lucene.initVM(vmargs=['-Djava.awt.headless=true'])
+
+MIME_MAPPER = MimeMapper()
 
 class ImageIndexer(object):
     """Given an image details the indexer will get all text files, lucene them
@@ -43,6 +45,8 @@ class ImageIndexer(object):
     text_field.setStored(False)
     text_field.setTokenized(True)
     text_field.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS)
+
+    mime_map = MimeMapper("/var/www/bcaw/conf/mimemap.conf")
 
     def __init__(self, store_dir):
         self.store_dir = store_dir
@@ -74,7 +78,7 @@ class ImageIndexer(object):
     def get_path_details(cls, temp_path, image_path):
         """Return the byte sequence and the full text for a given path."""
         byte_sequence = ByteSequence.from_path(temp_path)
-        extension = map_mime_to_ext(byte_sequence.mime_type)
+        extension = map_mime_to_ext(byte_sequence.mime_type, cls.mime_map)
         logging.debug("Assessing MIME: %s EXTENSION %s SHA1:%s", byte_sequence.mime_type,
                       extension, byte_sequence.sha1)
         full_text = ""
