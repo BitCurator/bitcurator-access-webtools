@@ -64,37 +64,30 @@ def bcaw_images():
     # Render the home page template with a list of images
     return render_template('images.html', db_images=Image.all())
 
-@APP.route('/image/meta/<image_id>/')
+@APP.route('/image/<image_id>/')
 def image_meta(image_id):
-    """Image metadata page, retrieves image info from DB and displays it."""
-    # Get and test the image
+    """Page listing the partition details for on image, retrieved from DB."""
     image = _found_or_404(Image.by_id(image_id))
-    return render_template('image.html', image=image)
+    logging.debug("Getting parts for image: %s", image.name)
+    return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
-@APP.route('/image/data/<image_id>/')
+@APP.route('/image/<image_id>/raw')
 def image_dnld(image_id):
     """Image download request, returns the image binary"""
     image = _found_or_404(Image.by_id(image_id))
     parent = os.path.abspath(os.path.join(image.path, os.pardir))
     return send_from_directory(parent, image.name, as_attachment=True)
 
-@APP.route('/image/<image_id>/')
-def image_parts(image_id):
-    """Page listing the partition details for on image, retrieved from DB."""
-    image = _found_or_404(Image.by_id(image_id))
-    logging.debug("Getting parts for image: " + image.name)
-    for part in image.partitions.all():
-        logging.debug("Part " + str(part.id))
-    return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
-@APP.route('/image/<image_id>/<part_id>/')
-def part_root(image_id, part_id):
+@APP.route('/image/<image_id>/table/<part_table>/slot/part_slot')
+def part_root(image_id, part_table, part_slot):
     """Displays the root directory of a the chosen partition."""
-    return file_handler(image_id, part_id, "/")
+    return file_handler(image_id, part_table, part_slot, "/")
 
-@APP.route('/image/<image_id>/<part_id>/', defaults={'encoded_filepath': '/'})
-@APP.route('/image/<image_id>/<part_id>/<path:encoded_filepath>/')
-def file_handler(image_id, part_id, encoded_filepath):
+@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/',
+           defaults={'encoded_filepath': '/'})
+@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')
+def file_handler(image_id, part_table, part_slot, encoded_filepath):
     """Display page for a file system element.
     If the element is a directory then the page displays the directory listing
     as read from the disk image.
@@ -102,7 +95,7 @@ def file_handler(image_id, part_id, encoded_filepath):
     the Response.
     """
     file_path = urllib.unquote(encoded_filepath)
-    partition = _found_or_404(Partition.by_id(part_id))
+    partition = _found_or_404(Partition.by_image_table_and_slot(image_id, part_table, part_slot))
     fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))
     # Check if we have a directory
     if fs_ele.is_directory:
@@ -112,7 +105,8 @@ def file_handler(image_id, part_id, encoded_filepath):
     # Its a file, we'll need a temp file to analyse or serve
     temp_file = FileSysEle.create_temp_copy(partition, fs_ele)
     # Get the byte stream object and index it.
-    byte_sequence, full_text = ImageIndexer.get_path_details(temp_file, os.path.abspath(fs_ele.path))
+    byte_sequence, full_text =\
+            ImageIndexer.get_path_details(temp_file, os.path.abspath(fs_ele.path))
 
     # Check whether this path has been indexed and the results are in the DB
     file_element = FileElement.by_partition_and_path(partition, file_path)
@@ -129,13 +123,14 @@ def file_handler(image_id, part_id, encoded_filepath):
                            file_path=file_path, fs_ele=fs_ele, file_element=file_element,
                            full_text=full_text)
 
-@APP.route('/raw/<image_id>/<part_id>/', defaults={'encoded_filepath': '/'})
-@APP.route('/raw/<image_id>/<part_id>/<path:encoded_filepath>/')
-def download_file(image_id, part_id, encoded_filepath):
+@APP.route('/raw/<image_id>/table/<part_table>/slot/<part_slot>/',
+           defaults={'encoded_filepath': '/'})
+@APP.route('/raw/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')
+def download_file(image_id, part_table, part_slot, encoded_filepath):
     """Download the raw bytes for a given file."""
 
     file_path = urllib.unquote(encoded_filepath)
-    partition = _found_or_404(Partition.by_id(part_id))
+    partition = _found_or_404(Partition.by_image_table_and_slot(image_id, part_table, part_slot))
     fs_ele = _found_or_404(FileSysEle.from_partition(partition, file_path))
     # Check if we have a directory
     if fs_ele.is_directory:
