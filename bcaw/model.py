@@ -23,12 +23,13 @@ from sqlalchemy.orm import relationship, backref
 
 from .database import BASE, DB_SESSION, ENGINE
 from .const import MimeTypes
+from .model_uuid import unique_id
 from .utilities import check_param_not_none, sha1_path, identify_mime_path
 
 # Link entity that records image occurence in a group.
 GROUP_IMAGES = Table('group_images', BASE.metadata,
                      Column('group_id', Integer, ForeignKey('group.id')),
-                     Column('image_id', Integer, ForeignKey('image.id'))
+                     Column('image_id', String(10), ForeignKey('image.id'))
                     )
 
 class Group(BASE):
@@ -83,7 +84,7 @@ class Image(BASE):
         database tables.
     """
     __tablename__ = 'image'
-    id = Column(Integer, primary_key=True)
+    id = Column(String(10), primary_key=True)
     path = Column(String(4096), unique=True, nullable=False)
     name = Column(String(256))
     added = Column(DateTime(timezone=True), server_default=func.now())
@@ -117,10 +118,11 @@ class Image(BASE):
         self.indexed = datetime.datetime.utcnow()
         DB_SESSION.commit()
 
-
     @staticmethod
     def add(image):
         """Add a new image to the database."""
+        if image.id is None:
+            image.id = unique_id(Image.by_id)
         _add(image)
 
     @staticmethod
@@ -235,7 +237,7 @@ class Partition(BASE):
     start = Column(Integer)
     description = Column(String(40))
 
-    image_id = Column(Integer, ForeignKey('image.id'), nullable=False)
+    image_id = Column(String(10), ForeignKey('image.id'), nullable=False)
     image = relationship('Image', backref=backref('partitions', lazy='dynamic'))
 
     def __init__(self, image, addr=None, slot=None, start=None, description=None):

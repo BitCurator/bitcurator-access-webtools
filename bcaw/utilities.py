@@ -40,6 +40,29 @@ MIME_TO_EXT = {
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx"
 }
 
+class MimeMapper(object):
+    """Class that parses MIME to extenion mappings from config file. Used to
+    decide which text types are indexed."""
+    def __init__(self, config_path=None):
+        self.mime_map = MIME_TO_EXT.copy()
+        if config_path:
+            self.parse_config(config_path)
+
+    def parse_config(self, config_path):
+        """Parse the MIME mappings from the JSON file."""
+        check_param_not_none(config_path, "config_path")
+        try:
+            with open(config_path, mode='rb') as config_file:
+                self.mime_map = eval(config_file.read())
+        except IOError as _e:
+            # if silent and e.errno in (errno.ENOENT, errno.EISDIR):
+            #     return False
+            _e.strerror = 'Unable to load configuration file (%s)' % _e.strerror
+            raise
+
+    def get_mime_map(self):
+        """Return the GROUPS element for iterating."""
+        return self.mime_map
 
 def identify_mime_path(apath):
     """Perform Python Magic identification."""
@@ -74,11 +97,12 @@ def _hashfile(afile, hasher, blocksize=65536):
     afile.seek(0)
     return hasher.hexdigest()
 
-def map_mime_to_ext(mime_type):
+def map_mime_to_ext(mime_type, mapper=None):
     """Performs MIME type to extension mapping, used to pass file type to Textract."""
     if not mime_type:
         return None
-    return MIME_TO_EXT.get(mime_type, None)
+    lookup_map = MIME_TO_EXT if mapper is None else mapper.get_mime_map()
+    return lookup_map.get(mime_type, None)
 
 def check_param_not_none(param, name):
     """Check that the passed param is not None or an empty string.
