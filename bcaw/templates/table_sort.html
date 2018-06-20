@@ -5,7 +5,11 @@
       $(document).ready(function() {
          $('#{{ table_id }}').DataTable({
            pageLength: 50,
-           stateSave: true
+           stateSave: true,
+           "language": {
+             "search": "Find",
+             "searchPlaceholder": "in table..."
+           }
          });
        } );
     </script>

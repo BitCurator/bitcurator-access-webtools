@@ -197,8 +197,8 @@ class ImageFile(object):
     def to_model_image(self):
         """Returns the image as a map suitable for database."""
         # Set up a default
-        details_fields = ImgDetsFlds.DEFAULT
-        properties_fields = ImgPropsFlds.DEFAULT
+        details_fields = ImgDetsFlds.DEFAULT.copy()
+        properties_fields = ImgPropsFlds.DEFAULT.copy()
         if self.is_ewf():
             # Expert witness, if there's no metadata file try generating one
             if not self.has_ewf:
@@ -324,7 +324,7 @@ class ImageFile(object):
             except:
                 # Botch by populating with file system details
                 image_file.__partitions__.append(
-                    Partition(image, -1, -1, -1, "Error Parsing"))
+                    Partition(image, -1, -1, -1, -1, "Error Parsing"))
                 return
 
             if fs_info.info.ftype == pytsk3.TSK_FS_TYPE_FAT12:
@@ -334,11 +334,11 @@ class ImageFile(object):
             else:
                 fs_desc = "Unknown file system"
             # Botch by populating with file system details
-            image_file.__partitions__.append(Partition(image, 0, 0, 0, fs_desc))
+            image_file.__partitions__.append(Partition(image, 0, 0, 0, 0, fs_desc))
             return
 
         # Loop through the partition info found
-        logging.info("Got image info for: " + image_file.path)
+        logging.info("Got image info for: %s", image_file.path)
         logging.debug(volume_info)
         for part in volume_info:
             # The slot_num field of volume object has a value of -1
@@ -354,16 +354,18 @@ class ImageFile(object):
                 # start_offset.
                 try:
                     fs_info = pytsk3.FS_Info(image_info, offset=(part.start * 512))
-                except:
+                except Exception, _:
                     # Exception, log and loop
-                    logging.warn("Sleuth toolkit exception thrown getting partition: " +
-                                 str(part.slot_num) + " for image: " + image_file.path)
+                    logging.exception("Sleuthkit exception getting partion info, " \
+                                      "slot: %i, table %d, desc: %s, for image path: %s.",
+                                      part.slot_num, part.table_num, part.desc, image_file.path)
                     continue
 
-                logging.info("Adding partition: " + part.desc +
-                             " for image: " + image_file.path)
+                logging.info("Adding partition slot: %d, table %d, desc: %s, for image %s. ",
+                             part.slot_num, part.table_num, part.desc, image_file.path)
                 image_file.__partitions__.append(
-                    Partition(image, part.addr, part.slot_num, part.start, part.desc))
+                    Partition(image, part.table_num, part.slot_num, part.addr,
+                              part.start, part.desc))
 
 class FileSysEle(object):
     """Class to wrap image methods to handle files and directories."""

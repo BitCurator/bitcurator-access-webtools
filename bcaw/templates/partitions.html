@@ -60,7 +60,8 @@
         <table id="partitions" class="table table-striped">
           <thead>
             <tr>
-              <th>Id</th>
+              <th>Table</th>
+              <th>Slot</th>
               <th>Name</th>
               <th>File System</th>
               <th>Start</th>
@@ -69,8 +70,9 @@
           <tbody>
             {% for part in partitions %}
             <tr>
-              <td>{{ part.id }}</td>
-              <td><a href="{{ "/image/" + image.id|string + "/" + part.id|string }}" >{{ image.name }}</a></td>
+              <td>{{ part.table }}</td>
+              <td>{{ part.slot }}</td>
+              <td><a href="{{ "/image/" + image.id|string + "/table/" + part.table|string + "/slot/" + part.slot|string }}" >{{ image.name }}</a></td>
               <td>{{ part.description }}</td>
               <td>{{ part.start }}</td>
             </tr>

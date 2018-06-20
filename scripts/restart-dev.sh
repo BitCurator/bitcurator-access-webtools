@@ -13,7 +13,8 @@ BCAW_ROOT="$WWW_ROOT/bcaw"
 BCAW_TARGET="$BCAW_ROOT/bcaw"
 SOURCE_ROOT="/vagrant"
 BCAW_SOURCE="$SOURCE_ROOT/bcaw"
-
+CONF_SOURCE="$SOURCE_ROOT/conf"
+CONF_TARGET="$BCAW_ROOT/conf"
 if [ -d "$BCAW_TARGET" ]; then
   find "$BCAW_TARGET" -name "*.pyc" -type f -exec rm {} \;
 fi
@@ -29,6 +30,8 @@ fi
 
 cp -f "$SOURCE_ROOT/"*.py "$BCAW_ROOT"
 cp -fr "$BCAW_SOURCE" "$BCAW_ROOT"
+cp -fr "$CONF_SOURCE" "$CONF_TARGET"
+
 chown www-data:www-data "$BCAW_ROOT/"*.py
 chown -R www-data:www-data "$BCAW_TARGET"
 sudo rm /var/log/bcaw.log

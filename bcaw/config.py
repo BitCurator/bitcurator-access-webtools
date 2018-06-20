@@ -68,6 +68,7 @@ class AnalyserConfig(BaseConfig):# pylint: disable-msg=R0903
     NAME = "Analyser"
     LOG_FORMAT = '[%(asctime)-15s %(levelname)-8s %(filename)-15s:'+\
                  '%(lineno)-5d %(funcName)-30s] %(message)s'
+    LOG_FILE = LOG_ROOT + 'bcaw-analyser.log'
 
 CONFIGS = {
     "default": 'bcaw.config.BaseConfig',

@@ -13,6 +13,8 @@
 import logging
 import os
 
+from sqlalchemy.exc import IntegrityError
+
 from .config import LUCENE_ROOT, ENV_CONF_PROFILE
 from .disk_utils import ImageDir, ImageFile, FileSysEle
 from .model import Image, Partition, FileElement, Group
@@ -97,9 +99,19 @@ class DbSynch(object):
                 Image.add(image)
 
                 # Add the partitions for the image
+                logging.info("Finding partitions for image id: %s, path: %s.",
+                             image.id, image_file.path)
                 ImageFile.populate_parts(image, image_file)
                 for part in image_file.get_partitions():
-                    Partition.add(part)
+                    logging.info("Adding partition slot: %d for image id: %s, path: %s.",
+                                 part.slot, image.id, image_file.path)
+                    try:
+                        Partition.add(part)
+                    except IntegrityError, _:
+                        logging.exception("Duplicate partition detected for" \
+                                          "image id: %s, partition slot: %d",
+                                          image.id, part.slot)
+
 
             db_image = Image.by_path(image_file.path)
             # Now check that the image belongs to this group
@@ -180,7 +192,9 @@ def main():
             db_group = Group(group['name'], group['description'])
             Group.add(db_group)
         # Synch the group images
+        logging.info("Creating synch object for group: %s.", db_group.name)
         db_synch = DbSynch(db_group, path)
+        logging.info("Synching group: %s.", db_group.name)
         db_synch.synch_db()
 
     # Now the heavyweight image analysis loop

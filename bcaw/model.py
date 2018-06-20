@@ -18,7 +18,7 @@ import ntpath
 import os
 
 from sqlalchemy import Boolean, BigInteger, Date, DateTime, Integer, String
-from sqlalchemy import Column, ForeignKey, func, Table, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, func, Table, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 
 from .database import BASE, DB_SESSION, ENGINE
@@ -231,17 +231,20 @@ class ImageProperties(BASE):
 class Partition(BASE):
     """Models a partition from a disk image."""
     __tablename__ = 'partition'
-    id = Column(Integer, primary_key=True)
+    table = Column(Integer, primary_key=True, autoincrement=False)
+    slot = Column(Integer, primary_key=True, autoincrement=False)
     addr = Column(Integer)
-    slot = Column(Integer)
     start = Column(Integer)
     description = Column(String(40))
 
-    image_id = Column(String(10), ForeignKey('image.id'), nullable=False)
+    image_id = Column(String(10), ForeignKey('image.id'), primary_key=True, nullable=False)
     image = relationship('Image', backref=backref('partitions', lazy='dynamic'))
 
-    def __init__(self, image, addr=None, slot=None, start=None, description=None):
+    __table_args__ = (UniqueConstraint('image_id', 'table', 'slot', name='uix_partition_slot'),)
+
+    def __init__(self, image, table, slot, addr=None, start=None, description=None):
         self.image = image
+        self.table = table
         self.addr = addr
         self.slot = slot
         self.start = start
@@ -253,10 +256,10 @@ class Partition(BASE):
         return Partition.query.order_by(Partition.id).all()
 
     @staticmethod
-    def by_id(id_to_get):
+    def by_image_table_and_slot(image_id, table, slot):
         """Retrieve a partition by id, returns the partition or None if no partition
         with that id exists."""
-        return Partition.query.filter_by(id=id_to_get).first()
+        return Partition.query.filter_by(image_id=image_id, table=table, slot=slot).first()
 
     @staticmethod
     def add(part):
@@ -271,13 +274,19 @@ class FileElement(BASE):
     id = Column(Integer, primary_key=True)# pylint: disable-msg=C0103
     path = Column(String(4096), nullable=False)
 
-    partition_id = Column(Integer, ForeignKey('partition.id'), nullable=False)
+    image_id = Column(String(10), nullable=False)
+    partition_table = Column(Integer, nullable=False)
+    partition_slot = Column(Integer, nullable=False)
     partition = relationship('Partition', backref=backref('file_elements', lazy='dynamic'))
 
     byte_sequence_id = Column(Integer, ForeignKey('byte_sequence.id'), nullable=False)
     byte_sequence = relationship('ByteSequence', backref=backref('file_elements', lazy='dynamic'))
 
-    __table_args__ = (UniqueConstraint('partition_id', 'path', name='uix_partition_path'),)
+    __table_args__ = (UniqueConstraint('image_id', 'partition_table', 'partition_slot',
+                                       'path', name='uix_partition_path'),
+                      ForeignKeyConstraint([image_id, partition_table, partition_slot],
+                                           [Partition.image_id, Partition.table, Partition.slot]),
+                      {})
 
     def __init__(self, path, partition, byte_sequence):
         self.path = os.path.abspath(path)
@@ -308,7 +317,9 @@ class FileElement(BASE):
     @staticmethod
     def by_partition_and_path(partition, path):
         """Retrieve a file element by partition and path."""
-        return FileElement.query.filter_by(partition_id=partition.id, path=path).first()
+        return FileElement.query.filter_by(image_id=partition.image_id,
+                                           partition_slot=partition.slot,
+                                           path=path).first()
 
     @staticmethod
     def add(element):
