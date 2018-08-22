@@ -22,7 +22,7 @@
         {% for byte_sequence in byte_sequences %}
         {% for file_ele in byte_sequence.file_elements %}
         <tr>
-          <td><a href="{{ "/image/" + file_ele.partition.image.id|string + "/table/" + part.table|string + "/slot/" + file_ele.part.slot|string +"/" + file_ele.path }}" >{{ file_ele.name }}</a></td>
+          <td><a href="{{ "/image/" + file_ele.partition.image.id|string + "/table/" + partition.table|string + "/slot/" + file_ele.part.slot|string +"/" + file_ele.path }}" >{{ file_ele.name }}</a></td>
           <td>{{ byte_sequence.sha1 }}</td>
           <td>{{ byte_sequence.mime_type }}</td>
           <td>{{ byte_sequence.size|sizeof_fmt }}</td>
