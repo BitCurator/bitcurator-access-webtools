@@ -605,8 +605,10 @@ configure_webstack() {
   echoinfo "bitcurator-access-webtools: Configuring BCA Webtools web stack..."
 
    # Temporary: Create and perm-fix log file
-  echoinfo "bitcurator-access-webtools: Preparing log file"
+  echoinfo "bitcurator-access-webtools: Preparing log files"
   sudo touch /var/log/bcaw.log
+  sudo chmod 666 /var/log/bcaw.log
+  sudo touch /var/log/bcaw-analyser.log
   sudo chmod 666 /var/log/bcaw.log
 
   if [ -d "$WWW_ROOT/run" ]; then
