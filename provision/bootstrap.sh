@@ -609,7 +609,7 @@ configure_webstack() {
   sudo touch /var/log/bcaw.log
   sudo chmod 666 /var/log/bcaw.log
   sudo touch /var/log/bcaw-analyser.log
-  sudo chmod 666 /var/log/bcaw.log
+  sudo chmod 666 /var/log/bcaw-analyser.log
 
   if [ -d "$WWW_ROOT/run" ]; then
     rm -rf "$WWW_ROOT/run"
