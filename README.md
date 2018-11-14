@@ -19,46 +19,24 @@ This software uses Vagrant to provision a virtual machine in which **bitcurator-
   * http://www.virtualbox.org/
   * https://vagrantup.com
 
-To clone out this repository from git, you'll also need git installed.
+Clone this repository using git. Need help installing git? See the **How to install a git client** section at the bottom of this page.
 
-On **Windows**, download and install git from:
-
-  * https://git-scm.com/downloads
-
-On **MacOS**, run the following command in a terminal and click through the prompts:
-
-```shell
-xcode-select --install
-```
-
-On Debian-based variants of Linux (including Ubuntu), run the following from a terminal:
-
-```shell
-sudo apt-get install git
-```
-
-**IMPORTANT**: On Windows, you **must** make Git check out files with Unix-style line endings in order for the VM to run properly. After installing git, run the following in a console (cmd prompt):
-
-```shell
-git config --global core.autocrlf false
-```
-
-Check out the bitcurator-access-webtools software from git:
+Check out the bitcurator-access-webtools software from GitHub with the following command in a terminal or command shell:
 
 ```shell
 git clone https://github.com/bitcurator/bitcurator-access-webtools
 ```
 
-Once you have the source code (and you have unzipped it if you're using a release), change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
+Once you've checked out the source, change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
 
 ```shell
 cd bitcurator-access-webtools
 vagrant box add bento/ubuntu-18.04
 ```
 
-You will be prompted for a provider. Select **2) virtualbox** by typing '2' and hitting enter.
+You will be prompted for a provider. Select **3) virtualbox** by typing '3' and hitting enter.
 
-The first time you run **vagrant box add bento/ubuntu-18.04** may take some time. Updates to the base vagrant box (a headless Ubuntu environment) are generally issued every couple of weeks. Vagrant will warn you when your box is out of date. (Note: You only need to run the "vagrant box add" the first time after installing Vagrant. You may be promted to run the command "vagrant box update" in future sessions, however, in order to keep the box up to date).
+The first time you run **vagrant box add bento/ubuntu-18.04** may take some time. (Note: You only need to run **vagrant box add** for a particular box one time after installing Vagrant. You may be promted to run the command **vagrant box update** in future sessions in order to keep the box up to date).
 
 The bitcurator-access-webtools application can be used to view raw (.dd) and EWF (.E01) images containing FAT16, FAT32, NTFS, ext2/3/4, and HFS+ file systems. The application includes several sample images (in the **bitcurator-access-webtools/disk-images** directory) for testing. You can place additional images in this directory (and remove these test images) as needed.
 
@@ -117,3 +95,26 @@ Unless otherwise indicated, software items in this repository are distributed un
 
 In addition to software produced by the BitCurator team, BitCurator packages and modifies open source software produced by other developers. Licenses and attributions are retained here where applicable.
 
+## How to install a git client
+
+On **Windows**, download and install git from:
+
+  * https://git-scm.com/downloads
+
+On **MacOS**, run the following command in a terminal and click through the prompts:
+
+```shell
+xcode-select --install
+```
+
+On Debian-based variants of Linux (including Ubuntu), run the following from a terminal:
+
+```shell
+sudo apt-get install git
+```
+
+**IMPORTANT**: On Windows, you **must** make Git check out files with Unix-style line endings in order for the VM to run properly. After installing git, run the following in a console (cmd prompt):
+
+```shell
+git config --global core.autocrlf false
+```
