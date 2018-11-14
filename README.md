@@ -19,9 +19,7 @@ This software uses Vagrant to provision a virtual machine in which **bitcurator-
   * http://www.virtualbox.org/
   * https://vagrantup.com
 
-Clone this repository using git. Need help installing git? See the **How to install a git client** section at the bottom of this page.
-
-Check out the bitcurator-access-webtools software from GitHub with the following command in a terminal or command shell:
+Clone this repository with the following command in a terminal or command shell (Need help installing git? See the **How to install a git client** section at the bottom of this page):
 
 ```shell
 git clone https://github.com/bitcurator/bitcurator-access-webtools
