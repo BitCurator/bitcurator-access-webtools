@@ -9,6 +9,10 @@
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
 #
+"""NLP markup"""
+import spacy
+from spacy import displacy
+
 """Controller module, handles incoming HTTP requests and routing."""
 import logging
 import os
@@ -23,6 +27,10 @@ from .model import Image, Partition, FileElement, ByteSequence, Group
 from .text_indexer import ImageIndexer, FullTextSearcher
 
 ROUTES = True
+
+# Load the English language model
+# TODO: configuration for language model selection
+nlp = spacy.load('en')
 
 @APP.route('/')
 def bcaw_home():
@@ -84,14 +92,19 @@ def part_root(image_id, part_table, part_slot):
     """Displays the root directory of a the chosen partition."""
     return file_handler(image_id, part_table, part_slot, "/")
 
+#@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/',
+#           defaults={'encoded_filepath': '/'})
+#@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')
 @APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/',
-           defaults={'encoded_filepath': '/'})
-@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')
-def file_handler(image_id, part_table, part_slot, encoded_filepath):
+            defaults={'encoded_filepath': '/', 'view_type': ''})
+@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>',
+            defaults={'view_type': ''})
+@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/<string:view_type>')
+def file_handler(image_id, part_table, part_slot, encoded_filepath, view_type):
     """Display page for a file system element.
     If the element is a directory then the page displays the directory listing
     as read from the disk image.
-    If a file is selected they files contents as a binary payload is sent in
+    If a file is selected the files contents as a binary payload is sent in
     the Response.
     """
     file_path = urllib.unquote(encoded_filepath)
@@ -108,6 +121,10 @@ def file_handler(image_id, part_table, part_slot, encoded_filepath):
     byte_sequence, full_text =\
             ImageIndexer.get_path_details(temp_file, os.path.abspath(fs_ele.path))
 
+    # Build the NLP object from extracted full_text, generate entity markup
+    full_text_nlp_obj = nlp(unicode(full_text, 'utf-8'))
+    full_text_entity_html = displacy.render(full_text_nlp_obj, style='ent', page=False)
+
     # Check whether this path has been indexed and the results are in the DB
     file_element = FileElement.by_partition_and_path(partition, file_path)
     if file_element is None:
@@ -119,9 +136,20 @@ def file_handler(image_id, part_table, part_slot, encoded_filepath):
         return send_file(temp_file, mimetype=byte_sequence.mime_type,
                          as_attachment=True, attachment_filename=fs_ele.name)
 
-    return render_template('analysis.html', image=partition.image, partition=partition,
-                           file_path=file_path, fs_ele=fs_ele, file_element=file_element,
-                           full_text=full_text)
+    # Return correct view depending on URL parameter
+    if view_type == 'text-view': 
+        return render_template('text_analysis.html', image=partition.image, partition=partition,
+                               file_path=file_path, fs_ele=fs_ele, file_element=file_element,
+                               full_text=full_text)
+    else:
+        return render_template('entity_analysis.html', image=partition.image, partition=partition,
+                               file_path=file_path, fs_ele=fs_ele, file_element=file_element,
+                               full_text=full_text_entity_html)
+
+    
+#    return render_template('analysis.html', image=partition.image, partition=partition,
+#                           file_path=file_path, fs_ele=fs_ele, file_element=file_element,
+#                           full_text=full_text_entity_html)
 
 @APP.route('/raw/<image_id>/table/<part_table>/slot/<part_slot>/',
            defaults={'encoded_filepath': '/'})
