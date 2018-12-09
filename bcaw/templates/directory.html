@@ -1,0 +1,53 @@
+{% extends "page.html" %}
+{% block title %}{{ image.name }} | files{% endblock %}
+{% block scripts %}
+{% with table_id='listing' %}
+{% include "table_sort.html" %}
+{% endwith %}
+{% endblock scripts %}
+{% block page_content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <h2>Directory Listing</h2>
+    <table id="listing" class="table table-striped">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Filename</th>
+          <th>Bytes</th>
+          <th>Last Modified</th>
+          <th>Text View</th>
+          <th>Entity View</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+	<tr>
+	  {% if file.is_deleted %}
+          <td><span class="glyphicon glyphicon-trash text-danger" aria-hidden="true"></span></td>
+          {% elif file.is_directory %}
+          <td><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></td>
+          {% else %}
+          <td><span class="glyphicon glyphicon-file" aria-hidden="true"></span></a></td>
+          {% endif %}
+
+          {% if file.is_directory %}
+	  <td><a href="{{ "/image/" + image.id|string + "/table/" + partition.table|string + "/slot/" + partition.slot|string + file.path }}" >{{ file.name }}</a></td>
+          {% else %}
+	  <td><a href="{{ "/raw/" + image.id|string + "/table/" + partition.table|string + "/slot/" + partition.slot|string + file.path }}" >{{ file.name }}</a></td>
+          {% endif %}
+
+	  <td>{{ file.size|sizeof_fmt }}</td>
+	  <td>{{ file.details.mtime }}</td>
+
+          {% if file.is_directory %}
+	  <td></td>
+	  <td></td>
+          {% else %}
+          <td><a href="{{ "/image/" + image.id|string + "/table/" + partition.table|string + "/slot/" + partition.slot|string + file.path + "/text-view" }}" ><span class="glyphicon glyphicon-align-left" aria-hidden="true"></span></a></td>
+          <td><a href="{{ "/image/" + image.id|string + "/table/" + partition.table|string + "/slot/" + partition.slot|string + file.path + "/entity-view" }}" ><span class="glyphicon glyphicon-object-align-horizontal" aria-hidden="true"></span></a></td>
+          {% endif %}
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+{% endblock page_content %}
