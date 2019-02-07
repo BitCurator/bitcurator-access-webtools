@@ -50,7 +50,7 @@ from within the bitcurator-access-webtools directory. This step can take a long 
 127.0.0.1:8080
 ```
 
-to see the **bitcurator-access-webtools** service running. The first time you bring the service up, you must follow the steps in the next section to enable all browsing and search features. 
+to see the **bitcurator-access-webtools** service running.
 
 ## Terminating the bitcurator-access-webtools service and virtual machine
 
