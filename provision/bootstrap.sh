@@ -331,7 +331,7 @@ install_ubuntu_pip_packages() {
         pdfminer
         python-magic
         textract
-        spacy-nightly
+        spacy
         shortuuid"
 
     pip_special_packages="textacy"
@@ -660,8 +660,6 @@ configure_webstack() {
 complete_message() {
     echo
     echo "Installation Complete!"
-    echo
-    echo "Additional documentation at: https://wiki.bitcurator.net"
     echo
 }
 
