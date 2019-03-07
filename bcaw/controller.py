@@ -79,7 +79,9 @@ def image_meta(image_id):
     logging.debug("Getting parts for image: %s", image.name)
     return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
-@APP.route('/image/<image_id>/raw')
+# TODO - Check why change to raw was made on 6/12/2018. Switched back for now.
+#@APP.route('/image/<image_id>/raw')
+@APP.route('/image/data/<image_id>/')
 def image_dnld(image_id):
     """Image download request, returns the image binary"""
     image = _found_or_404(Image.by_id(image_id))

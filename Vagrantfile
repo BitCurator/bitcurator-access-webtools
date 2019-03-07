@@ -9,11 +9,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Note: The current build is tested only with Ubuntu 18.04.
     config.vm.box = "bento/ubuntu-18.04"
 
-    # Optional "official" cloud xenial box (currently broken):
-    #config.vm.box = "https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
-    # Set the box host-name
-    # config.vm.hostname = "ubuntu-xenial"
-
     # Run the provisioning script. This installs packages and builds sources.
     # Runs only on the first instance of "vagrant up".
     config.vm.provision :shell, :path => "./provision/bootstrap.sh"
@@ -32,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
 
     config.vm.provider :virtualbox do |vb|
-      vb.name = "bca-webtools-0.9.14"
+      vb.name = "bca-webtools-0.9.16"
       vb.memory = 4096
       vb.cpus = 2
     end
