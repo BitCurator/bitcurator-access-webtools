@@ -390,9 +390,9 @@ install_source_packages() {
     echoinfo " -- This may take several minutes..."
 
         cd /tmp
-        wget http://apache.osuosl.org/lucene/pylucene/pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-6.5.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-6.5.0
+        wget http://apache.claz.org/lucene/pylucene/pylucene-8.1.1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar -zxvf pylucene-8.1.1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd pylucene-8.1.1
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
 
