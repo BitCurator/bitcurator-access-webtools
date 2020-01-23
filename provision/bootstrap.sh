@@ -498,17 +498,31 @@ install_source_packages() {
   # Install The Sleuth Kit
   echoinfo "bitcurator-access-webtools: Building and installing The Sleuth Kit..."
         cd /tmp
-        wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.7.0/sleuthkit-4.7.0.tar.gz -O sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar zxvf sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd sleuthkit-sleuthkit-4.7.0
+        # Note: as of 1/23/2019 all existing Sleuthkit releases have a reference
+	# to a non-ssl Ivy download url that no longer exists. Pulling from github
+	# source for now
+	git clone https://github.com/sleuthkit/sleuthkit
+	cd sleuthkit
+	chmod 755 bootstrap
         ./bootstrap >> $LOG_BASE/bca-install.log 2>&1
         ./configure >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
-        # Clean up
-        rm /tmp/sleuthkit-4.7.0.tar.gz
-        rm -rf /tmp/sleuthkit-sleuthkit-4.7.0
+	cd ..
+	rm -rf sleuthkit
+
+	#wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.7.0/sleuthkit-4.7.0.tar.gz -O sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        #tar zxvf sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        #cd sleuthkit-sleuthkit-4.7.0
+        #./bootstrap >> $LOG_BASE/bca-install.log 2>&1
+        #./configure >> $LOG_BASE/bca-install.log 2>&1
+        #make >> $LOG_BASE/bca-install.log 2>&1
+        #sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
+        #sudo ldconfig
+        ## Clean up
+        #rm /tmp/sleuthkit-4.7.0.tar.gz
+        #rm -rf /tmp/sleuthkit-sleuthkit-4.7.0
 
   # Install TSK Python bindings
   echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
