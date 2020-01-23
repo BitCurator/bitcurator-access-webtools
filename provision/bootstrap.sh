@@ -500,7 +500,7 @@ install_source_packages() {
         cd /tmp
         wget https://github.com/sleuthkit/sleuthkit/archive/sleuthkit-4.7.0/sleuthkit-4.7.0.tar.gz -O sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar zxvf sleuthkit-4.7.0.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd sleuthkit-4.7.0
+        cd sleuthkit-sleuthkit-4.7.0
         ./configure >> $LOG_BASE/bca-install.log 2>&1
         make >> $LOG_BASE/bca-install.log 2>&1
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
