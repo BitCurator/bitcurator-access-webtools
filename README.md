@@ -21,16 +21,10 @@ This software uses Vagrant to provision a virtual machine in which **bitcurator-
   * http://www.virtualbox.org/
   * https://vagrantup.com
 
-Clone this repository with the following command in a terminal or command shell (Need help installing git? See the **How to install a git client** section at the bottom of this page):
+Download the latest release (.zip or .tar.gz file) from https://github.com/BitCurator/bitcurator-access-webtools/releases and extract the contents. In a terminal, change into the extracted bitcurator-access-webtools-x-x-xx directory (using the release numbers for your release in place of the x's), and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
 
 ```shell
-git clone https://github.com/bitcurator/bitcurator-access-webtools
-```
-
-Once you've checked out the source, change directory into bitcurator-access-webtools, and make sure the associated Vagrant box (bentu/ubuntu-18.04) is added:
-
-```shell
-cd bitcurator-access-webtools
+cd bitcurator-access-webtools-x-x-xx
 vagrant box add bento/ubuntu-18.04
 ```
 
@@ -94,6 +88,16 @@ The BitCurator logo, BitCurator project documentation, and other non-software pr
 Unless otherwise indicated, software items in this repository are distributed under the terms of the GNU General Public License, Version 3. See the text file "COPYING" for further details about the terms of this license.
 
 In addition to software produced by the BitCurator team, BitCurator packages and modifies open source software produced by other developers. Licenses and attributions are retained here where applicable.
+
+## Building a development snapshot
+
+Clone this repository with the following command in a terminal or command shell (Need help installing git? See the **How to install a git client** section at the bottom of this page):
+
+```shell
+git clone https://github.com/bitcurator/bitcurator-access-webtools
+```
+
+Once you've checked out the source, change directory into bitcurator-access-webtools, and follow the remaining instructions in the Getting Started section above.
 
 ## How to install a git client
 
