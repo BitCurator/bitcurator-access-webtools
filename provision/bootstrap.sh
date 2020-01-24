@@ -506,7 +506,7 @@ install_source_packages() {
 	# to a non-ssl Ivy download url that no longer exists. Replace relevant
 	# link with sed for now
         cd bindings/java
-        sed -i "s/http:\/\/repo2.maven.org/https:\/\/repo1.maven.org/g" setup.py
+        sed -i "s/http:\/\/repo2.maven.org/https:\/\/repo1.maven.org/g" build.xml
         cd ../../
 
         ./bootstrap >> $LOG_BASE/bca-install.log 2>&1
