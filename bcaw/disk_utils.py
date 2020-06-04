@@ -236,7 +236,7 @@ class ImageFile(object):
             return ImgDetsFlds.DEFAULT
         try:
             tree = ET.parse(xml_file)
-        except IOError, _e:
+        except IOError as _e:
             logging.error(ExcepMess.PARSING, xml_file, _e)
             return
 
@@ -262,7 +262,7 @@ class ImageFile(object):
             return ImgPropsFlds.DEFAULT
         try:
             tree = ET.parse(xml_file)
-        except IOError, _e:
+        except IOError as _e:
             logging.error(ExcepMess.PARSING, xml_file, _e)
             return
 
@@ -354,7 +354,7 @@ class ImageFile(object):
                 # start_offset.
                 try:
                     fs_info = pytsk3.FS_Info(image_info, offset=(part.start * 512))
-                except Exception, _:
+                except Exception as _:
                     # Exception, log and loop
                     logging.exception("Sleuthkit exception getting partion info, " \
                                       "slot: %i, table %d, desc: %s, for image path: %s.",

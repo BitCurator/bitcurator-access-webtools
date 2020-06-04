@@ -51,7 +51,7 @@ class ImageIndexer(object):
     def __init__(self, store_dir):
         self.store_dir = store_dir
         if not os.path.exists(store_dir):
-            os.mkdir(store_dir, 0777)
+            os.mkdir(store_dir, 0o777)
         self.store = SimpleFSDirectory(Paths.get(store_dir))
         self.analyzer = StandardAnalyzer()
         self.analyzer = LimitTokenCountAnalyzer(self.analyzer, 1048576)
@@ -120,7 +120,7 @@ class FullTextSearcher(object):
     def __init__(self, store_dir):
         self.store_dir = store_dir
         if not os.path.exists(store_dir):
-            os.mkdir(store_dir, 0777)
+            os.mkdir(store_dir, 0o777)
         self.store = SimpleFSDirectory(Paths.get(store_dir))
         self.searcher = None
         self.analyzer = StandardAnalyzer()
@@ -130,7 +130,7 @@ class FullTextSearcher(object):
         try:
             if self.searcher is None:
                 self.searcher = IndexSearcher(DirectoryReader.open(self.store))
-        except lucene.JavaError, _je:
+        except lucene.JavaError as _je:
             logging.exception("No Lucene index found at %s", self.store)
         return self
 

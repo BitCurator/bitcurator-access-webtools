@@ -390,9 +390,9 @@ install_source_packages() {
     echoinfo " -- This may take several minutes..."
 
         cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-8.1.1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        tar -zxvf pylucene-8.1.1-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-        cd pylucene-8.1.1
+        wget http://apache.claz.org/lucene/pylucene/pylucene-8.3.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        tar -zxvf pylucene-8.3.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        cd pylucene-8.3.0
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
 
@@ -430,7 +430,7 @@ install_source_packages() {
         sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
         sudo ldconfig
         # Clean up
-        # rm -rf /tmp/pylucene-6.5.0*
+        # rm -rf /tmp/pylucene-8.3.0*
 
   # Checking postgres setup
   echoinfo "bitcurator-access-webtools: Checking postgres setup"
