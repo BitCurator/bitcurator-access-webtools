@@ -1,4 +1,4 @@
-![logo](https://github.com/BitCurator/bitcurator.github.io/blob/master/logos/BitCurator-Basic-400px.png)
+![logo](https://github.com/BitCurator/bitcurator.github.io/blob/main/logos/BitCurator-Basic-400px.png)
 
 # BitCurator Access Webtools: Browse disk images and file system metadata in a web service
 
