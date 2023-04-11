@@ -4,8 +4,13 @@
 
 [![GitHub issues](https://img.shields.io/github/issues/bitcurator/bitcurator-access-webtools.svg)](https://github.com/bitcurator/bitcurator-access-webtools/issues)
 [![GitHub forks](https://img.shields.io/github/forks/bitcurator/bitcurator-access-webtools.svg)](https://github.com/bitcurator/bitcurator-access-webtools/network)
-[![Build Status](https://travis-ci.org/BitCurator/bitcurator-access-webtools.svg?branch=master)](https://travis-ci.org/BitCurator/bitcurator-access-webtools)
 [![Twitter Follow](https://img.shields.io/twitter/follow/bitcurator.svg?style=social&label=Follow)](https://twitter.com/bitcurator)
+
+# END-OF-LIFE (EOL) NOTICE 
+
+This research software has reached end-of-life. The code in this repository is no longer actively maintained or supported.
+
+## About
 
 The **BitCurator Access Webtools** project allows users to browse file systems contained within disk images using a web browser. It is intended to support access requirements in libraries, archives, and museums preserving born-digital materials extracted from source media as raw or forensically-packaged disk images. 
 
