@@ -610,6 +610,11 @@ copy_disk_images() {
   #chmod 666 "$DISK_IMAGE_TARGET/"*
 }
 
+run_indexer() {
+  # Webapp will crash attempting to create GROUP table if accessed before first indexer/analyser run
+  echoinfo "bitcurator-access-webtools: About to run indexer/analyser for the first time."
+  /vagrant/scripts/index_collections.sh >> $LOG_BASE/bca-install.log 2>&1 || return 1
+}
 
 configure_webstack() {
   echoinfo "bitcurator-access-webtools: Configuring BCA Webtools web stack..."
@@ -785,6 +790,9 @@ get_spacy_language_models
 copy_disk_images
 
 copy_source
+
+run_indexer
+
 configure_webstack
 
 complete_message

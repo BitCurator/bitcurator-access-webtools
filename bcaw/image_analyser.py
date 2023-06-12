@@ -12,6 +12,7 @@
 """Service that analyses new image groups for the BitCurator app."""
 import logging
 import os
+import traceback
 
 from sqlalchemy.exc import IntegrityError
 
@@ -33,9 +34,14 @@ class ImageAnalyser(object):
         """Analyse all of the files in a disk image, populate the database record,
         and carry out full text indexing if possible / appropriate."""
         logging.info("Analysing image %s", self.image.path)
-        with ImageIndexer(self.index_dir) as indexer:
-            for partition in self.image.partitions:
-                self.analyse_partition(partition, indexer)
+	try:
+		with ImageIndexer(self.index_dir) as indexer:
+		    for partition in self.image.partitions:
+			self.analyse_partition(partition, indexer)
+	except Exception as x:
+		logging.error("Failed to analyze %s; skipping. Exception: %s: %s", self.image.path, type(x), x)
+		logging.info("Traceback: %s", traceback.format_exc())
+
 
     def analyse_partition(self, partition, indexer):
         """Analyse a given partition from a disk image."""
