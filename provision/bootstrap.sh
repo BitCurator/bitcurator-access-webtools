@@ -390,7 +390,7 @@ install_source_packages() {
     echoinfo " -- This may take several minutes..."
 
         cd /tmp
-        wget http://apache.claz.org/lucene/pylucene/pylucene-8.3.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
+        wget https://archive.apache.org/dist/lucene/pylucene/pylucene-8.3.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         tar -zxvf pylucene-8.3.0-src.tar.gz >> $LOG_BASE/bca-install.log 2>&1
         cd pylucene-8.3.0
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -507,6 +507,7 @@ install_source_packages() {
 	# link with sed for now
         cd bindings/java
         sed -i "s/http:\/\/repo2.maven.org/https:\/\/repo1.maven.org/g" build.xml
+        sed -i 's/<ibiblio name="central" m2compatible="true"/<ibiblio name="central" m2compatible="true" root="https:\/\/repo1.maven.org\/maven2"\/>/' ivysettings.xml
         cd ../../
 
         ./bootstrap >> $LOG_BASE/bca-install.log 2>&1
