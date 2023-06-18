@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # coding=UTF-8
 #
-# JISC Format Sniffing
-# Copyright (C) 2016
+# BitCurator Access Webtools (Disk Image Access for the Web)
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public

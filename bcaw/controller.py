@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014 - 2016
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -29,7 +29,6 @@ from .text_indexer import ImageIndexer, FullTextSearcher
 ROUTES = True
 
 # Load the English language model
-# TODO: configuration for language model selection
 nlp = spacy.load('en')
 
 @APP.route('/')
@@ -79,8 +78,6 @@ def image_meta(image_id):
     logging.debug("Getting parts for image: %s", image.name)
     return render_template('partitions.html', image=image, partitions=image.get_partitions())
 
-# TODO - Check why change to raw was made on 6/12/2018. Switched back for now.
-#@APP.route('/image/<image_id>/raw')
 @APP.route('/image/data/<image_id>/')
 def image_dnld(image_id):
     """Image download request, returns the image binary"""
@@ -94,9 +91,6 @@ def part_root(image_id, part_table, part_slot):
     """Displays the root directory of a the chosen partition."""
     return file_handler(image_id, part_table, part_slot, "/")
 
-#@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/',
-#           defaults={'encoded_filepath': '/'})
-#@APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')
 @APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/',
             defaults={'encoded_filepath': '/', 'view_type': ''})
 @APP.route('/image/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>',
@@ -149,10 +143,6 @@ def file_handler(image_id, part_table, part_slot, encoded_filepath, view_type):
                                full_text=full_text_entity_html)
 
     
-#    return render_template('analysis.html', image=partition.image, partition=partition,
-#                           file_path=file_path, fs_ele=fs_ele, file_element=file_element,
-#                           full_text=full_text_entity_html)
-
 @APP.route('/raw/<image_id>/table/<part_table>/slot/<part_slot>/',
            defaults={'encoded_filepath': '/'})
 @APP.route('/raw/<image_id>/table/<part_table>/slot/<part_slot>/<path:encoded_filepath>/')

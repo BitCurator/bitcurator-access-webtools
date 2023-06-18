@@ -29,7 +29,7 @@ cd bitcurator-access-webtools-x-x-xx
 vagrant box add bento/ubuntu-18.04
 ```
 
-You will be prompted for a provider. Select **3) virtualbox** by typing '3' and hitting enter.
+You will be prompted for a provider. Type the number corresponding to **VirtualBox** and hit enter.
 
 The first time you run **vagrant box add bento/ubuntu-18.04** may take some time. (Note: You only need to run **vagrant box add** for a particular box one time after installing Vagrant. You may be promted to run the command **vagrant box update** in future sessions in order to keep the box up to date).
 

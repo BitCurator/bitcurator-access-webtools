@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014 - 2016
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -11,14 +11,13 @@
 #
 # This file contains items that can be configured in BitCurator Access Webtools.
 #
-"""Module for application config goodness."""
 import logging
 import os
 import tempfile
 
 from .const import ENV_CONF_PROFILE, ENV_CONF_FILE
 
-# TODO: template these values for flexible install
+# TODO: template these values
 HOST = 'localhost'
 DB_HOST = 'localhost'
 ROOT = '/var/www/bcaw/'
@@ -31,7 +30,7 @@ LUCENE_ROOT = '/var/www/.index'
 TEMP = tempfile.gettempdir()
 
 class BaseConfig(object):# pylint: disable-msg=R0903
-    """The basic default configuration."""
+    """The default configuration."""
     HOST = HOST
     SQLALCHEMY_DATABASE_URI = POSTGRES_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False

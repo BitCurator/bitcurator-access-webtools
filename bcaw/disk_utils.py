@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014 - 2016
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -249,7 +249,6 @@ class ImageFile(object):
             ret_val[ImgDetsFlds.SYS_DATE])
         ret_val[ImgDetsFlds.IS_PHYSICAL] = (ret_val[ImgDetsFlds.IS_PHYSICAL].lower() == "yes")
         return ret_val
-
 
     @staticmethod
     def ewf_to_image_properties_map(xml_file):
