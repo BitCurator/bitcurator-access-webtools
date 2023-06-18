@@ -22,7 +22,7 @@
 #===============================================================================
 #
 # Script Version
-__ScriptVersion="0.7"
+__ScriptVersion="0.7.1"
 # Base directory for build log
 LOG_BASE=/var/log
 WWW_ROOT=/var/www
@@ -386,7 +386,6 @@ install_source_packages() {
 
     # Install pylucene (also installs JCC)
     echoinfo "bitcurator-access-webtools: Building and installing pylucene"
-    #echoinfo "[CURRENTLY DISABLED IN BOOTSTRAP]"
     echoinfo " -- This may take several minutes..."
 
         cd /tmp
@@ -484,17 +483,6 @@ install_source_packages() {
         # Now clean up
         rm -rf /tmp/libewf-20140608
 
-  # Install libqcow (needed for pytsk)
-  #echoinfo "bitcurator-access-webtools: Building and installing libqcow..."
-  #      cd /tmp
-  #      wget -q https://github.com/libyal/libqcow/releases/download/20160123/libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-  #      tar zxvf libqcow-alpha-20160123.tar.gz >> $LOG_BASE/bca-install.log 2>&1
-  #      cd libqcow-20160123
-  #      ./configure --enable-python >> $LOG_BASE/bca-install.log 2>&1
-  #      make >> $LOG_BASE/bca-install.log 2>&1
-  #      sudo make install |& sudo tee -a  $LOG_BASE/bca-install.log
-  #      sudo ldconfig
-
   # Install The Sleuth Kit
   echoinfo "bitcurator-access-webtools: Building and installing The Sleuth Kit..."
         cd /tmp
@@ -518,17 +506,6 @@ install_source_packages() {
         # Clean up
         rm /tmp/sleuthkit-4.4.1.tar.gz
         rm -rf /tmp/sleuthkit-sleuthkit-4.4.1
-
-	#git clone https://github.com/sleuthkit/sleuthkit
-	#cd sleuthkit
-	#chmod 755 bootstrap
-        #./bootstrap >> $LOG_BASE/bca-install.log 2>&1
-        #./configure >> $LOG_BASE/bca-install.log 2>&1
-        #make >> $LOG_BASE/bca-install.log 2>&1
-        #sudo make install |& sudo tee -a $LOG_BASE/bca-install.log
-        #sudo ldconfig
-	#cd ..
-	#rm -rf sleuthkit
 
   # Install TSK Python bindings
   echoinfo "bitcurator-access-webtools: Building and installing pytsk..."
@@ -688,12 +665,6 @@ complete_message() {
     echo
 }
 
-#UPGRADE_ONLY=0
-#CONFIGURE_ONLY=0
-#SKIN=0
-#INSTALL=0
-#YESTOALL=0
-
 OS=$(lsb_release -si)
 ARCH=$(uname -m | sed 's/x86_//;s/i[3-6]86/32/')
 VER=$(lsb_release -sr)
@@ -703,8 +674,8 @@ if [ $OS != "Ubuntu" ]; then
     exit 1
 fi
 
-#if [ $VER != "17.04" ]; then
-#    echo "bitcurator-access-webtools is only installable on Ubuntu 17.04 at this time."
+#if [ $VER != "XX.XX" ]; then
+#    echo "bitcurator-access-webtools is only installable on Ubuntu XX.XX at this time."
 #    exit 3
 #fi
 
@@ -754,11 +725,6 @@ echoinfo "*********************************************************************"
 echoinfo "The bitcurator-access-webtools script will now configure your system."
 echoinfo "*********************************************************************"
 echoinfo ""
-
-#if [ "$YESTOALL" -eq 1 ]; then
-#    echoinfo "You supplied the -y option, this script will not exit for any reason"
-#fi
-
 echoinfo "OS: $OS"
 echoinfo "Arch: $ARCH"
 echoinfo "Version: $VER"

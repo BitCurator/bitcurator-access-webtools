@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # coding=UTF-8
 #
-# JISC Format Sniffing
-# Copyright (C) 2016
+# BitCurator Access Webtools (Disk Image Access for the Web)
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
 # License, Version 3. See the text file "COPYING" for further details
 # about the terms of this license.
+#
 """ Tests for the classes in model.py. """
 import os.path
 import unittest

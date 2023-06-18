@@ -2,7 +2,7 @@
 # coding=UTF-8
 #
 # BitCurator Access Webtools (Disk Image Access for the Web)
-# Copyright (C) 2014 - 2016
+# Copyright (C) 2014 - 2023
 # All rights reserved.
 #
 # This code is distributed under the terms of the GNU General Public
@@ -15,7 +15,7 @@ BitCurator Access web application.
 Initialisation module for package, kicks of the flask app.
 
 """
-__version__ = '0.1.0'
+__version__ = '0.9.22'
 import logging
 # Load the application
 from flask import Flask
