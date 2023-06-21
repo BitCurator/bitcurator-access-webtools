@@ -758,7 +758,7 @@ get_spacy_language_models
 # install_dfvfs
 
 # Copy over disk images
-copy_disk_images
+# copy_disk_images
 
 copy_source
 

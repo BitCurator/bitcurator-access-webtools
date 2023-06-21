@@ -42,7 +42,7 @@ class BaseConfig(object):# pylint: disable-msg=R0903
     GROUPS = [
         {
             'name' : 'Test Images',
-            'path' : '/var/www/bcaw/disk-images',
+            'path' : '/var/bcaw/disk-images',
             'description' : 'The set of test disk images supplied with BitCurator.'
         }
     ]
