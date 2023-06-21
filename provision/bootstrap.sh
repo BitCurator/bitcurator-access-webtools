@@ -355,6 +355,9 @@ install_ubuntu_pip_packages() {
         fi
     done
 
+    # Clean pip cache
+    rm -rf ~/.cache/pip
+
     # Prep environment for special packages, install cld2-cffi
     env CC=/usr/bin/gcc-5 pip3 install -U cld2-cffi
 
@@ -543,12 +546,12 @@ create_virtualenv() {
   if [ -d "$WWW_ROOT" ]; then
   	rm -rf "$WWW_ROOT"
   fi
-   mkdir "$WWW_ROOT"
-   mkdir "$BCAW_ROOT"
-   chmod -R 777 "$BCAW_ROOT"
-   chown -R www-data:www-data "$BCAW_ROOT"
-   virtualenv "$BCAW_ROOT/venv"
-   source "$BCAW_ROOT/venv/bin/activate"
+  mkdir -p "$WWW_ROOT"
+  mkdir -p "$BCAW_ROOT"
+  chmod -R 777 "$BCAW_ROOT"
+  chown -R www-data:www-data "$BCAW_ROOT"
+  virtualenv "$BCAW_ROOT/venv"
+  source "$BCAW_ROOT/venv/bin/activate"
 }
 
 copy_source() {
@@ -607,7 +610,7 @@ configure_webstack() {
     rm -rf "$WWW_ROOT/run"
   fi
 
-   mkdir "$WWW_ROOT/run"
+   mkdir -p "$WWW_ROOT/run"
    chown www-data:www-data "$WWW_ROOT/run"
    chmod 777 "$WWW_ROOT/run"
 
@@ -630,7 +633,7 @@ configure_webstack() {
 
    # Start and enable bcaw
    systemctl start bcaw
-   systemctl enable bcaw
+   systemctl enable bcaw 2>&1 
 
    # Start UWSGI and NGINX
    #if [ $VER == "17.04" ]; then
@@ -644,14 +647,16 @@ configure_webstack() {
    usermod -a -G www-data vagrant
 
    # Set up the cache + index directory
-   mkdir "$CACHE_DIR"
+   mkdir -p "$CACHE_DIR"
    chown www-data:www-data "$CACHE_DIR"
-   mkdir "$LUCENE_INDEX"
+
+   mkdir -p "$LUCENE_INDEX"
+
    chmod 775 "$LUCENE_INDEX"
    chown www-data:www-data "$LUCENE_INDEX"
 
    # Add the image indexing script to the chrontab
-   sudo -u vagrant crontab -l > /tmp/cron
+   sudo -u vagrant crontab -l 2>/dev/null > /tmp/cron || true # Suppress error message on normal condition where no crontab exists
    sudo -u vagrant echo "0 17 * * sun /vagrant/scripts/index_collections.sh" >> /tmp/cron
    sudo -u vagrant crontab /tmp/cron
    rm /tmp/cron
