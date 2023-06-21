@@ -22,6 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # In the example below, the first folder would be located on the host
     # at "/mnt/data", and the shared folder in the VM woud appear at "/vagrant/data"
     # config.vm.synced_folder "/mnt/data", "/vagrant/data"
+    config.vm.synced_folder "./disk-images", "/var/bcaw/disk-images", owner: "www-data", group: "www-data", mount_options: ["ro","dmode=0755", "fmode=0444"]
 
     # Port forward HTTP (80) to host 2020
     config.vm.network :forwarded_port, :host => 8080, :guest => 80
