@@ -355,7 +355,7 @@ install_ubuntu_pip_packages() {
         fi
     done
 
-    # Clean pip cachee
+    # Clean pip cache
     rm -rf ~/.cache/pip
 
     # Prep environment for special packages, install cld2-cffi
